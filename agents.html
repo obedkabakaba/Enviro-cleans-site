@@ -267,7 +267,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         </div>
         <div>
-          <div class="num" id="statTotal">150+</div>
+          <div class="num" id="statTotal">—</div>
           <div class="label">Agents actifs</div>
         </div>
       </div>
@@ -584,7 +584,7 @@
   }
 
   async function initAgentsPage(){
-    tbody.innerHTML = `<tr><td colspan="7"><div class="no-results">Chargement des agents...</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="no-results">Chargement des agents... (peut prendre jusqu'à une minute si le serveur était inactif)</div></td></tr>`;
     try {
       const response = await fetch('https://enviro-cleans-api.onrender.com/api/public/agents');
       const data = await response.json();
