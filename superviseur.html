@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Accès Superviseur – Enviro Cleans</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABICAYAAABhlHJbAAAg/klEQVR42u18e7xdVXXuN8aca+29zzkJLwkv22sLtPQECorlUZWTKCJIURD2EQhPkSgvMSL1Wh87u7Va+RVBoFZQsOYCkbN5KUhTpSaHIg8vXKQ2RzC+QuURyOu89mOtOcboH3PtkxMIJJAg3tu78tu/k19y9t5rfWuM8X3jm2Muwu/AYQZaiBrNbozQ8p2fpen/N/u5Wba82m9YCNTrdQNg+B066LX4zprVCMuW8chzs6wx2JCX8+ahoapbvvOzNPLcLGtUGwp6bQH9rQFYq9UYc5Zxfe5weMH/LTlrR7R1V7hslqptx6yJA+DZ2kbpeOqSNYnre+7Cd3z5WSLaCLDa0gGPOXO0TnX9fxLA6lDV9Vf7rXuB1eqQ2/P02w8g1cMMdhCr9oPweoPumKQMTgjkATYDweCUIUEBs3ECfkPMI57dj5yW7vHhTY9c+O4LO90y0GhUefBlRvTvLIA1q/FC1I2KFPvE0Mn7SaonEuQ9INu31MOAKSwAJAQVhZooMcxcBI9hSNiRY8fEgEsIpdSBCcjbAlL+ORPd5aS8+MIjvvnA9Hr624rIbQ+ggaqNKndr28dvPvVw9flHFHpUqcd56QgsExg0AAYiZQaTJweCkUEBD4AMbAp2Dh4MIhhBjZiMQQZTVy57Kpc9spbCMQ+zla84b84/3do9j83WRwPVUKPpN/o1BbA6VHVd4D568+lvIZ9/Ft6OYEfImjnIJBjADmCmeH0GBZHBgeDJQ01AbIAzEBREBEcMTwyieNXOMWAGB1UHVhCoVHHOOwcTt1Qzt/D8dyy6xww0HZhumi/f+Vma/dws2xbpvs0ArC0d8PW5w2HB187aETtnnzMOH+YE1J7sKBuM4JgIZFAYGdgIniyeAAkIgAMbE5uZAq4A0QzMQEKOHDNBFcRsTKYMQ+LIJSUP5yLA3nmQpk+j07Pgg4ddOXTNwx/yT40/bpgzrHXCRml99UNXJ714eJ+wntaecfjVTz4f8C05/LaKvPrcRjhv8bw5Umlfm1b4D1tjwayjYsZOCTGajBD/AEqGYFAPUoABmFOnlHhHjlMYC5AYSAFTAYwAMzWQMdiV+5xjAHlTWnmHlivRg6kr3Res/O9JqfJURztZwdj5BsA+sZ21n+oX7bwZRn8eJu5+U9ZX+iNN3XEAnmygysDLi8qtBZCqQ7HenX/zKecj0csBc5PrOoEAD7BDzLZ4sMKMjQCFgrnkOE09OwakI9AgTclptZBOEmvbBQaIygBmMmPntJKk3jM6E7I+b/ISD3eH99vdt2DuNb/elL6+dGhBJZ21+oAQsrczydvaoysOcCnvklYcSA0hB9rNDJT3/goAlqPffpspPAXeeY1TLklm0sXtsY5CFBxDakOtZgJgRiTCzvlSTwrNDCryy8TcDxPiHzLoJxXfuzJfveua+pl/3e4CQiB89Tuf7RkrPbmLaOePCLojXGn4E0dc99SmLufz3563F9L8UGJ7J7O8LfH0hnLZwyRHyAJCgMGxOMC8Z2fCzbLO3Ovsw69dZWb0fJ35agE4Bd45N8/7cmk7/khrXSeQkYvcV9Q2xBpmZsKeXanPI7RknDkZSlC6oX/d791/5pn19mbOzV66M6mlPy3/7EBz4UiQvtMR3ljudWWCIQSFdYJ5YgGD2CTWYcdwMC2VEpacfjEb/fvMnVsPxXe++gB2CeOcoZO+VNo+WdBe384BJArAYOCi0pnByFTLvd5JZpMO/mon5asuHfz6rzYS2kVr1r+83+oL64bnMefCZQMOALpdzNDQkPtJ8u0/V5cfT07fxd72ScsMDQJkAGBCZkYEJjL2IDARiAwMBSLhSG9P4rIWDZ8/d2hOrQau1/GytaN/5eDN+1hpO7egvb6dqyFRAtRil0bkATNlR5xUSk7bdntivZ/80gnXPNYFDQAagw19QS9c33Bzh4aqTNQQIAL3yZtP2odSPf5RNKrsaf9SSshzQ5YHyzOIg5Inx0TkQARYcTMj/8QbQt3IYSNmmNkvAABzBhj14VcXwC7bntM47QiuyKWT4+2gBm8UaxWRjzEoJmlP4kwwYZO84MrBRV+f6luXzdH6YF22RE8ODjZkqDrk/vfJtx1DTs4SZEeUelyqmSF01ELHxEyZiBgOHmCAbIq0iAGoRdAIUUfGkhL/jQkMenxrWHSLAazVaozldbto0YdnNd3YohDURMCAxVztlnyDpDMTJy37mY66wavPWvRodajq+pf3W31uPQDDL/kdCxfWjaghCy5dUOE9V53+AG75cFKi/R0InZZhcrQTCMZMxA7OAwQzA6lB2WAWZZIZoGaxo0GMRrVuNBrMhEIwqPnHAGD2nFn2qgI4MnuEGoOQ+d8a/WrS43bpjIYQ39+9vQCUJJ3pXTYRHtGn6KhrP3r9qpjyjbD5GzTg6/V6qNeBBbeccqK5Zz5LFfoTzRWtiaAu1kUGnGdSkMV6C9i0rycEsyjQiWEWwQ1s8AWqSgQyMxK4zkRmJfT8/JVKmC0mkW5KnXPDKcfyDnxbeyILALzBANMpkZf2eg7N/OerHln91ju+8INVA7UBP1wfDpuL7C5xXHj96QegN7/ElfBOCTmkrQEEJlYmA7iILobBkXZzsgBQwS5eEcPgOQoCUoBYwWRgAhwzHJn6hFlyXrUz/mDP09516eQr6UK2NAKpf3m/XfDlC0otv+YSl5vF07SpegKQ+pKDdmx0ckXzmDu+8INVBehhszV1sC7Vkarb+ebk0+KyTyYJlVoTuRiUGPAEApRBpjFViWGkCBYZlZi7oQlTAzmGAhBVEBMcM0AMI4EUEUPG5pIEEvCz0464dLJWA9PCzUumTR28Bazr6vW6ZruMnlGameydt4OoilOVqe8jZk3ShNtrO+cv/tSdj9WWDvjNOc0Dxe+cu+iUvWadlCxNe3mhZHmpNdYWM3MEZgNDTaAFeFaYD0YEIwejCF7MTjY1UmKCEUNBMLUpZWdFS2QWc58dwZR/soGB8Yrsr80BSPU5w3LBly8oCYWL804wM2GgUHymgJqkfSXfXN28fdHZt1zflTmbk0LDc4fDOYvnHUEz7X5O6W2To50QVM3YnJkWsiMyqkGhADSGTxToZOjKdQZJmiZUKqesOTcJQNefikRSEAcxRBUKg8bq838igMO63/yj9huoDfhtCmCtNuBAsM5O649Oev2eoZ0rYGxTIteMUk9ZUyayZ+WjMBCWzdEt0ZFn3XBy1Sp2V6756yYnWkFJvcGRFoU/vhSARkal+JJpYs7MBDD0bld2BH4mNHlR4pLHmZyZwZQZphqpxop8IbYAcu2mQsk/AgB1gk7kdvFza3Z4U3HhvE1q4MjsSO2B8zMY3hRiXckS7z5J2lv27ec6/3jjxbeuHHhzZNLNgffBG+cNuh76Vp5nCCFXInhSQ7qhusIK/ca8obuygmkVUAeycm/qNA/WmbQvIUt/6svZeSB7o3TUiCiWTyK4QhiaGYyd+cRxHujJzhO9j3WZdFRweLvVeQbAj4BlDGxZSvNLubWNwYac8pVTZgE0N2sFMjVnxoA5QNnAzrUn8onSZPplGGjOS0RfFOHD4ex/mvceruBbed6xkAcDiM2iURe6kaIEsy5wBiJX/J0Ao+BTz+XespMc36ZOz6Fi7jkttf4Bzt4YMlUiJjPAJH6eFLxHcICR+tQDSg/WP3RNkwDsdfQhe3RAuwWlwwkAFg7LVqfwwMLYfyY9YU7al/ZpbgJzZIWsNyJJesskrXD71ecserLaqHK9vul1iJrVuDHYkA/eeNps7bXFWZYh7yjIHJO6qZQUMwTd0G5FHceFcCElQHtmlL0Jr5QJvEd+s+N8S0MtnYG/yzMtNSc7KiYMUARdY6aoGQIsVm5Dwdzu7u75TfTMOEiMkClm73PS4XuDYFuaxi/6S3PmTAXi4UYENTNDcTFGUAZLMKCFb05V8xeJ5JHGCF1w1wUlIbkRjB7JoATHajGtyIrPLP4EUqjDVEdhasEnJU7SlPNJXDXj8n32CqH0DF6//lEq4ajxNa1clGBgVhUEC0UNJZjGNDY1mKgRwbUn8iBN3N0tCx1Hb1VVZIr0OcEAAGDZsq0DsD5nWACQEQ4KmQBWpEUsxuqThMNk/mT7MfshCNYYbGwy+roLTGNr1tZ8r//TzmQIBnaqBDWCgqGiKMprZE+dSjsDOJT7Us/KP6emf9flx994wfpzHz/Tejo/EtNdJ8azEIBEzWDGUHNQFYgKzAxa0Ld1a2fJUwh46LMnLF5hFr8gC3Y4icFUkQGHbD0LFytax9WO21kJe0oeoKYcBYVBzDTxHqT2QOOyRqtwV+xFUldP/dqpfwJvH2+PdcQMzrRgWQVMoqSAMUi5YEqCqqkwodRb8dqmxT3t7Q+6/KQbvnfBTSd90c/013Sy3NrtoGrmu6ytFs00qIOpFvoRCAKoEgLI4B0M7hYAYIbtedxAv3m3r0oQVcDU9icAGN6yOsgvFjUA0DMr+R+ccF/I1WBEZrGeSNE+aaY/BID+582zTLF4YyRmoZe/5tQnGtSe3z4aCuFLHC9eGCYkPk2YvA8yiQuuOOHGk/9u3j+uO/+mk69PZvBfNkfbQXKL/WPUBhAAagpVhYAgoCkpZAZoICNj15qQrNzuubXwGjFRKh+rqWcAYqpQ0B+86fADt9vAWq8AwGeXR0Co5H7fpQwYaWRABpsDG3PWDtBAPwaAkede6GTUapE4Trr69H3gcFxnoqNq5ESB7ku1eJsVnSERDBRKPSXH6lfyROnwr5x0/VXnXnVu37lDp9xFfTyvOdrOzdQbtCgpFLOiIB1Viy8U3YhNdWhSrpRgGYY/ecI3flmzGlcBl6udLEFBag5qgOMdVvf17l5cxCsDEAWB+IR3ia5G0QHFImUOjvOmBIhfCQD9y1/oZCybE4uw+fwM6nEuiKpCaUokq0INEC1qnxFUkZdmlr127H63NnnLNWcsuue8b563k82a+GfrsaMm1rdyVUpUY0qqxrrXvQFCBmWeAjK2gg6mBjEhAwjC10bxXLf7/uKwI6SU/gnyXIzIwUyNiCfb2ayYQiOvDMACP+RBd5iWa0VRlq6nNjY6OroOAOoL688HkIbnDkttac0H6Ps67RwBxqoGsfjqghh9O0DVQmVmJclH5ftj98oRV5+z6MlzvnLODnl57Lua6lsn1rVyMpoii0ITRpYtdGMkJoMUElIKYhLzyknKzfGwsqm7f6cQz9ae2ftXmaFYQSCYmRkTuFzefqtIZFnxUxESKYqzmEJMoWamUKhZs+fZnvaLWFQEwFas+PW+ytir087NFKyRbBG6NavQfqYaSjPKPhvLb1v10LpjGl9pTMyv/UVPc8a62yWxgydH2zkZJ6qGYEAo2rspsR2HPiILK6AKBIoWtBoQFOrSlFTcFZcNXtYCgN1OPur9WeLfallbADiDgYiMmCBMM2Mte5a2qpULCvhChIKsqFkGxAjQXd+wi27KVVxWtEId5G9xZU9hIgQBeS3aKUK8QALAYqFn+4rPxsJ3bvzA4hNgsPmd+cnkG0YbaY8/rDXWyQmUaGGfkhnANvW1ZNEWnOpbis8lBXI2MEFd4lxzPDy9Qyf9Omo1Rr2uHcJpompMZDJtFTEq+tCzbdwYZZ3SfkXIdDWamTkfPL+Uiyaqb9apSNmw0muIKSdiUppR8fmE3bN2aN1gdahKINj4n41dm8xM390c6+RmlERiAMQiu0KoaPcQtWRBSFPSyLpODEGUNS2nxOK/WD/1hrEjd3wwAYBgEINR7KsYIJpytdV52yYAOnbruykR3SUClIkFMEV57Y5rS5t633DRS6phL8kBESIJhO5LlaAC9ZXUhaatCOvKxx38zwfnjcGGVL96Yj3ZITm1ub6Vm1qiUVrEZseK9ES3pEwjoEJibXByCKamPnWuPRZ+QU+Fa2q1Gi+5d0YAAFLtgREMVhhjNOUZgjC+dQAWRdAEq1QiqwkYoYiA2DZRn2Y6EwBqCzei+2JJGATgdaoReZt2cRrM4LxRzpNhbfN9jYuuXVunur7vsve/P5nhP9scbQVT81OC26LYlildV5xH99+0iDzlSEhTsoE0TRKi4P/ysosaLWAZo9EQA9jUdi9IbMO5kxIp4DNeBwCYtfmFpk3WwFmFjQXh/wwdgRo4nmFs7nIlTZKkFNrYA8ATI7NfSPdnnH56KaDTGyUEwU/Lc3Ikacl7XdM++/aLb/sPAKheefJ+1ovr2p1MKRgXk0hdQ6YwUrtrldGbBkXxDAO4KAtEcbBEzELfzB7fHg13/eOpN90alw9iu7n3AQfsJGqvj6NKRF2pBoBZDQlhFQCgf/MLTZuMwEah67LxySfyTt4Gg83IYLFNgkEpIeQUZk8X3tOPNW9YwyLmRDZIDVGCCCTtLfl8bfYPty9oLB5YOuCrV53bF8o0pIye0IEJHIsRVDAlhKcisStblGASJVDAtOhUhYiq857zpqzWidJ8s7iug2qVAKA5q7K3eT8DMT1oSuMSE4lOlFvNJ6MhUH9lAKKwpfwf+qdh9ASTQ1CzrsqXAIgSgtiLNt6njVQ6ALe6DClEEJBwOXGd9dlI/ovRiwYKaz/j9V9FmfbJJ/NARk4VEHUQMFQ5AjYVwQWrFRa1aUzlHEAe+3QDSJ1LOEzYmVefs+jJwa7VFmUJtSqVQy1NQCA1KuqemYEJpPbEqd+/f/WWzOW8JIlMTZuKPQoXfQSBQqIG5JArBHpYsXQpG7W3AA02GkKg9Yh9bixnFNtBndQPLblySWd47nB431Wnnsq9fl57rB0CzOcmkVHVoEIIU0xbAGndrC4gNQaUYUpQdQhEwff1+NY6+dTX599050Bt2gLXnDlKgIU0facUkqBYY4JBlb2DN3ukDiiqcfzkFQPYTUsRHY7rv0XHEAOA806uSJK9+ypxHaE771L8vStvngERQi7QXKVUKTuatG8s+Z+Ne1Gr8YlXfmD3DtsVk81MRYljmhvyKYZVkBTyRRlBuxEZU1a6JikIFFu6vNzXm2Trw1cXffimzw8s3WhdmlCv6+xj3r6LOHqLZCHW9g3L89HtzPJ7t1REv7ShimjP+5y/n09KMCJnRtblEogppx5I3CkAbHodnDIjzP00akcVOGaZzMZKk/hUV8yul87llrrtNYOqelYhkHKc2tfosgQUlleh9SLzciGFDKKKoGpiFkp95aSzLv+n68++6ZzqUNUNz52WGQPRYX8q9UdrmvaxSojUVAgkIsdZLmmWLetG69YZqvW6wkDf/vhNPwu5PWLeQYRUhCCBEYRcc7JjWkrnHfv5Y3caXjgsXWd6isVze0BzIIizpFxmbdtlt336hqdRr+vRl536LilRtTnWFFN4aJQnwRy0ACi6NobcDEEVQQ0igAqgyjB10EAKc+YrFd8eDV9e/KGhM2u1GjeqDd2ohsX0RSCar6JgbFD3ZqrsHTnBT+Z/7/6fdaN1q4X0wMIBZwCoQzcyJQQjiws8DIIjy0y4t7xjXqlcAIJ111G6LF5eY/dlzXzS+SS1SVmzPfdcATOqDlXdpMglWVCIEjoiyFQhGllUwRB1CMIIBUl0a19cNzGImIkgcJIyu8TC2vCRoQ8PfbRWq3G9vvGMIapVh3pdZ73n7XOllB5MWa4GcsUsXmxOnYMXG6oD2o3WrQaw21HIZOfGfCIbY+ecaVztNjWoKbfGm5axfeTIv63uPIw5ihoY9brWajW+7fM3PE05/VtvXy8l5q5pXHTtWhDZ+l+WqlxK/zSfDBIvpKh9qggmCBIiWRFiNEaTNcoWNVNDECLyfSUPocfcBL/95guHrqwOVd0mNiQWmyNAzUr6d7JhuX1qcZuYHHfydmmieUO88C2fE+TNjB5Zdajqvl+/7Vlry2JOHIkEEVVkosjFOGtnqqVkB0n936Je1wEM8DRDASy4xTJBWdzVAGj+1fOTDPhMp5MblGG5FbZ+tOBzVeQqCKrFuoYCxghgVXMBYEorZe8paVoLX9xhrOegoQU33jONbTeWHgMDDo2GzHrvnHOklBxkWSaAuQ3r2xBOE/LBbn367h8+UbDvFgO42VGGwiylUlsuaU1mp2eEFBrFVhwsYm6NtaW30nP2O//m/Td//zM3fW+6tEln9C5BM/varRcvWgkAK1ZNHBP6uD9rZsJMjo3AgUAopq3IYBx5n9g0JzVvcEk5YZ8mjE6YQEbfKlPl7xvnXvf4NMn1wgX9atWh0Qi/d+zcPdf1lr8onTzOanXjL/Z77AU6M5dLxl/ByPNml+7q9bpWh6r83fqtv5SWXu3LKQcVgQAUCJwzIQe1W7nlPcmioz9X3WO4PhwKTxBLLvz6b/ZOt7ugu87aZj0ny4OJCIKIBZWQQ4MYBzUXTFmhHmAmLpWcq5Q9vCMK+A/uyKdmSrLfd867/uzGudc9XkgnepFBJkZ/v1Wr1XSsp/StDNQHNVMY6YZJB+FSiX0mNz753aWPolplNF7ePpEtQ9xAWFijI8ZGtm/Nwk/N0essMxiIAxWpoCppb9lxbvevfejHc0b6q2FaV0MAbO6n5/3xeEn/Iw+5IwDsQWlPCscM6s40iwGZwFifIod/9879W5nK/3rGfUc9NNgYlKnB9OX9Vn9xpiRUq0yNhuw476jFk+xP1FYWQPA6NSZHBmZNgc6M0fWzV/3LgytRA73cKS2/hTBbdWiEG4ONtW/59AkX+53K32zlrWBQ7nqEILjmeDOUeiuHbr//ny62Ty88gaIDQAfOP9A/fM3D+YTIX4hPfMjynJkTr9Tyk/q/XILniGgtgDWOaZUvp/85M+1b2Tj/KxPdU7gL38BAbcDPwWZmrGs1xsKFRkTyutOP/tqkuRO12Qkg81rYXMW0lvhSyZfGJuqr/uXBX0emfvl7515Wznfbu0MXVm/HzOS92XgnsMFLd4QMhCAWKjN7fdK2m3cIPaffid3a1dkj1BhsyP4XHb/EZpbeFVqdTtpbLpUzu+6Bv7nxrJcCYwDLeNbILGs0nqfrNqm7BjyGh8MQ4C6Yd+R1E0nptHxiA3hTCSVBqFJypY488O5bvvfWRrUKbMnnb/U+kRoYqGFg/OEdsx16f5yx7iGdoFaMiRYzdzCzrG/H7dLSRPa5exbe8BmY0SGHHlqeeMseP5cS7x7ykPf2VJIZ4+EUnrHqpiITQleEb2q/yGYGrBkjI4RGQ/Y6buD163t7vtHm5PCslQWgG3nR+ydVNUdI2Y/3rln7Z6vvfnBFlF6vbMDy5Q0U1qHV6ohrNO5c/dZPDr6f+3hZTkSaw4iItGtuGnhysq2a2+8XYtXCmUfvFkxnSW4wZZJgIMfjwwuHpdqo2kvsF9k8cPWY0ruectTxzxBfEYx2j2kLL0XvabDYtzGpT1JfGm2etvruB1e80tTdYhZ+gVfYaMhAbcDf+4WhH9K4fsCnZSeAqMRdqiLR8jIxznOZsvxbJjsZOS8BJqqWA1jfyvYGwX60/NlkC7IhzpdXqw7dSdJ6XdFoyB+ecdR+O53y7sYY+ZuzHLtbJ5dIGDa105FAZirBlSu+3JKPrf/u0u9gYMC/XNbduhSeXm6KCfyDPn3iglDxX2qNNcXUWBHP1JVKzk2G4eWX3zoHAPb/0LEHNfv8g3nI4zppklCi/AQ/s+7PH//W3U9NZ8+NnJBZswz9/fb83pQA7HbSuw5tuuSDuckpgVyqrTzuYiCjKamn2p3iCL6nkpRa+RfGb1nyV916ia08tmrDdRfEgz8z72Ntj0ubE02FKIwY5Dz7XH+z54pf//Gddz7cfONZx+w12pP8NId6mFkuBi4l5ERWcke+mLb1Oz9f9N0n7UXLL/hrR7xtD92uMltK/m0d4Mhg9KaMHdDJ4U1FAdcdRu9enogoMcGXylzuhEvGblnyiQI8wTZ4Bs1W71jvgnjARdXTQ4+7tt3OnWYawORSYqTrJw789+uWPHLIIYdUntp/l8ck9b8fQlCYMSxuOfc+gbY749oJKyzo06z2bBBMKhMT6Y6imGWgPZTxe5qmPYEdpJ2DsmBEcVZWYKRTXlvxQy3As0+dRzLRuXD8zn+9ouhOFNvoAT7bZMv/FIgfHzy84+mbObB7NtlulyrlEq1vfuxn19xxOQDsftYxDesrHy/tjqiZj8kFFTVTkCP2U4JaLHp93dbfxKBBoMGUwApT9kRMRYIGDRvGqURViZV7yj7p5KsqE60PrFtyz13bKm23ikQ26drUh8NAbcD/+O+H7vars4N90Dt8T6WcG0iZ3tu9WQncYjVQrkJBFbkIMgGLkQtiFjqZhnZbsnYesmYW8lYW8lYepJWLdEQlwAjEgHkuBqFjymoXeDOzYN5x2lPx5WZ2xw6/Wn3QqwUeALht9UErh1dqtVp1S6+/ZXT1fSOLZx3U/4yC34zeyr679r9+yeqHV/zmiL32+8V/+vz43PMuGoJAma3QjmpGZkZmYFNiUWONu7O42FFDXGzuAuKDeYosNFVVUzN4x5x6TsWeKI03Pzpxxw8+Mf7006OoVh3uuutVeSDPtn9uTCG2Ua/rvh85cZd2xdd9K3/DTPODP7ryhrE/mv/edzzn/d2dyXZgg7NiYUeiv7jRBEKcgylW5JTgESeBXTHUUUzGeXJxQzVn4UmfhWu2/+WzV/1mZGRtsXSAl2NPvfYAdo+hqkMhjvc9/6R9+pJk/IGZf/A06nXd9exjPzuR+Ho+OplzUfjyoIizpd1NNAArUAx0GRngEHECMeJKoYKzTscT35cqbuh7tnXrE/feu26alfWqPwbq1X12loEwuJFFRBgYcBgeDjudfszlrdRfmE22lONDUYq1z+gLkhXTpeUUBAapAmpweSYMW0kqj3rVf51B/L2nbr17hW3sAW4zln1tAZzecm2w2qnru+102jGfaDv6fFuE0QmBiJwSCEKAwTybpuDrnbkRUmnB3K8cZyvejpm/ajQa2UbXEW+M4Lf8fMHX4vmB0yNFdj353YdNlpJ/6Jjta60MpBZAIFMlYgdvuL8y2fzMmrvuWfq8HtgDywHMlt9Gqv7uATjNfjqkekjlsfLrPtYxO0+Jdwt5DssDyBAoTb1jhgv5vUlLLtvroeVLHn766SZ+Rw56zc9gWrHf59R37PSMVt6fBT1JVA5Wx0nX4aE0gQPAWfZkSfED5LoUHX10hq+smtnT89zIxin93wjA6SZCASQB2O09c/94kt1hecJvNsVearaLg+sFoULesSdeze3OQ6Ucd5cm/PdWDt+1atpszn/bgzAw4J+/9677ZIQjjzyydPWBByaE/39sGXMPDHgMDPgozjcZta5Y7aPX7o7/3xSdz1eZvwPHfwEoJbTfn12hHwAAAABJRU5ErkJggg=="/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#3ab54a;--green-dark:#2d8f3c;--green-light:#e8f5e9;
+  --orange:#f59e0b;--orange-light:#fff8e1;
+  --red:#e53935;--red-light:#fdecea;
+  --blue:#1976d2;--blue-light:#e3f2fd;
+  --purple:#7b5fd1;--purple-light:#efebfb;
+  --sidebar:260px;--topbar:64px;
+}
+body{font-family:'Open Sans',sans-serif;background:#f4f6f3;color:#1a1a1a;display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:var(--sidebar);background:#111;color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s ease;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px;}
+.sb-logo img{width:34px;height:34px;object-fit:contain;}
+.sb-logo-t span:first-child{display:block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:1.4px;color:#fff;text-transform:uppercase;}
+.sb-logo-t span:last-child{display:block;font-size:8.5px;color:#555;}
+.sb-profile{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;overflow:hidden;}
+.sb-avatar img{width:100%;height:100%;object-fit:cover;}
+.sb-profile-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;color:#fff;}
+.sb-profile-role{font-size:10.5px;color:#666;margin-top:1px;}
+.sb-status{display:inline-flex;align-items:center;gap:4px;background:rgba(58,181,74,.15);color:var(--green);font-size:9.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:2px 7px;border-radius:10px;margin-top:3px;}
+.sb-status::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;display:inline-block;}
+.sb-nav{padding:10px 12px 4px;flex:1;}
+.sb-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.8px;color:#444;text-transform:uppercase;padding-left:8px;margin-bottom:4px;margin-top:10px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;color:#aaa;transition:all .2s;border:none;background:none;width:100%;text-align:left;}
+.sb-item:hover,.sb-item.active{background:rgba(255,255,255,.08);color:#fff;}
+.sb-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+.sb-pill{margin-left:auto;font-size:9.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:2px 7px;border-radius:10px;color:#fff;}
+.sb-pill.red{background:var(--red);}
+.sb-pill.orange{background:var(--orange);}
+.sb-footer{padding:12px 12px 16px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-logout{display:flex;align-items:center;gap:8px;background:none;border:none;padding:8px;font-size:12px;color:#555;cursor:pointer;width:100%;font-family:'Open Sans',sans-serif;transition:color .2s;}
+.sb-logout:hover{color:var(--red);}
+.sb-logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s ease;}
+.topbar{height:var(--topbar);background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;}
+.menu-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:4px;display:none;}
+.menu-btn span{display:block;width:20px;height:2px;background:#333;border-radius:2px;}
+.topbar-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#111;}
+.topbar-sub{font-size:10.5px;color:#999;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.tb-search{display:flex;align-items:center;gap:8px;background:#f5f5f5;border-radius:8px;padding:7px 12px;width:220px;}
+.tb-search svg{width:14px;height:14px;stroke:#999;fill:none;stroke-width:2;flex-shrink:0;}
+.tb-search input{border:none;outline:none;background:transparent;font-size:12.5px;flex:1;min-width:0;}
+.tb-date{font-size:12px;color:#666;background:#f5f5f5;padding:5px 10px;border-radius:7px;font-family:'Montserrat',sans-serif;font-weight:600;white-space:nowrap;}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:5px;border-radius:7px;}
+.notif-btn:hover{background:#f5f5f5;}
+.notif-btn svg{width:18px;height:18px;stroke:#555;fill:none;stroke-width:1.8;display:block;}
+.notif-badge{position:absolute;top:1px;right:1px;width:15px;height:15px;background:var(--red);border-radius:50%;font-size:8.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+.tb-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:#fff;cursor:pointer;border:2px solid rgba(58,181,74,.3);overflow:hidden;}
+.tb-avatar img{width:100%;height:100%;object-fit:cover;}
+.tb-userblock{display:flex;align-items:center;gap:8px;cursor:pointer;}
+.tb-userinfo{display:none;}
+@media(min-width:1024px){.tb-userinfo{display:block;}}
+.tb-uname{font-size:12.5px;font-weight:700;color:#222;}
+.tb-urole{font-size:10.5px;color:#3ab54a;display:flex;align-items:center;gap:4px;}
+.tb-urole::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;}
+
+/* ══ CONTENT ══ */
+.content{padding:24px 28px;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{margin-bottom:22px;}
+.page-header h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#111;}
+.page-header p{font-size:13px;color:#999;margin-top:3px;}
+.page-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+
+/* ── Buttons ── */
+.btn-green{background:var(--green);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-green svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;}
+.btn-outline{background:#fff;color:#333;border:1.5px solid #ddd;padding:9px 16px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .2s,color .2s;}
+.btn-outline:hover{border-color:var(--green);color:var(--green);}
+.btn-outline svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.btn-red{background:var(--red-light);color:var(--red);border:none;padding:9px 16px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.btn-red svg{width:13px;height:13px;stroke:var(--red);fill:none;stroke-width:2.5;}
+.btn-sm{padding:7px 12px;font-size:11.5px;}
+.btn-icon{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;transition:background .2s;}
+.btn-icon:hover{background:#f0f0f0;}
+.btn-icon svg{width:15px;height:15px;stroke:#777;fill:none;stroke-width:1.8;}
+.btn-icon.danger:hover svg{stroke:var(--red);}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:12px;border:1px solid #eee;padding:20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.card-head h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;}
+.voir-tout{font-size:12px;color:var(--green);font-weight:700;cursor:pointer;}
+
+/* ── Badges ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;font-family:'Montserrat',sans-serif;white-space:nowrap;}
+.bg{background:var(--green-light);color:var(--green);}
+.br{background:var(--red-light);color:var(--red);}
+.bo{background:var(--orange-light);color:var(--orange);}
+.bb{background:var(--blue-light);color:var(--blue);}
+.bp{background:var(--purple-light);color:var(--purple);}
+.bgr{background:#f0f0f0;color:#888;}
+
+/* ── Detail rows ── */
+.detail-row{padding:10px 0;border-bottom:1px solid #f5f5f5;}
+.sec-card{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid #f5f5f5;}
+.sec-ic{width:38px;height:38px;border-radius:9px;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-ic svg{width:17px;height:17px;fill:none;stroke-width:2;}
+.sec-title{font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+.sec-desc{font-size:11.5px;color:#888;}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{font-size:10.5px;color:#999;font-family:'Montserrat',sans-serif;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.detail-val{font-size:13px;color:#222;font-weight:500;}
+
+/* ── Form ── */
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#444;margin-bottom:6px;}
+.form-group select,.form-group textarea,.form-group input[type=text],.form-group input[type=password],.form-group input[type=email],.form-group input[type=date],.form-group input[type=number]{width:100%;padding:11px 13px;border:1.5px solid #ddd;border-radius:9px;font-size:13.5px;font-family:'Open Sans',sans-serif;outline:none;transition:border-color .2s;background:#fff;color:#222;}
+.form-group select:focus,.form-group textarea:focus,.form-group input:focus{border-color:var(--green);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #ccc;border-radius:9px;padding:14px;font-size:12.5px;color:#999;font-family:'Montserrat',sans-serif;font-weight:600;cursor:pointer;background:none;width:100%;transition:border-color .2s,color .2s;}
+.photo-btn:hover{border-color:var(--green);color:var(--green);}
+.photo-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+/* ══ STAT CARDS ══ */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;display:flex;align-items:center;gap:13px;}
+.stat-ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-ic svg{width:20px;height:20px;fill:none;stroke-width:2;}
+.stat-ic.gr{background:var(--green-light);}  .stat-ic.gr svg{stroke:var(--green);}
+.stat-ic.or{background:var(--orange-light);} .stat-ic.or svg{stroke:var(--orange);}
+.stat-ic.rd{background:var(--red-light);}    .stat-ic.rd svg{stroke:var(--red);}
+.stat-ic.bl{background:var(--blue-light);}   .stat-ic.bl svg{stroke:var(--blue);}
+.stat-ic.pp{background:var(--purple-light);} .stat-ic.pp svg{stroke:var(--purple);}
+.stat-lbl{font-size:10.5px;color:#999;margin-bottom:2px;}
+.stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:21px;color:#111;line-height:1.1;}
+.stat-val.g{color:var(--green);} .stat-val.o{color:var(--orange);} .stat-val.r{color:var(--red);}
+.stat-sub{font-size:10.5px;color:#bbb;margin-top:2px;}
+.stat-sub.up{color:var(--green);}
+
+/* ══ ALERT CARDS ══ */
+.alert-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.alert-card{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;}
+.alert-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:24px;margin-bottom:2px;}
+.alert-num.r{color:var(--red);} .alert-num.o{color:var(--orange);}
+.alert-lbl{font-size:11.5px;color:#777;margin-bottom:6px;}
+.alert-link{font-size:11px;color:var(--green);font-weight:700;cursor:pointer;}
+
+/* ══ SEARCH ══ */
+.search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #eee;border-radius:9px;padding:10px 14px;margin-bottom:14px;}
+.search-bar svg{width:15px;height:15px;stroke:#bbb;fill:none;stroke-width:2;flex-shrink:0;}
+.search-bar input{border:none;outline:none;font-size:13px;color:#333;font-family:'Open Sans',sans-serif;flex:1;background:transparent;min-width:0;}
+.filter-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.filter-select{padding:9px 12px;border:1.5px solid #eee;border-radius:8px;font-size:12.5px;font-family:'Open Sans',sans-serif;background:#fff;color:#444;outline:none;}
+
+/* ══ TABS ══ */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid #eee;margin-bottom:16px;overflow-x:auto;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{padding:9px 16px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s,border-color .2s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* ══ TABLE ══ */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+th{font-size:10.5px;font-weight:700;color:#999;text-align:left;padding:0 10px 10px;border-bottom:1px solid #eee;font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+td{padding:11px 10px;font-size:12.5px;color:#333;border-bottom:1px solid #f8f8f8;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.tr-hover:hover{background:#fafafa;}
+.table-pagination{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;}
+.pg-btn{width:30px;height:30px;border-radius:7px;border:1px solid #eee;background:#fff;font-size:12px;font-family:'Montserrat',sans-serif;font-weight:600;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pg-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+
+/* ══ TWO/THREE COL ══ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.col-2-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;}
+.col-1-2{display:grid;grid-template-columns:1fr 2fr;gap:16px;}
+
+/* ══ EMPLOYEE AVATAR ══ */
+.emp-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:800;font-size:12px;color:var(--green);flex-shrink:0;}
+.emp-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+.emp-name-cell{display:flex;align-items:center;gap:10px;}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:560px;width:100%;position:relative;animation:mIn .25s ease;max-height:92vh;overflow-y:auto;}
+.modal.wide{max-width:760px;}
+@keyframes mIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;}
+.modal-close:hover{color:#333;}
+.modal h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:17px;margin-bottom:4px;}
+.modal .msub{font-size:13px;color:#888;margin-bottom:20px;}
+
+/* ══ MISC ══ */
+.banner{background:var(--green);border-radius:12px;padding:18px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;overflow:hidden;position:relative;}
+.banner::after{content:'';position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%;}
+.banner-big{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;opacity:.2;}
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;}
+.overlay-bg.show{display:block;}
+.toast{display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:30px;font-size:12.5px;font-family:Montserrat;font-weight:700;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);gap:8px;align-items:center;}
+
+/* ══ MINI BAR CHART (CSS only) ══ */
+.mini-chart{display:flex;align-items:flex-end;gap:4px;height:60px;}
+.mini-bar{flex:1;background:var(--green-light);border-radius:3px 3px 0 0;position:relative;transition:background .2s;}
+.mini-bar:hover{background:var(--green);}
+
+/* ══ ZONE LIST ══ */
+.zone-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:9px;cursor:pointer;transition:background .2s;margin-bottom:4px;border:1.5px solid transparent;}
+.zone-item:hover{background:#f7f9f6;}
+.zone-item.active{background:var(--green-light);border-color:var(--green);}
+.zone-name{font-family:Montserrat;font-weight:700;font-size:13px;}
+.zone-count{font-size:11px;color:#999;}
+
+/* ══ DROPDOWN ══ */
+.dropdown-menu{position:absolute;background:#fff;border:1px solid #eee;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);padding:6px;z-index:300;min-width:180px;display:none;}
+.dropdown-menu.show{display:block;}
+.dd-item{padding:9px 12px;font-size:12.5px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#444;}
+.dd-item:hover{background:#f5f5f5;}
+.dd-item.danger{color:var(--red);}
+
+/* ══ TIMELINE / AUDIT ══ */
+.audit-row{display:grid;grid-template-columns:120px 140px 1fr 1fr;gap:10px;padding:11px 0;border-bottom:1px solid #f5f5f5;align-items:center;font-size:12px;}
+.audit-row:last-child{border-bottom:none;}
+.audit-row.head{font-family:Montserrat;font-weight:700;color:#999;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1200px){
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .alert-grid{grid-template-columns:repeat(2,1fr);}
+  .three-col{grid-template-columns:1fr;}
+}
+@media(max-width:1024px){
+  .two-col,.col-2-1,.col-1-2{grid-template-columns:1fr;}
+  .tb-search{display:none;}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0 !important;}
+  .menu-btn{display:flex !important;}
+  .content{padding:16px;}
+  .stat-grid,.alert-grid{grid-template-columns:1fr 1fr;}
+  .page-top{flex-direction:column;align-items:flex-start;}
+  .banner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .form-row{grid-template-columns:1fr;}
+  .audit-row{grid-template-columns:1fr;gap:2px;}
+}
+@media(max-width:480px){
+  .stat-grid,.alert-grid{grid-template-columns:1fr;}
+  .btn-green,.btn-outline{font-size:12px;padding:9px 14px;}
+}
+
+/* ══ SUPERVISOR-SPECIFIC: Progress bars ══ */
+.progress-track{background:#f0f0f0;border-radius:6px;height:10px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:6px;transition:width .6s ease;}
+.progress-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+
+/* ══ Tournée card (list item) ══ */
+.tournee-item{background:#fff;border-radius:10px;border:1px solid #eee;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,box-shadow .2s;}
+.tournee-item:hover{border-color:var(--green);box-shadow:0 2px 8px rgba(58,181,74,.1);}
+.tournee-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+.tournee-title{font-family:Montserrat;font-weight:700;font-size:13px;}
+.tournee-meta{font-size:11.5px;color:#888;display:flex;gap:10px;flex-wrap:wrap;margin-top:3px;}
+.tournee-pct{font-family:Montserrat;font-weight:800;font-size:13px;color:var(--green);}
+
+/* ══ Affectation columns ══ */
+.affect-col{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;}
+.affect-col h4{font-family:Montserrat;font-weight:800;font-size:12.5px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;color:#666;}
+.affect-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f5f5f5;font-size:12.5px;}
+.affect-row:last-child{border-bottom:none;}
+.affect-check{width:18px;height:18px;accent-color:var(--green);cursor:pointer;}
+.affect-client-name{font-weight:600;color:#222;}
+.affect-client-addr{font-size:11px;color:#999;}
+.chip-remove{font-size:10.5px;color:var(--red);cursor:pointer;font-weight:700;}
+
+/* ══ Collecte status pills in table ══ */
+.status-action{display:flex;gap:4px;align-items:center;}
+.status-dot{width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.status-dot svg{width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;}
+.status-dot.gr{background:var(--green);}
+.status-dot.or{background:var(--orange);}
+.status-dot.rd{background:var(--red);}
+.status-dot.gray{background:#ccc;}
+
+/* ══ Mobile preview frame (côté collecteur demo) ══ */
+.phone-frame{background:#111;border-radius:20px;padding:14px;max-width:280px;margin:0 auto;}
+.phone-screen{background:#f4f6f3;border-radius:12px;padding:14px;}
+.phone-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;color:#fff;}
+.phone-action-btn{flex:1;padding:9px;border-radius:8px;font-family:Montserrat;font-weight:700;font-size:11px;text-align:center;cursor:pointer;border:none;color:#fff;}
+
+/* ══ Validation decision buttons ══ */
+.decision-row{display:flex;gap:10px;}
+.btn-validate{flex:1;background:var(--green);color:#fff;border:none;padding:12px;border-radius:9px;font-family:Montserrat;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .2s;}
+.btn-validate:hover{background:var(--green-dark);}
+.btn-reject{flex:1;background:var(--red);color:#fff;border:none;padding:12px;border-radius:9px;font-family:Montserrat;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .2s;}
+.btn-reject:hover{background:#c62828;}
+.btn-validate svg,.btn-reject svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;}
+
+/* ══ Rule callout box ══ */
+.rule-box{background:var(--blue-light);border-radius:9px;padding:12px 14px;font-size:12px;color:var(--blue);font-weight:600;display:flex;align-items:center;gap:8px;}
+.rule-box svg{width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2;flex-shrink:0;}
+
+body.logged-out .sidebar,
+body.logged-out .topbar { display:none; }
+body.logged-out .main { margin-left:0; }
+</style>
+</head>
+<body class="logged-out" id="bodyEl">
+<div id="supTransition" style="position:fixed;inset:0;background:#fff;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+  <div style="width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:var(--green);border-radius:50%;animation:supSpin .8s linear infinite;"></div>
+  <p style="font-family:'Montserrat',sans-serif;font-weight:600;color:var(--green);font-size:14px;margin:0;">Connexion en cours...</p>
+</div>
+<style>@keyframes supSpin{to{transform:rotate(360deg);}}</style>
+<div class="overlay-bg" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="data:image/png;base64,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" alt="Enviro Cleans logo"/>
+    <div class="sb-logo-t"><span>ENVIRO CLEANS</span><span>Espace Superviseur</span></div>
+  </div>
+  <div class="sb-profile">
+    <div class="sb-avatar" id="sbAvatar">SD</div>
+    <div>
+      <div class="sb-profile-name">Superviseur Dupont</div>
+      <div class="sb-profile-role">Superviseur · Ngaliema</div>
+      <div class="sb-status">En ligne</div>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-lbl">Navigation</div>
+    <button class="sb-item active" onclick="nav('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Tableau de bord
+    </button>
+    <button class="sb-item" onclick="nav('tournees'); supLoadTournees();">
+      <svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Tournées
+    </button>
+    <button class="sb-item" onclick="nav('collecteurs'); supLoadCollecteursPage();">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+      Collecteurs
+    </button>
+    <button class="sb-item" onclick="nav('clients'); supLoadClientsPage();">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clients
+    </button>
+    <button class="sb-item" onclick="nav('affectations'); supLoadAffectPage();">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Affectations
+    </button>
+    <button class="sb-item" onclick="nav('suivi'); supLoadSuiviListe();">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Suivi des collectes
+    </button>
+    <button class="sb-item" onclick="nav('rattrapage'); supLoadRattrapagePage();">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      Rattrapage
+    </button>
+    <button class="sb-item" onclick="nav('dispatch'); supLoadDispatchApercu();">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dispatch
+    </button>
+    <button class="sb-item" onclick="nav('rapports'); supInitRapportsPage();">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Rapports
+    </button>
+    <button class="sb-item" onclick="nav('notifications'); supOpenNotifications();">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notifications
+      <span class="sb-pill red" id="supSbNotifBadge" style="display:none;">0</span>
+    </button>
+    <button class="sb-item" onclick="nav('parametres'); supLoadProfilPage();">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Paramètres
+    </button>
+  </div>
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="handleSupLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Se déconnecter
+    </button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main" id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <div class="tb-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Rechercher..." autocomplete="off" name="sup-global-search"/>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-date" id="supTbDate">📅 —</div>
+      <button class="notif-btn" onclick="nav('notifications'); supOpenNotifications();">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="supNotifBadge" style="display:none;">0</span>
+      </button>
+      <div class="tb-userblock" onclick="nav('parametres'); supLoadProfilPage();">
+        <div class="tb-avatar" id="tbAvatar">SD</div>
+        <div class="tb-userinfo">
+          <div class="tb-uname">Superviseur Dupont</div>
+          <div class="tb-urole">En ligne</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ══ PAGE : CONNEXION ══ -->
+  <div class="page active" id="page-login">
+    <div style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.08);">
+        <div style="text-align:center;margin-bottom:28px;">
+          <img src="data:image/png;base64,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" alt="logo" style="width:52px;height:52px;object-fit:contain;margin:0 auto 12px;display:block;"/>
+          <div style="font-family:Montserrat;font-weight:800;font-size:10px;letter-spacing:2px;color:#aaa;text-transform:uppercase;margin-bottom:6px;">ENVIRO CLEANS</div>
+          <h2 style="font-family:Montserrat;font-weight:900;font-size:22px;">Espace Superviseur</h2>
+          <p style="font-size:13px;color:#888;margin-top:4px;">Connexion à votre compte</p>
+        </div>
+        <div class="form-group"><label>Téléphone ou email</label><input type="text" id="supIdentifiant" placeholder="sup.dupont@envirocleans.cd" autocomplete="off"/></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="supPwd" placeholder="••••••••" autocomplete="new-password"/></div>
+        <div id="supLoginError" style="font-size:12.5px;color:#e53935;margin:-8px 0 14px;display:none;"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#555;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="supRemember" style="width:auto;accent-color:var(--green);"> Se souvenir de moi</label>
+        <button class="btn-green" id="supLoginBtn" style="width:100%;justify-content:center;padding:13px;" onclick="handleSupLogin()">Se connecter</button>
+        <a href="forgot-password.html" style="display:block;text-align:center;margin-top:14px;font-size:12.5px;color:var(--green);text-decoration:none;font-weight:600;">Mot de passe oublié ?</a>
+        <p style="text-align:center;margin-top:18px;font-size:11px;color:#bbb;">© <span id="copyrightYear">2024</span> Enviro Cleans</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : TABLEAU DE BORD ══ -->
+  <div class="page" id="page-dashboard">
+    <div class="page-top">
+      <div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Tableau de bord</h1><p style="font-size:13px;color:#999;margin-top:3px;">Vue générale des activités du jour · <span id="supDateAujourdhui"></span></p></div>
+      <button class="btn-green" onclick="openModal('modalNewTournee')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle tournée</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/></svg></div><div><div class="stat-lbl">Tournées du jour</div><div class="stat-val" id="supTourneesDuJour">—</div><a class="voir-tout" onclick="nav('tournees'); supLoadTournees();">Voir détails →</a></div></div>
+      <div class="stat-card"><div class="stat-ic bl"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg></div><div><div class="stat-lbl">Collecteurs actifs</div><div class="stat-val" id="supCollecteursActifs">—</div><a class="voir-tout" onclick="nav('collecteurs')">Voir détails →</a></div></div>
+      <div class="stat-card"><div class="stat-ic or"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-lbl">Collectes prévues</div><div class="stat-val" id="supCollectesPrevues">—</div><a class="voir-tout" onclick="nav('suivi')">Voir détails →</a></div></div>
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-lbl">Collectes effectuées</div><div class="stat-val g" id="supCollectesEffectuees">—</div><a class="voir-tout" onclick="nav('suivi')">Voir détails →</a></div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h3>Résumé aujourd'hui</h3></div>
+      <div class="stat-grid" style="margin-bottom:0;">
+        <div class="mini-stat"><div class="mini-stat-lbl">Taux de réalisation</div><div class="mini-stat-val" id="supTaux" style="color:var(--green);">—</div></div>
+        <div class="mini-stat"><div class="mini-stat-lbl">Collectes effectuées</div><div class="mini-stat-val" id="supResEffectuees">—</div></div>
+        <div class="mini-stat"><div class="mini-stat-lbl">Collectes en attente</div><div class="mini-stat-val" id="supResAttente" style="color:var(--orange);">—</div></div>
+        <div class="mini-stat"><div class="mini-stat-lbl">Problèmes signalés</div><div class="mini-stat-val" id="supResProblemes" style="color:var(--red);">—</div></div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-ic bl"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg></div><div><div class="stat-lbl">Tournées en cours</div><div class="stat-val" id="supTourneesEnCoursCount">—</div><a class="voir-tout" onclick="nav('suivi'); supLoadSuiviListe();">Voir détails →</a></div></div>
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="stat-lbl">Tournées terminées</div><div class="stat-val g" id="supTourneesTermineesCount">—</div><a class="voir-tout" onclick="nav('tournees'); supLoadTournees();">Voir détails →</a></div></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : TOURNÉES ══ -->
+  <div class="page" id="page-tournees">
+    <div class="page-top">
+      <div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Tournées</h1><p style="font-size:13px;color:#999;">Voir, créer et gérer les tournées</p></div>
+      <button class="btn-green" onclick="supOpenNewTournee()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Nouvelle tournée</button>
+    </div>
+    <div class="filter-row">
+      <input type="date" class="filter-select" id="supTourneeFiltreDate" onchange="supLoadTournees()"/>
+      <select class="filter-select" id="supTourneeFiltreZone" onchange="supLoadTournees()"><option value="">Zone : Toutes</option></select>
+      <select class="filter-select" id="supTourneeFiltreStatut" onchange="supLoadTournees()">
+        <option value="">Statut : Tous</option>
+        <option value="en_cours">En cours</option>
+        <option value="planifiee">Planifiée</option>
+        <option value="terminee">Terminée</option>
+        <option value="annulee">Annulée</option>
+      </select>
+      <div class="search-bar" style="flex:1;margin-bottom:0;min-width:180px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="supTourneeFiltreSearch" autocomplete="off" placeholder="Rechercher..." oninput="supLoadTournees()"/></div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="tourneesTable">
+          <thead><tr><th>Nom</th><th>Zone</th><th>Date</th><th>Collecteur</th><th>Statut</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="6" style="text-align:center;color:#999;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : COLLECTEURS ══ -->
+  <div class="page" id="page-collecteurs">
+    <div class="page-header"><h1>Collecteurs</h1><p>Gérer les collecteurs sous votre supervision</p></div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg></div><div><div class="stat-lbl">Collecteurs actifs</div><div class="stat-val g" id="supColActifsCount">—</div></div></div>
+      <div class="stat-card"><div class="stat-ic bl"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/></svg></div><div><div class="stat-lbl">Tournées en cours</div><div class="stat-val" id="supColTourneesEnCours">—</div></div></div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Collecteur</th><th>Zone</th><th>Tournée active</th><th>Progression</th><th>Statut</th></tr></thead>
+          <tbody id="supCollecteursTable"><tr><td colspan="5" style="text-align:center;color:#999;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : CLIENTS ══ -->
+  <div class="page" id="page-clients">
+    <div class="page-header"><h1>Clients</h1><p>Clients en attente d'affectation (envoyés par le gestionnaire)</p></div>
+    <div class="filter-row">
+      <select class="filter-select" id="supClientsFiltreZone" onchange="supLoadClientsPage()"><option value="">Zone : Toutes</option></select>
+      <div class="search-bar" style="flex:1;margin-bottom:0;min-width:200px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="supClientsFiltreSearch" autocomplete="off" placeholder="Rechercher un client..." oninput="supLoadClientsPage()"/></div>
+    </div>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="supClientsTable">
+          <thead><tr><th>N° abonné</th><th>Nom</th><th>Adresse</th><th>Zone</th></tr></thead>
+          <tbody><tr><td colspan="4" style="text-align:center;color:#999;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+      <p style="text-align:center;margin-top:14px;font-size:12.5px;color:#aaa;" id="supClientsTotal"></p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : AFFECTATIONS ══ -->
+  <div class="page" id="page-affectations">
+    <div class="page-header"><h1>Affectations des clients</h1><p>Affecter les bons clients aux bons collecteurs</p></div>
+
+    <div class="rule-box" style="margin-bottom:16px;">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Règle : Maximum 100 clients par collecteur et par jour.
+    </div>
+
+    <div class="three-col">
+      <!-- Colonne 1 : Liste des clients par zone (pool, pas encore affectés) -->
+      <div class="affect-col">
+        <h4>Clients en attente d'affectation</h4>
+        <div class="form-group" style="margin-bottom:10px;">
+          <select class="filter-select" style="width:100%;" id="supAffectFiltreZone" onchange="supLoadAffectPool()"><option value="">Zone : Toutes</option></select>
+        </div>
+        <div class="search-bar" style="margin-bottom:10px;"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="supAffectFiltreSearch" autocomplete="off" placeholder="Rechercher..." oninput="supRenderAffectPool()"/></div>
+        <div style="max-height:340px;overflow-y:auto;" id="supAffectPoolListe">
+          <p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Chargement...</p>
+        </div>
+        <p style="text-align:center;margin-top:10px;font-size:11.5px;color:#aaa;" id="supAffectPoolTotal"></p>
+      </div>
+
+      <!-- Colonne 2 : Créer une affectation -->
+      <div class="affect-col">
+        <h4>Créer une affectation</h4>
+        <div class="form-group"><label>Tournée</label><select id="supAffectTournee" onchange="supLoadTourneeAssignedClients()"></select></div>
+        <p style="font-size:11.5px;color:#888;margin:-6px 0 10px;">Sélectionnez les clients à gauche, puis cochez-les ici pour les ajouter à la tournée choisie.</p>
+        <label style="display:block;font-family:Montserrat;font-weight:700;font-size:12px;color:#444;margin-bottom:8px;">Clients sélectionnés (<span id="supAffectSelectedCount">0</span>)</label>
+        <div style="max-height:200px;overflow-y:auto;margin-bottom:12px;" id="supAffectSelectedListe">
+          <p style="color:#999;font-size:12px;padding:10px 0;text-align:center;">Cochez des clients dans la liste de gauche.</p>
+        </div>
+        <button class="btn-green" style="width:100%;justify-content:center;" id="supAffectBtn" onclick="supAffecterClients()" disabled>Affecter (<span id="affectCount">0</span>)</button>
+      </div>
+
+      <!-- Colonne 3 : Clients déjà affectés à la tournée sélectionnée -->
+      <div class="affect-col">
+        <h4>Clients affectés à la tournée</h4>
+        <div style="max-height:340px;overflow-y:auto;" id="supAffectAssignedListe">
+          <p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Sélectionnez une tournée.</p>
+        </div>
+        <p style="text-align:center;margin-top:10px;font-size:11.5px;color:#aaa;" id="supAffectAssignedTotal"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : SUIVI DES COLLECTES ══ -->
+  <div class="page" id="page-suivi">
+    <div class="page-header"><h1>Suivi des collectes</h1><p>Tournées en cours — sélectionnez-en une pour voir le détail en temps réel</p></div>
+    <div id="supSuiviListe"><p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p></div>
+  </div>
+
+  <!-- ══ PAGE : SUIVI - DÉTAIL D'UNE TOURNÉE ══ -->
+  <div class="page" id="page-suivi-detail">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap;">
+      <button class="btn-outline btn-sm" onclick="nav('suivi')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button>
+      <div><h1 style="font-family:Montserrat;font-weight:900;font-size:18px;" id="supSuiviTitre">—</h1><p style="font-size:12.5px;color:#999;" id="supSuiviSousTitre">—</p></div>
+      <span class="badge bo" id="supSuiviStatutBadge" style="margin-left:auto;">—</span>
+    </div>
+    <div id="supSuiviSoumettreRow" style="display:none;margin-bottom:14px;">
+      <button class="btn-green" style="width:100%;justify-content:center;" onclick="supSubmitReport()">Soumettre le rapport au gestionnaire</button>
+      <p id="supSuiviSoumisMsg" style="display:none;text-align:center;color:var(--green);font-weight:700;font-size:12.5px;margin-top:8px;">✓ Rapport soumis au gestionnaire</p>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h3>Avancement de la tournée</h3></div>
+      <div class="progress-label-row"><span style="font-size:12.5px;color:#888;">Progression globale</span><span style="font-family:Montserrat;font-weight:800;color:var(--green);" id="supSuiviPct">0%</span></div>
+      <div class="progress-track" style="margin-bottom:16px;"><div class="progress-fill" id="supSuiviProgressFill" style="width:0%;"></div></div>
+      <div class="stat-grid" style="margin-bottom:0;">
+        <div class="mini-stat" style="text-align:center;"><div class="mini-stat-val" style="color:var(--green);" id="supSuiviEffectuees">—</div><div class="mini-stat-lbl">Effectuées</div></div>
+        <div class="mini-stat" style="text-align:center;"><div class="mini-stat-val" style="color:var(--blue);" id="supSuiviAttente">—</div><div class="mini-stat-lbl">En attente</div></div>
+        <div class="mini-stat" style="text-align:center;"><div class="mini-stat-val" style="color:var(--orange);" id="supSuiviAbsents">—</div><div class="mini-stat-lbl">Absents</div></div>
+        <div class="mini-stat" style="text-align:center;"><div class="mini-stat-val" style="color:var(--red);" id="supSuiviProblemes">—</div><div class="mini-stat-lbl">Problèmes</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h3>Liste des clients</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>N° abonné</th><th>Nom</th><th>Statut</th><th>Heure</th><th>Action</th></tr></thead>
+          <tbody id="supSuiviTable"><tr><td colspan="5" style="text-align:center;color:#999;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="supSuiviApercu" style="display:none;">
+      <div class="card-head"><h3>Aperçu de la collecte sélectionnée</h3></div>
+      <div class="detail-row"><div class="detail-lbl">Client</div><div class="detail-val" id="supApercuClient">—</div></div>
+      <div class="detail-row"><div class="detail-lbl">Statut signalé</div><div class="detail-val" id="supApercuStatut">—</div></div>
+      <div class="detail-row"><div class="detail-lbl">Heure</div><div class="detail-val" id="supApercuHeure">—</div></div>
+      <div class="detail-row"><div class="detail-lbl">Commentaire</div><div class="detail-val" id="supApercuCommentaire">—</div></div>
+      <button class="btn-green" style="width:100%;justify-content:center;margin-top:10px;" id="supApercuValiderBtn" onclick="supOpenValidationPage()">Valider ou rejeter cette collecte →</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : VALIDATIONS ══ -->
+  <!-- ══ PAGE : RATTRAPAGE ══ -->
+  <div class="page" id="page-rattrapage">
+    <div class="page-header"><h1>Rattrapage</h1><p>Clients non collectés envoyés par le gestionnaire</p></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h3>Clients en attente</h3><span id="supRattrapagePoolTotal" style="font-size:12px;color:#888;"></span></div>
+        <div id="supRattrapagePoolListe"><p style="color:#999;font-size:13px;padding:10px 0;">Chargement...</p></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Créer la tournée de rattrapage</h3></div>
+        <div class="form-group"><label>Collecteur</label><select id="supRtpCollecteur"></select></div>
+        <div class="form-row">
+          <div class="form-group"><label>Date</label><input type="date" id="supRtpDate"/></div>
+          <div class="form-group"><label>Heure de début</label><input type="time" id="supRtpHeure" value="08:00"/></div>
+        </div>
+        <p style="font-size:12px;color:#888;margin-bottom:10px;"><span id="supRtpSelectedCount">0</span> client(s) sélectionné(s) ci-contre.</p>
+        <div id="supRtpError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+        <button class="btn-green" id="supRtpCreateBtn" style="width:100%;justify-content:center;" onclick="supCreateRattrapage()" disabled>Créer la tournée de rattrapage</button>
+        <p id="supRtpSuccessMsg" style="font-size:12.5px;color:var(--green);margin-top:10px;text-align:center;display:none;"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : DISPATCH (création des tournées de la semaine) ══ -->
+  <div class="page" id="page-dispatch">
+    <div class="page-header"><h1>Dispatch</h1><p>Créez les tournées de la semaine pour vos collecteurs, selon le jour fixe de chaque client</p></div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h3>Comment ça fonctionne</h3></div>
+      <p style="font-size:12.5px;color:#666;line-height:1.6;">
+        Chaque client de vos zones a un <strong>jour de collecte fixe</strong> (Basic = 1 jour/semaine, Standard/Premium = 2 jours/semaine), attribué automatiquement par le gestionnaire.
+        Cliquez sur <strong>"Créer les tournées de la semaine"</strong> pour générer, pour chacun de vos collecteurs, la tournée du jour avec exactement les clients dont c'est le jour aujourd'hui — aucun risque de doublon, ni d'oubli.
+        Si vous avez déjà créé une tournée manuellement pour un collecteur ce jour-là, les clients à jour fixe y seront simplement ajoutés.
+      </p>
+      <button class="btn-outline" style="width:100%;justify-content:center;margin-top:10px;" onclick="supLoadDispatchApercu()">🔄 Recalculer l'aperçu</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Aperçu — semaine du <span id="supDispatchSemaine">—</span></h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Collecteur</th><th>Zone</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Total semaine</th><th>Sans jour fixe</th></tr></thead>
+          <tbody id="supDispatchTable"><tr><td colspan="9" style="text-align:center;color:#999;">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+      <button class="btn-green" style="width:100%;justify-content:center;margin-top:14px;" id="supDispatchRunBtn" onclick="supConfirmGenererTournees()">✅ Créer les tournées de la semaine</button>
+      <p id="supDispatchResultMsg" style="font-size:12.5px;color:var(--green);margin-top:10px;text-align:center;display:none;"></p>
+    </div>
+  </div>
+
+  <div class="page" id="page-validations">
+    <div class="page-header"><h1>Validation des collectes</h1><p>Validez ou rejetez la collecte signalée</p></div>
+
+    <div class="card">
+      <div class="card-head"><h3>Collecte à examiner</h3></div>
+      <div class="two-col">
+        <div>
+          <div class="detail-row"><div class="detail-lbl">Client</div><div class="detail-val" id="val-client">—</div></div>
+          <div class="detail-row"><div class="detail-lbl">Statut signalé</div><div class="detail-val" id="val-statut">—</div></div>
+          <div class="detail-row"><div class="detail-lbl">Heure</div><div class="detail-val" id="val-heure">—</div></div>
+          <div class="detail-row"><div class="detail-lbl">Commentaire du collecteur</div><div class="detail-val" id="val-commentaire">—</div></div>
+        </div>
+        <div>
+          <div class="detail-lbl" style="margin-bottom:8px;">Photo (preuve)</div>
+          <div style="background:#f0f0f0;border-radius:10px;height:160px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px;gap:6px;">
+            <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#bbb;fill:none;stroke-width:1.8;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Photo de preuve
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="detail-lbl" style="margin-bottom:8px;">Votre décision</div>
+        <div class="decision-row" style="margin-bottom:12px;">
+          <button class="btn-validate" onclick="supSelectDecision('valider')" id="btnValidate"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Valider</button>
+          <button class="btn-reject" onclick="supSelectDecision('rejeter')" id="btnReject"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Rejeter</button>
+        </div>
+        <div class="form-group"><label>Commentaire (si rejet)</label><textarea id="supValCommentaire" placeholder="Expliquez le motif du rejet..."></textarea></div>
+        <div id="supValError" style="font-size:12.5px;color:#e53935;margin-bottom:8px;display:none;"></div>
+        <p id="supValAlreadyMsg" style="font-size:12.5px;color:var(--green);margin-bottom:8px;display:none;">✓ Décision déjà enregistrée pour cette collecte.</p>
+        <button class="btn-green" style="width:100%;justify-content:center;" id="supValSaveBtn" onclick="supConfirmValidation()">Enregistrer</button>
+        <button class="btn-outline" style="width:100%;justify-content:center;margin-top:8px;display:none;" id="supValModifyBtn" onclick="supEnableModify()">Modifier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : RAPPORTS ══ -->
+  <div class="page" id="page-rapports">
+    <div class="page-header"><h1>Rapports</h1><p>Générer des rapports détaillés</p></div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="card-head"><h3>Générer un rapport</h3></div>
+      <div class="form-row">
+        <div class="form-group"><label>Zone</label><select id="supRapportZone"><option value="">Toutes</option></select></div>
+      </div>
+      <div class="form-group"><label>Période</label>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input type="date" id="supRapportDateDebut"/><span style="color:#ccc;">—</span><input type="date" id="supRapportDateFin"/>
+        </div>
+      </div>
+      <button class="btn-green" style="width:100%;justify-content:center;" onclick="supGenerateRapport()">Générer</button>
+    </div>
+
+    <div class="card" id="supRapportResultCard" style="display:none;">
+      <div class="card-head"><h3>Collectes par tournée</h3></div>
+      <p style="font-size:12px;color:#888;margin-bottom:14px;" id="supRapportPeriodeTxt"></p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tournée</th><th>Collecteur</th><th>Prévu</th><th>Effectué</th><th>Taux</th></tr></thead>
+          <tbody id="supRapportTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" id="supRapportNonCollectesCard" style="display:none;margin-top:18px;">
+      <div class="card-head"><h3>Clients non collectés sur la période</h3></div>
+      <div id="supRapportNonCollectes"></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : NOTIFICATIONS ══ -->
+  <div class="page" id="page-notifications">
+    <div class="page-header"><h1>Notifications</h1><p>Alertes et notifications du système</p></div>
+    <div class="card" id="supNotifListe">
+      <p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : PARAMÈTRES ══ -->
+  <div class="page" id="page-parametres">
+    <div class="page-header"><h1>Paramètres</h1><p>Paramètres de votre compte</p></div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h3>Informations personnelles</h3><button class="btn-outline btn-sm" id="supProfilEditBtn" onclick="supToggleProfilEdit()">Modifier</button></div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+          <div class="emp-avatar" id="supPhotoView" style="width:64px;height:64px;font-size:22px;">—</div>
+          <div><div style="font-family:Montserrat;font-weight:700;font-size:14px;" id="supProfilNom">—</div><div style="font-size:11.5px;color:#888;" id="supProfilEmailSub">—</div></div>
+        </div>
+        <div class="detail-row"><div class="detail-lbl">Nom complet</div><div class="detail-val" id="supProfilNomComplet">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Téléphone</div><div class="detail-val" id="supProfilTelView">—</div></div>
+        <div class="form-group" id="supProfilTelEdit" style="display:none;margin:8px 0;"><label>Téléphone</label><input type="text" id="supProfilTelInput"/></div>
+        <div class="detail-row"><div class="detail-lbl">Email</div><div class="detail-val" id="supProfilEmailView">—</div></div>
+        <div class="form-group" id="supProfilEmailEdit" style="display:none;margin:8px 0;"><label>Email</label><input type="email" id="supProfilEmailInput"/></div>
+        <div id="supProfilSaveRow" style="display:none;margin-top:10px;"><button class="btn-green btn-sm" onclick="supSaveProfilPage()">Enregistrer</button></div>
+        <div id="supProfilError" style="font-size:12px;color:#e53935;margin-top:8px;display:none;"></div>
+        <button class="pmi" style="width:100%;text-align:left;margin-top:14px;cursor:pointer;border:none;background:none;" onclick="openModal('modalSupPassword')">
+          <span style="font-family:Montserrat;font-weight:700;font-size:13px;color:#444;">🔒 Modifier le mot de passe</span>
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Informations du compte</h3></div>
+        <div class="detail-row"><div class="detail-lbl">Rôle</div><div class="detail-val">Superviseur</div></div>
+        <div class="detail-row"><div class="detail-lbl">Zone supervisée</div><div class="detail-val" id="supProfilZone">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Date d'embauche</div><div class="detail-val" id="supProfilEmbauche">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Collecteurs gérés</div><div class="detail-val" id="supProfilCollecteursGeres">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ MODAL : NOUVELLE TOURNÉE ══ -->
+<div class="modal-overlay" id="modalNewTournee">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalNewTournee')">×</button>
+    <h2 id="supTourneeModalTitre">Nouvelle tournée</h2>
+    <p class="msub">Créer et planifier une nouvelle tournée</p>
+    <div class="form-group"><label>Date</label><input type="date" id="supTourneeDate"/></div>
+    <div class="form-group"><label>Heure de début</label><input type="time" id="supTourneeHeure"/></div>
+    <div class="form-group"><label>Zone</label><select id="supTourneeZone"></select></div>
+    <div class="form-group"><label>Nom de la tournée</label><input type="text" id="supTourneeNom" placeholder="Ex: Tournée Ngaliema Matin"/></div>
+    <div class="form-group"><label>Collecteur</label><select id="supTourneeCollecteur"></select></div>
+    <div id="supTourneeModalError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:10px;margin-top:6px;">
+      <button class="btn-green" id="supTourneeSaveBtn" style="flex:1;justify-content:center;" onclick="supSaveTournee()">Enregistrer la tournée</button>
+      <button class="btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('modalNewTournee')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL : CHANGER LE MOT DE PASSE ══ -->
+<div class="modal-overlay" id="modalSupPassword">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalSupPassword')">×</button>
+    <h2>Modifier le mot de passe</h2>
+    <div class="form-group"><label>Mot de passe actuel</label><input type="password" id="supPwdAncien" autocomplete="current-password"/></div>
+    <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="supPwdNouveau" autocomplete="new-password"/></div>
+    <div class="form-group"><label>Confirmer le nouveau mot de passe</label><input type="password" id="supPwdConfirm" autocomplete="new-password"/></div>
+    <div id="supPwdError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-green" id="supPwdSaveBtn" style="flex:1;justify-content:center;" onclick="supChangePasswordPage()">Enregistrer</button>
+      <button class="btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('modalSupPassword')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2.5;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Action effectuée !</span>
+</div>
+
+<script>
+// ── Navigation ──
+const titles = {
+  login:        {t:'Connexion', s:'Espace Superviseur'},
+  dashboard:    {t:'Tableau de bord', s:"Vue générale des activités du jour"},
+  tournees:     {t:'Tournées', s:'Voir, créer et gérer les tournées'},
+  collecteurs:  {t:'Collecteurs', s:'Collecteurs sous votre supervision'},
+  clients:      {t:'Clients', s:"En attente d'affectation"},
+  affectations: {t:'Affectations', s:'Affecter les clients aux collecteurs'},
+  suivi:        {t:'Suivi des collectes', s:'Tournées en cours'},
+  'suivi-detail':{t:'Suivi des collectes', s:'Temps réel'},
+  rattrapage:   {t:'Rattrapage', s:'Clients non collectés'},
+  dispatch:     {t:'Dispatch', s:'Création des tournées de la semaine'},
+  validations:  {t:'Validation', s:'Décision sur la collecte'},
+  rapports:     {t:'Rapports', s:'Générer des rapports détaillés'},
+  notifications:{t:'Notifications', s:''},
+  parametres:   {t:'Paramètres', s:''}
+};
+const navIndex = {login:null,dashboard:0,tournees:1,collecteurs:2,clients:3,affectations:4,suivi:5,'suivi-detail':5,rattrapage:6,dispatch:7,validations:5,rapports:8,notifications:9,parametres:10};
+
+(function setRealDateImmediately(){
+  const tbDateEl = document.getElementById('supTbDate');
+  if(tbDateEl) tbDateEl.textContent = '📅 ' + new Date().toLocaleDateString('fr-FR');
+})();
+
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const idx = navIndex[id];
+  if (idx !== null && idx !== undefined) {
+    const items = document.querySelectorAll('.sb-item');
+    if (items[idx]) items[idx].classList.add('active');
+  }
+  closeSidebar();
+  window.scrollTo(0, 0);
+}
+
+// ── Affectation count ──
+function updateAffectCount() {
+  const checked = document.querySelectorAll('.affect-check:checked').length;
+  document.getElementById('affectCount').textContent = checked;
+}
+
+// ── Validation ──
+let currentDecision = null;
+function openValidation(clientId, name, addr, statut) {
+  document.getElementById('val-client').textContent = clientId + ' – ' + name;
+  document.getElementById('val-addr').textContent = addr + ', Ngaliema';
+  const statutEl = document.getElementById('val-statut');
+  const badgeClass = statut === 'Problème' ? 'br' : statut === 'Absent' ? 'bo' : 'bg';
+  statutEl.innerHTML = `<span class="badge ${badgeClass}">${statut}</span>`;
+  nav('validations');
+}
+function selectDecision(decision) {
+  currentDecision = decision;
+  document.getElementById('btnValidate').style.opacity = decision === 'valider' ? '1' : '0.5';
+  document.getElementById('btnReject').style.opacity = decision === 'rejeter' ? '1' : '0.5';
+}
+function confirmValidation() {
+  if (!currentDecision) { showToast('Veuillez choisir Valider ou Rejeter'); return; }
+  showToast(currentDecision === 'valider' ? 'Collecte validée !' : 'Collecte rejetée !');
+  document.getElementById('btnValidate').style.opacity = '1';
+  document.getElementById('btnReject').style.opacity = '1';
+  currentDecision = null;
+}
+
+// ── Modal ──
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ── Sidebar ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Filter table ──
+function filterTable(val, tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+  const rows = table.querySelectorAll('tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(val.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.style.display = 'flex';
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    toast.style.transition = 'opacity .5s';
+    toast.style.opacity = '0';
+    setTimeout(() => { toast.style.display = 'none'; toast.style.transition = ''; toast.style.opacity = '1'; }, 500);
+  }, 2500);
+}
+
+// ── Photo de profil (superviseur) ──
+function handleSupPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('Veuillez sélectionner une image.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const src = ev.target.result;
+    const view = document.getElementById('supPhotoView');
+    if (view) { view.innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`; }
+    const sbAvatar = document.getElementById('sbAvatar');
+    if (sbAvatar) { sbAvatar.innerHTML = `<img src="${src}" alt="Photo"/>`; }
+    const tbAvatar = document.getElementById('tbAvatar');
+    if (tbAvatar) { tbAvatar.innerHTML = `<img src="${src}" alt="Photo"/>`; }
+    showToast('Photo de profil mise à jour !');
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+// ════════════════════════════════════════
+// CONNEXION À L'API – ESPACE SUPERVISEUR
+// ════════════════════════════════════════
+const SUP_API_BASE_URL = 'https://enviro-cleans-api.onrender.com';
+document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
+function setSupLoggedIn(isLoggedIn){
+  document.getElementById('bodyEl').classList.toggle('logged-out', !isLoggedIn);
+}
+
+let SUP_TOKEN_MEMORY = null;
+function getSupToken(){ return SUP_TOKEN_MEMORY || localStorage.getItem('supAccessToken'); }
+function showSupTransition(){ document.getElementById('supTransition').style.display = 'flex'; }
+function hideSupTransition(){ document.getElementById('supTransition').style.display = 'none'; }
+
+async function handleSupLogin(){
+  const identifiant = document.getElementById('supIdentifiant').value.trim();
+  const mot_de_passe = document.getElementById('supPwd').value;
+  const errorBox = document.getElementById('supLoginError');
+  const btn = document.getElementById('supLoginBtn');
+  const remember = document.getElementById('supRemember').checked;
+  errorBox.style.display = 'none';
+
+  if(!identifiant || !mot_de_passe){
+    errorBox.textContent = 'Veuillez remplir tous les champs.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Connexion...';
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifiant, mot_de_passe })
+    });
+    const data = await response.json();
+
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Identifiant ou mot de passe incorrect.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    if(data.user.role !== 'superviseur'){
+      errorBox.textContent = "Ce compte n'a pas accès à l'espace superviseur.";
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    if(remember){
+      localStorage.setItem('supAccessToken', data.accessToken);
+      localStorage.setItem('supRefreshToken', data.refreshToken);
+      localStorage.setItem('supUser', JSON.stringify(data.user));
+    } else {
+      SUP_TOKEN_MEMORY = data.accessToken;
+      localStorage.removeItem('supAccessToken');
+      localStorage.removeItem('supRefreshToken');
+      localStorage.removeItem('supUser');
+    }
+
+    document.getElementById('supIdentifiant').value = '';
+    document.getElementById('supPwd').value = '';
+
+    showSupTransition();
+    setSupLoggedIn(true);
+    nav('dashboard');
+    await loadSupDashboard();
+    hideSupTransition();
+  } catch (err) {
+    console.error('Erreur connexion superviseur:', err);
+    errorBox.textContent = "Impossible de contacter le serveur. Réessayez dans un instant (le serveur peut prendre 30 à 50 secondes à démarrer s'il était inactif).";
+    errorBox.style.display = 'block';
+    hideSupTransition();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function handleSupLogout(){
+  SUP_TOKEN_MEMORY = null;
+  localStorage.removeItem('supAccessToken');
+  localStorage.removeItem('supRefreshToken');
+  localStorage.removeItem('supUser');
+  setSupLoggedIn(false);
+  nav('login');
+  const idField = document.getElementById('supIdentifiant');
+  const pwdField = document.getElementById('supPwd');
+  if(idField) idField.value = '';
+  if(pwdField) pwdField.value = '';
+}
+
+async function loadSupDashboard(){
+  const token = getSupToken();
+  if(!token) return;
+
+  const dateEl = document.getElementById('supDateAujourdhui');
+  if(dateEl) dateEl.textContent = new Date().toLocaleDateString('fr-FR');
+  const tbDateEl = document.getElementById('supTbDate');
+  if(tbDateEl) tbDateEl.textContent = '📅 ' + new Date().toLocaleDateString('fr-FR');
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/dashboard`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(response.status === 401){
+      handleSupLogout();
+      return;
+    }
+    if(!response.ok){
+      console.error('Erreur API dashboard superviseur:', await response.text());
+      return;
+    }
+    const data = await response.json();
+    renderSupDashboard(data);
+
+    fetch(`${SUP_API_BASE_URL}/api/notifications/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if(d) setSupNotificationBadges(d.count || 0); })
+      .catch(() => {});
+    supStartNotificationPolling();
+  } catch(err){
+    console.error('Impossible de charger le tableau de bord superviseur:', err);
+  }
+}
+
+function renderSupDashboard(data){
+  const s = data.superviseur || {};
+  const stats = data.stats || {};
+  const resume = data.resume || {};
+
+  const profileName = document.querySelector('.sb-profile-name');
+  if(profileName) profileName.textContent = `${s.prenom||''} ${s.nom||''}`.trim();
+  const sbAvatar = document.getElementById('sbAvatar');
+  if(sbAvatar && !sbAvatar.querySelector('img')){
+    const initials = `${(s.prenom||'')[0]||''}${(s.nom||'')[0]||''}`.toUpperCase();
+    sbAvatar.textContent = initials || 'S';
+  }
+
+  document.getElementById('supTourneesDuJour').textContent = stats.tourneesDuJour ?? 0;
+  document.getElementById('supCollecteursActifs').textContent = stats.collecteursActifs ?? 0;
+  document.getElementById('supCollectesPrevues').textContent = stats.collectesPrevues ?? 0;
+  document.getElementById('supCollectesEffectuees').textContent = stats.collectesEffectuees ?? 0;
+  document.getElementById('supTourneesEnCoursCount').textContent = stats.tourneesEnCoursCount ?? 0;
+  document.getElementById('supTourneesTermineesCount').textContent = stats.tourneesTermineesCount ?? 0;
+
+  document.getElementById('supTaux').textContent = (resume.tauxRealisation ?? 0) + '%';
+  document.getElementById('supResEffectuees').textContent = resume.collectesEffectuees ?? 0;
+  document.getElementById('supResAttente').textContent = resume.collectesEnAttente ?? 0;
+  document.getElementById('supResProblemes').textContent = resume.collectesProblemes ?? 0;
+}
+
+// ════════════════════════════════════════
+// TOURNÉES : liste, création, modification
+// ════════════════════════════════════════
+let SUP_ZONES = [];
+let SUP_COLLECTEURS_SIMPLE = [];
+let SUP_EDITING_TOURNEE_ID = null;
+
+async function supLoadZones(){
+  if(SUP_ZONES.length) return SUP_ZONES;
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/zones`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    SUP_ZONES = data.zones || [];
+  } catch(err){ console.error('Erreur chargement zones:', err); }
+  return SUP_ZONES;
+}
+
+async function supLoadCollecteursSimple(){
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/collecteurs`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    SUP_COLLECTEURS_SIMPLE = data.collecteurs || [];
+  } catch(err){ console.error('Erreur chargement collecteurs:', err); }
+  return SUP_COLLECTEURS_SIMPLE;
+}
+
+async function supPopulateTourneeSelects(){
+  await supLoadZones();
+  await supLoadCollecteursSimple();
+  const zoneFiltre = document.getElementById('supTourneeFiltreZone');
+  if(zoneFiltre && zoneFiltre.options.length <= 1){
+    zoneFiltre.innerHTML = '<option value="">Zone : Toutes</option>' + SUP_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+  }
+  const zoneModal = document.getElementById('supTourneeZone');
+  if(zoneModal) zoneModal.innerHTML = SUP_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+  const collecteurModal = document.getElementById('supTourneeCollecteur');
+  if(collecteurModal) collecteurModal.innerHTML = SUP_COLLECTEURS_SIMPLE.map(c => `<option value="${c.id}">${c.prenom||''} ${c.nom}</option>`).join('');
+}
+
+async function supLoadTournees(){
+  const tbody = document.querySelector('#tourneesTable tbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Chargement...</td></tr>';
+  await supPopulateTourneeSelects();
+
+  const params = new URLSearchParams();
+  const date = document.getElementById('supTourneeFiltreDate').value;
+  const zone = document.getElementById('supTourneeFiltreZone').value;
+  const statut = document.getElementById('supTourneeFiltreStatut').value;
+  const search = document.getElementById('supTourneeFiltreSearch').value.trim();
+  if(date) params.set('date', date);
+  if(zone) params.set('zone_id', zone);
+  if(statut) params.set('statut', statut);
+  if(search) params.set('search', search);
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees?${params.toString()}`, {
+      headers: { 'Authorization': `Bearer ${getSupToken()}` }
+    });
+    const data = await response.json();
+    const tournees = data.tournees || [];
+    if(tournees.length === 0){
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">Aucune tournée trouvée.</td></tr>';
+      return;
+    }
+    const statutBadges = { en_cours:['bg','En cours'], planifiee:['bb','Planifiée'], terminee:['bo','Terminée'], annulee:['br','Annulée'] };
+    tbody.innerHTML = tournees.map(t => {
+      const [cls,label] = statutBadges[t.statut] || ['bb', t.statut];
+      const modifiable = t.statut === 'planifiee';
+      return `<tr class="tr-hover">
+        <td style="font-weight:700;">${t.nom}</td>
+        <td>${t.zone||'—'}</td>
+        <td>${new Date(t.date).toLocaleDateString('fr-FR')}${t.heure_debut ? ' · '+t.heure_debut : ''}</td>
+        <td>${t.collecteur||'—'}</td>
+        <td><span class="badge ${cls}">${label}</span></td>
+        <td><div style="display:flex;gap:2px;">
+          <button class="btn-icon" onclick="supOpenSuiviDetail(${t.id});" title="Voir"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+          <button class="btn-icon" ${modifiable?'':'disabled style="opacity:.3;cursor:not-allowed;"'} onclick="${modifiable?`supOpenEditTournee(${t.id})`:''}" title="${modifiable?'Modifier':'Verrouillée (moins de 2h avant le début, ou déjà commencée)'}"><svg viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  } catch(err){
+    console.error('Erreur chargement tournées:', err);
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#e53935;">Erreur de connexion au serveur.</td></tr>';
+  }
+}
+
+async function supOpenNewTournee(){
+  SUP_EDITING_TOURNEE_ID = null;
+  document.getElementById('supTourneeModalTitre').textContent = 'Nouvelle tournée';
+  document.getElementById('supTourneeDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('supTourneeHeure').value = '08:00';
+  document.getElementById('supTourneeNom').value = '';
+  document.getElementById('supTourneeModalError').style.display = 'none';
+  await supPopulateTourneeSelects();
+  openModal('modalNewTournee');
+}
+
+async function supOpenEditTournee(id){
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const t = (data.tournees || []).find(x => x.id === id);
+    if(!t){ showSupToast('Tournée introuvable.'); return; }
+
+    SUP_EDITING_TOURNEE_ID = id;
+    document.getElementById('supTourneeModalTitre').textContent = 'Modifier la tournée';
+    await supPopulateTourneeSelects();
+    document.getElementById('supTourneeDate').value = t.date;
+    document.getElementById('supTourneeHeure').value = t.heure_debut || '';
+    document.getElementById('supTourneeNom').value = t.nom;
+    document.getElementById('supTourneeModalError').style.display = 'none';
+
+    const collecteurMatch = SUP_COLLECTEURS_SIMPLE.find(c => `${c.prenom||''} ${c.nom}`.trim() === t.collecteur);
+    if(collecteurMatch) document.getElementById('supTourneeCollecteur').value = collecteurMatch.id;
+    const zoneMatch = SUP_ZONES.find(z => z.nom === t.zone);
+    if(zoneMatch) document.getElementById('supTourneeZone').value = zoneMatch.id;
+
+    openModal('modalNewTournee');
+  } catch(err){
+    console.error('Erreur ouverture modification tournée:', err);
+    showSupToast('Impossible de charger cette tournée.');
+  }
+}
+
+async function supSaveTournee(){
+  const errorBox = document.getElementById('supTourneeModalError');
+  errorBox.style.display = 'none';
+  const body = {
+    nom: document.getElementById('supTourneeNom').value.trim(),
+    zone_id: document.getElementById('supTourneeZone').value,
+    collecteur_id: document.getElementById('supTourneeCollecteur').value,
+    date_tournee: document.getElementById('supTourneeDate').value,
+    heure_debut: document.getElementById('supTourneeHeure').value,
+  };
+  if(!body.nom || !body.zone_id || !body.collecteur_id || !body.date_tournee){
+    errorBox.textContent = 'Veuillez remplir tous les champs.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('supTourneeSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    const url = SUP_EDITING_TOURNEE_ID
+      ? `${SUP_API_BASE_URL}/api/superviseur/tournees/${SUP_EDITING_TOURNEE_ID}`
+      : `${SUP_API_BASE_URL}/api/superviseur/tournees`;
+    const response = await fetch(url, {
+      method: SUP_EDITING_TOURNEE_ID ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de l\'enregistrement.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    closeModal('modalNewTournee');
+    showSupToast(SUP_EDITING_TOURNEE_ID ? 'Tournée modifiée avec succès !' : 'Tournée créée avec succès !');
+    supLoadTournees();
+    loadSupDashboard();
+  } catch(err){
+    console.error('Erreur enregistrement tournée:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer la tournée';
+  }
+}
+
+// ════════════════════════════════════════
+// SUIVI DES COLLECTES
+// ════════════════════════════════════════
+let SUP_SUIVI_TOURNEE_ID = null;
+let SUP_SUIVI_DATA = null;
+let SUP_SUIVI_SELECTED_TC = null;
+
+async function supLoadSuiviListe(){
+  const liste = document.getElementById('supSuiviListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p>';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees-en-cours`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const tournees = data.tournees || [];
+    if(tournees.length === 0){
+      liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucune tournée en cours pour le moment.</p>';
+      return;
+    }
+    liste.innerHTML = tournees.map(t => `
+      <div class="tournee-item" onclick="supOpenSuiviDetail(${t.id});">
+        <div class="tournee-top"><span class="tournee-title">${t.nom}${t.zone?' – '+t.zone:''}</span><span class="badge bo">En cours</span></div>
+        <div class="tournee-meta"><span>Collecteur : ${t.collecteur||'—'}</span><span>${new Date(t.date).toLocaleDateString('fr-FR')}</span></div>
+        <div class="progress-track" style="margin-top:8px;"><div class="progress-fill" style="width:${t.progression}%;"></div></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px;"><span class="tournee-pct">${t.progression}%</span></div>
+      </div>
+    `).join('');
+  } catch(err){
+    console.error('Erreur chargement tournées en cours:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:20px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+async function supOpenSuiviDetail(id){
+  SUP_SUIVI_TOURNEE_ID = id;
+  nav('suivi-detail');
+  document.getElementById('supSuiviTable').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Chargement...</td></tr>';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/suivi/${id}`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    if(!response.ok){ showSupToast('Impossible de charger cette tournée.'); nav('suivi'); return; }
+    const data = await response.json();
+    SUP_SUIVI_DATA = data;
+
+    document.getElementById('supSuiviTitre').textContent = data.tournee.nom;
+    document.getElementById('supSuiviSousTitre').textContent = `${data.tournee.zone||''} · Collecteur : ${data.tournee.collecteur||'—'}`;
+
+    const tourneeStatutBadges = { en_cours:['bo','En cours'], terminee:['bg','Terminée'], planifiee:['bb','Planifiée'], annulee:['br','Annulée'] };
+    const [scls,slabel] = tourneeStatutBadges[data.tournee.statut] || ['bb', data.tournee.statut];
+    const statutBadgeEl = document.getElementById('supSuiviStatutBadge');
+    statutBadgeEl.className = `badge ${scls}`;
+    statutBadgeEl.textContent = slabel;
+
+    const soumettreRow = document.getElementById('supSuiviSoumettreRow');
+    if(data.tournee.statut === 'terminee'){
+      soumettreRow.style.display = 'block';
+      document.getElementById('supSuiviSoumisMsg').style.display = 'none';
+      document.querySelector('#supSuiviSoumettreRow button').style.display = '';
+    } else {
+      soumettreRow.style.display = 'none';
+    }
+    document.getElementById('supSuiviPct').textContent = data.resume.progression + '%';
+    document.getElementById('supSuiviProgressFill').style.width = data.resume.progression + '%';
+    document.getElementById('supSuiviEffectuees').textContent = data.resume.effectuees;
+    document.getElementById('supSuiviAttente').textContent = data.resume.attente;
+    document.getElementById('supSuiviAbsents').textContent = data.resume.absents;
+    document.getElementById('supSuiviProblemes').textContent = data.resume.problemes;
+
+    const statutBadges = { a_venir:['bb','En attente'], effectue:['bg','Effectué'], valide:['bg','Validé'], absent:['bo','Absent'], probleme:['br','Problème'], rejete:['br','Rejeté'] };
+    document.getElementById('supSuiviTable').innerHTML = data.clients.map(c => {
+      const [cls,label] = statutBadges[c.statut] || ['bb', c.statut];
+      const clickable = ['probleme','absent'].includes(c.statut);
+      return `<tr class="tr-hover" ${clickable?`onclick="supSelectSuiviClient(${c.tourneeClientId})" style="cursor:pointer;"`:''}>
+        <td style="font-weight:700;">${c.numero_abonne||'—'}</td><td>${c.prenom||''} ${c.nom||''}</td><td><span class="badge ${cls}">${label}</span></td><td>${c.heure_passage||'–'}</td>
+        <td>${clickable ? `<span class="status-dot rd"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>` : (c.statut==='valide'||c.statut==='effectue' ? `<span class="status-dot gr"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>` : `<span class="status-dot gray"></span>`)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('supSuiviApercu').style.display = 'none';
+  } catch(err){
+    console.error('Erreur chargement suivi:', err);
+    showSupToast('Erreur de connexion au serveur.');
+  }
+}
+
+function supSelectSuiviClient(tourneeClientId){
+  const c = (SUP_SUIVI_DATA.clients || []).find(x => x.tourneeClientId === tourneeClientId);
+  if(!c) return;
+  SUP_SUIVI_SELECTED_TC = c;
+  const labels = { probleme: 'Problème ⚡', absent: 'Absent ⚠' };
+  document.getElementById('supApercuClient').textContent = `${c.numero_abonne} – ${c.prenom||''} ${c.nom||''}`.trim();
+  document.getElementById('supApercuStatut').innerHTML = `<span class="badge ${c.statut==='probleme'?'br':'bo'}">${labels[c.statut]||c.statut}</span>`;
+  document.getElementById('supApercuHeure').textContent = c.heure_passage || '—';
+  document.getElementById('supApercuCommentaire').textContent = c.commentaire || '—';
+  document.getElementById('supApercuValiderBtn').style.display = SUP_SUIVI_DATA.tournee.statut === 'en_cours' ? '' : 'none';
+  document.getElementById('supSuiviApercu').style.display = 'block';
+}
+
+// ════════════════════════════════════════
+// RATTRAPAGE
+// ════════════════════════════════════════
+let SUP_RTP_POOL = [];
+let SUP_RTP_SELECTED = new Set();
+
+async function supLoadRattrapagePage(){
+  await supLoadCollecteursSimple();
+  const select = document.getElementById('supRtpCollecteur');
+  select.innerHTML = SUP_COLLECTEURS_SIMPLE.map(c => `<option value="${c.id}">${c.prenom||''} ${c.nom}</option>`).join('');
+  document.getElementById('supRtpDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('supRtpSuccessMsg').style.display = 'none';
+  document.getElementById('supRtpError').style.display = 'none';
+  SUP_RTP_SELECTED.clear();
+
+  const liste = document.getElementById('supRattrapagePoolListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:10px 0;">Chargement...</p>';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/rattrapage/pool`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    SUP_RTP_POOL = data.clients || [];
+    document.getElementById('supRattrapagePoolTotal').textContent = `${SUP_RTP_POOL.length} client(s)`;
+    supRenderRattrapagePool();
+  } catch(err){
+    console.error('Erreur chargement pool rattrapage:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:10px 0;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+function supRenderRattrapagePool(){
+  const liste = document.getElementById('supRattrapagePoolListe');
+  if(SUP_RTP_POOL.length === 0){
+    liste.innerHTML = '<p style="color:#999;font-size:13px;padding:10px 0;">Aucun client en attente de rattrapage pour le moment.</p>';
+    return;
+  }
+  const labels = { absent:'Absent', probleme:'Problème', a_venir:'Non traité', rejete:'Rejeté' };
+  liste.innerHTML = SUP_RTP_POOL.map(c => `
+    <label class="affect-row" style="cursor:pointer;">
+      <div><div class="affect-client-name">${c.numero_abonne} · ${c.prenom||''} ${c.nom}</div>
+      <div class="affect-client-addr">${labels[c.statut]||c.statut} · manqué le ${new Date(c.dateManquee).toLocaleDateString('fr-FR')} · ${c.zone||''}</div></div>
+      <input type="checkbox" class="affect-check" ${SUP_RTP_SELECTED.has(c.tourneeClientId)?'checked':''} onchange="supToggleRtpSelect(${c.tourneeClientId}, this.checked)"/>
+    </label>
+  `).join('');
+}
+
+function supToggleRtpSelect(tcId, checked){
+  if(checked) SUP_RTP_SELECTED.add(tcId);
+  else SUP_RTP_SELECTED.delete(tcId);
+  const count = SUP_RTP_SELECTED.size;
+  document.getElementById('supRtpSelectedCount').textContent = count;
+  document.getElementById('supRtpCreateBtn').disabled = count === 0;
+}
+
+async function supCreateRattrapage(){
+  const errorBox = document.getElementById('supRtpError');
+  errorBox.style.display = 'none';
+  const collecteur_id = document.getElementById('supRtpCollecteur').value;
+  const date_tournee = document.getElementById('supRtpDate').value;
+  const heure_debut = document.getElementById('supRtpHeure').value;
+
+  if(!collecteur_id || !date_tournee || SUP_RTP_SELECTED.size === 0){
+    errorBox.textContent = 'Choisissez un collecteur, une date, et au moins un client.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('supRtpCreateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Création en cours...';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/rattrapage/creer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify({ collecteur_id, date_tournee, heure_debut, tourneeClientIds: Array.from(SUP_RTP_SELECTED) })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de la création.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    document.getElementById('supRtpSuccessMsg').textContent = data.message;
+    document.getElementById('supRtpSuccessMsg').style.display = 'block';
+    showSupToast('Tournée de rattrapage créée, clients informés !');
+    SUP_RTP_SELECTED.clear();
+    supLoadRattrapagePage();
+  } catch(err){
+    console.error('Erreur création tournée rattrapage:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = SUP_RTP_SELECTED.size === 0;
+    btn.textContent = 'Créer la tournée de rattrapage';
+  }
+}
+
+async function supSubmitReport(){
+  if(!SUP_SUIVI_TOURNEE_ID) return;
+  const btn = document.querySelector('#supSuiviSoumettreRow button');
+  btn.disabled = true;
+  btn.textContent = 'Envoi...';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/suivi/${SUP_SUIVI_TOURNEE_ID}/soumettre`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${getSupToken()}` }
+    });
+    const data = await response.json();
+    if(!response.ok){ showSupToast(data.message || 'Erreur lors de la soumission.'); return; }
+    btn.style.display = 'none';
+    document.getElementById('supSuiviSoumisMsg').style.display = 'block';
+    showSupToast('Rapport soumis au gestionnaire !');
+  } catch(err){
+    console.error('Erreur soumission rapport:', err);
+    showSupToast('Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Soumettre le rapport au gestionnaire';
+  }
+}
+
+// ════════════════════════════════════════
+// DISPATCH (création des tournées de la semaine)
+// ════════════════════════════════════════
+async function supLoadDispatchApercu(){
+  const tbody = document.getElementById('supDispatchTable');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;">Calcul en cours...</td></tr>';
+  document.getElementById('supDispatchResultMsg').style.display = 'none';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/dispatch/apercu`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const apercu = data.apercu || [];
+    document.getElementById('supDispatchSemaine').textContent = new Date(data.semaineDebut).toLocaleDateString('fr-FR');
+
+    if(apercu.length === 0){
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#999;">Aucun collecteur actif sous votre supervision.</td></tr>';
+      document.getElementById('supDispatchRunBtn').disabled = true;
+      return;
+    }
+    document.getElementById('supDispatchRunBtn').disabled = false;
+    tbody.innerHTML = apercu.map(a => {
+      const jours = a.detailJours.map(j => `<td>${j.nbClients}</td>`).join('');
+      return `<tr><td style="font-weight:700;">${a.collecteur}</td><td>${a.zone}</td>${jours}<td style="font-weight:700;">${a.totalSemaine}</td>
+        <td>${a.sansJourFixe>0 ? `<span style="color:var(--orange);">${a.sansJourFixe}</span>` : '0'}</td></tr>`;
+    }).join('');
+  } catch(err){
+    console.error('Erreur chargement aperçu dispatch:', err);
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#e53935;">Erreur de connexion au serveur.</td></tr>';
+  }
+}
+
+async function supConfirmGenererTournees(){
+  if(!confirm("Cette action va créer les tournées de la semaine pour vos collecteurs, avec les clients dont c'est le jour fixe. Continuer ?")) return;
+
+  const btn = document.getElementById('supDispatchRunBtn');
+  btn.disabled = true;
+  btn.textContent = 'Génération en cours...';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/dispatch/generer`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${getSupToken()}` }
+    });
+    const data = await response.json();
+    if(!response.ok){ showSupToast(data.message || 'Erreur lors de la génération.'); return; }
+    const msg = document.getElementById('supDispatchResultMsg');
+    msg.textContent = data.message;
+    msg.style.display = 'block';
+    showSupToast('Tournées créées avec succès !');
+    supLoadDispatchApercu();
+  } catch(err){
+    console.error('Erreur génération tournées:', err);
+    showSupToast('Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✅ Créer les tournées de la semaine';
+  }
+}
+
+function supOpenValidationPage(){
+  if(!SUP_SUIVI_SELECTED_TC) return;
+  nav('validations');
+  supInitValidationPage(SUP_SUIVI_SELECTED_TC, SUP_SUIVI_DATA.tournee);
+}
+
+// ════════════════════════════════════════
+// VALIDATIONS
+// ════════════════════════════════════════
+let SUP_VAL_TC = null;
+let SUP_VAL_TOURNEE = null;
+let SUP_VAL_DECISION = null;
+let SUP_VAL_LAST_SAVED = null;
+
+function supInitValidationPage(tc, tournee){
+  SUP_VAL_TC = tc;
+  SUP_VAL_TOURNEE = tournee;
+  SUP_VAL_DECISION = null;
+  SUP_VAL_LAST_SAVED = null;
+
+  const labels = { probleme: 'Problème ⚡', absent: 'Absent ⚠' };
+  document.getElementById('val-client').textContent = `${tc.numero_abonne} – ${tc.prenom||''} ${tc.nom||''}`.trim();
+  document.getElementById('val-statut').innerHTML = `<span class="badge ${tc.statut==='probleme'?'br':'bo'}">${labels[tc.statut]||tc.statut}</span>`;
+  document.getElementById('val-heure').textContent = tc.heure_passage || '—';
+  document.getElementById('val-commentaire').textContent = tc.commentaire || '—';
+  document.getElementById('supValCommentaire').value = '';
+
+  document.getElementById('btnValidate').classList.remove('sel');
+  document.getElementById('btnReject').classList.remove('sel');
+  document.getElementById('supValError').style.display = 'none';
+  document.getElementById('supValAlreadyMsg').style.display = 'none';
+  document.getElementById('supValSaveBtn').style.display = '';
+  document.getElementById('supValSaveBtn').disabled = false;
+  document.getElementById('supValSaveBtn').textContent = 'Enregistrer';
+  document.getElementById('supValModifyBtn').style.display = 'none';
+}
+
+function supSelectDecision(decision){
+  SUP_VAL_DECISION = decision;
+  document.getElementById('btnValidate').classList.toggle('sel', decision === 'valider');
+  document.getElementById('btnReject').classList.toggle('sel', decision === 'rejeter');
+}
+
+async function supConfirmValidation(){
+  const errorBox = document.getElementById('supValError');
+  errorBox.style.display = 'none';
+  if(!SUP_VAL_DECISION){
+    errorBox.textContent = 'Choisissez Valider ou Rejeter avant d\'enregistrer.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const commentaire = document.getElementById('supValCommentaire').value.trim();
+  const correction = SUP_VAL_LAST_SAVED === 'rejeter' && SUP_VAL_DECISION === 'valider';
+
+  const btn = document.getElementById('supValSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/validations/${SUP_VAL_TC.tourneeClientId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify({ decision: SUP_VAL_DECISION, commentaire, correction })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de l\'enregistrement.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer';
+      return;
+    }
+    SUP_VAL_LAST_SAVED = SUP_VAL_DECISION;
+    showSupToast(correction ? 'Correction envoyée au collecteur.' : 'Décision enregistrée.');
+    btn.style.display = 'none';
+    document.getElementById('supValAlreadyMsg').style.display = 'block';
+    document.getElementById('supValModifyBtn').style.display = '';
+  } catch(err){
+    console.error('Erreur validation collecte:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+}
+
+function supEnableModify(){
+  document.getElementById('supValAlreadyMsg').style.display = 'none';
+  document.getElementById('supValModifyBtn').style.display = 'none';
+  const btn = document.getElementById('supValSaveBtn');
+  btn.style.display = '';
+  btn.disabled = false;
+  btn.textContent = 'Enregistrer';
+}
+
+// ════════════════════════════════════════
+// PARAMÈTRES / MON PROFIL
+// ════════════════════════════════════════
+async function supLoadProfilPage(){
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/profil`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const p = data.profil;
+
+    const nomComplet = `${p.prenom||''} ${p.nom}`.trim();
+    document.getElementById('supProfilNom').textContent = nomComplet;
+    document.getElementById('supProfilNomComplet').textContent = nomComplet;
+    document.getElementById('supProfilEmailSub').textContent = p.email || '—';
+    document.getElementById('supProfilTelView').textContent = p.telephone || '—';
+    document.getElementById('supProfilEmailView').textContent = p.email || '—';
+    document.getElementById('supProfilTelInput').value = p.telephone || '';
+    document.getElementById('supProfilEmailInput').value = p.email || '';
+    document.getElementById('supProfilZone').textContent = p.zone || '—';
+    document.getElementById('supProfilEmbauche').textContent = p.date_embauche ? new Date(p.date_embauche).toLocaleDateString('fr-FR') : '—';
+    document.getElementById('supProfilCollecteursGeres').textContent = p.collecteursGeres ?? 0;
+
+    const initials = `${(p.prenom||'')[0]||''}${(p.nom||'')[0]||''}`.toUpperCase();
+    const photoView = document.getElementById('supPhotoView');
+    if(photoView && !photoView.querySelector('img')) photoView.textContent = initials || '—';
+  } catch(err){
+    console.error('Erreur chargement profil superviseur:', err);
+    showSupToast('Impossible de charger le profil.');
+  }
+}
+
+function supToggleProfilEdit(){
+  const editing = document.getElementById('supProfilTelEdit').style.display !== 'none';
+  document.getElementById('supProfilTelEdit').style.display = editing ? 'none' : 'block';
+  document.getElementById('supProfilEmailEdit').style.display = editing ? 'none' : 'block';
+  document.getElementById('supProfilTelView').style.display = editing ? '' : 'none';
+  document.getElementById('supProfilEmailView').style.display = editing ? '' : 'none';
+  document.getElementById('supProfilSaveRow').style.display = editing ? 'none' : 'block';
+  document.getElementById('supProfilEditBtn').textContent = editing ? 'Modifier' : 'Annuler';
+}
+
+async function supSaveProfilPage(){
+  const errorBox = document.getElementById('supProfilError');
+  errorBox.style.display = 'none';
+  const telephone = document.getElementById('supProfilTelInput').value.trim();
+  const email = document.getElementById('supProfilEmailInput').value.trim();
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/profil`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify({ telephone, email })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de la mise à jour.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    showSupToast('Profil mis à jour !');
+    supToggleProfilEdit();
+    supLoadProfilPage();
+  } catch(err){
+    console.error('Erreur sauvegarde profil superviseur:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  }
+}
+
+async function supChangePasswordPage(){
+  const ancien = document.getElementById('supPwdAncien').value;
+  const nouveau = document.getElementById('supPwdNouveau').value;
+  const confirmPwd = document.getElementById('supPwdConfirm').value;
+  const errorBox = document.getElementById('supPwdError');
+  const btn = document.getElementById('supPwdSaveBtn');
+  errorBox.style.display = 'none';
+
+  if(!ancien || !nouveau || !confirmPwd){
+    errorBox.textContent = 'Veuillez remplir tous les champs.';
+    errorBox.style.display = 'block';
+    return;
+  }
+  if(nouveau !== confirmPwd){
+    errorBox.textContent = 'Les deux nouveaux mots de passe ne correspondent pas.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify({ ancien_mot_de_passe: ancien, nouveau_mot_de_passe: nouveau })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors du changement de mot de passe.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    closeModal('modalSupPassword');
+    document.getElementById('supPwdAncien').value = '';
+    document.getElementById('supPwdNouveau').value = '';
+    document.getElementById('supPwdConfirm').value = '';
+    showSupToast('Mot de passe modifié avec succès !');
+  } catch(err){
+    console.error('Erreur changement mot de passe:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+}
+
+// ════════════════════════════════════════
+// NOTIFICATIONS
+// ════════════════════════════════════════
+function setSupNotificationBadges(count){
+  const bellBadge = document.getElementById('supNotifBadge');
+  const menuBadge = document.getElementById('supSbNotifBadge');
+  [bellBadge, menuBadge].forEach(el => {
+    if(!el) return;
+    if(count > 0){ el.textContent = count; el.style.display = ''; }
+    else { el.style.display = 'none'; }
+  });
+}
+
+let supNotifPollingStarted = false;
+function supStartNotificationPolling(){
+  if(supNotifPollingStarted) return;
+  supNotifPollingStarted = true;
+  setInterval(async () => {
+    const onNotifPage = document.getElementById('page-notifications')?.classList.contains('active');
+    if(onNotifPage) return;
+    try {
+      const response = await fetch(`${SUP_API_BASE_URL}/api/notifications/unread-count`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+      if(!response.ok) return;
+      const data = await response.json();
+      setSupNotificationBadges(data.count || 0);
+    } catch(err){ console.error('Erreur verification notifications:', err); }
+  }, 30000);
+
+  setInterval(() => {
+    const onDashboard = document.getElementById('page-dashboard')?.classList.contains('active');
+    if(onDashboard) loadSupDashboard();
+  }, 45000);
+}
+
+async function supOpenNotifications(){
+  const liste = document.getElementById('supNotifListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>';
+  setSupNotificationBadges(0);
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/notifications`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const notifications = data.notifications || [];
+
+    if(notifications.length === 0){
+      liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Aucune notification pour le moment.</p>';
+    } else {
+      const iconMap = { collecte: ['var(--red-light)','var(--red)'], rapport: ['var(--green-light)','var(--green)'] };
+      liste.innerHTML = notifications.map(n => {
+        const [bg,stroke] = iconMap[n.type] || ['var(--orange-light)','var(--orange)'];
+        return `<div class="sec-card"><div class="sec-ic" style="background:${bg};"><svg viewBox="0 0 24 24" style="stroke:${stroke};"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+        <div><div class="sec-title">${n.titre}</div><div class="sec-desc">${n.message}</div><div style="font-size:11px;color:#bbb;margin-top:2px;">${supTimeAgo(n.date)}</div></div></div>`;
+      }).join('');
+    }
+
+    await fetch(`${SUP_API_BASE_URL}/api/notifications/mark-read`, { method: 'PUT', headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+  } catch(err){
+    console.error('Erreur chargement notifications:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:16px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+function supTimeAgo(dateStr){
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if(mins < 1) return "à l'instant";
+  if(mins < 60) return `Il y a ${mins} min`;
+  const heures = Math.floor(mins / 60);
+  if(heures < 24) return `Il y a ${heures} h`;
+  return `Il y a ${Math.floor(heures/24)} j`;
+}
+
+// ════════════════════════════════════════
+// RAPPORTS
+// ════════════════════════════════════════
+async function supInitRapportsPage(){
+  await supLoadZones();
+  const zoneSelect = document.getElementById('supRapportZone');
+  if(zoneSelect.options.length <= 1){
+    zoneSelect.innerHTML = '<option value="">Toutes</option>' + SUP_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+  }
+  if(!document.getElementById('supRapportDateDebut').value){
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById('supRapportDateDebut').value = today;
+    document.getElementById('supRapportDateFin').value = today;
+  }
+}
+
+async function supGenerateRapport(){
+  const dateDebut = document.getElementById('supRapportDateDebut').value;
+  const dateFin = document.getElementById('supRapportDateFin').value;
+  const zoneId = document.getElementById('supRapportZone').value;
+  if(!dateDebut || !dateFin){ showSupToast('Choisissez une période.'); return; }
+
+  const params = new URLSearchParams({ dateDebut, dateFin });
+  if(zoneId) params.set('zone_id', zoneId);
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/rapport?${params.toString()}`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const lignes = data.lignes || [];
+
+    document.getElementById('supRapportResultCard').style.display = 'block';
+    document.getElementById('supRapportPeriodeTxt').textContent =
+      `Période : ${new Date(dateDebut).toLocaleDateString('fr-FR')} au ${new Date(dateFin).toLocaleDateString('fr-FR')}`;
+
+    if(lignes.length === 0){
+      document.getElementById('supRapportTable').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Aucune tournée sur cette période.</td></tr>';
+      document.getElementById('supRapportNonCollectesCard').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('supRapportTable').innerHTML = lignes.map(l => {
+      const badgeCls = l.taux >= 60 ? 'bg' : (l.taux >= 30 ? 'bo' : 'br');
+      return `<tr class="tr-hover"><td style="font-weight:700;">${l.nom}</td><td>${l.collecteur}</td><td>${l.prevu}</td><td>${l.effectue}</td><td><span class="badge ${badgeCls}">${l.taux}%</span></td></tr>`;
+    }).join('');
+
+    const toutesNonCollectes = lignes.flatMap(l => l.nonCollectes.map(nc => ({ ...nc, tournee: l.nom })));
+    const nonCollectesCard = document.getElementById('supRapportNonCollectesCard');
+    const nonCollectesDiv = document.getElementById('supRapportNonCollectes');
+    if(toutesNonCollectes.length === 0){
+      nonCollectesCard.style.display = 'block';
+      nonCollectesDiv.innerHTML = '<p style="color:#999;font-size:13px;padding:8px 0;">Aucun client non collecté sur cette période 🎉</p>';
+    } else {
+      const statutLabels = { absent:['bo','Absent'], probleme:['br','Problème'], a_venir:['bb','Non traité'], rejete:['br','Rejeté'] };
+      nonCollectesCard.style.display = 'block';
+      nonCollectesDiv.innerHTML = `<div class="table-wrap"><table><thead><tr><th>N° abonné</th><th>Nom</th><th>Tournée</th><th>Statut</th></tr></thead><tbody>` +
+        toutesNonCollectes.map(c => {
+          const [cls,label] = statutLabels[c.statut] || ['bb', c.statut];
+          return `<tr><td style="font-weight:700;">${c.numero_abonne||'—'}</td><td>${c.nom||'—'}</td><td>${c.tournee}</td><td><span class="badge ${cls}">${label}</span></td></tr>`;
+        }).join('') + `</tbody></table></div>`;
+    }
+  } catch(err){
+    console.error('Erreur génération rapport:', err);
+    showSupToast('Impossible de contacter le serveur.');
+  }
+}
+
+// ════════════════════════════════════════
+// COLLECTEURS
+// ════════════════════════════════════════
+async function supLoadCollecteursPage(){
+  const tbody = document.getElementById('supCollecteursTable');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Chargement...</td></tr>';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/collecteurs`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const collecteurs = data.collecteurs || [];
+    document.getElementById('supColActifsCount').textContent = data.stats ? data.stats.actifs : collecteurs.length;
+    document.getElementById('supColTourneesEnCours').textContent = data.stats ? data.stats.tourneesEnCours : 0;
+
+    if(collecteurs.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">Aucun collecteur sous votre supervision.</td></tr>';
+      return;
+    }
+    const statutBadges = { en_cours:['bg','En service'], planifiee:['bb','Planifiée'], terminee:['bo','Terminée'] };
+    tbody.innerHTML = collecteurs.map(c => {
+      const initials = `${(c.prenom||'')[0]||''}${(c.nom||'')[0]||''}`.toUpperCase();
+      const [cls,label] = c.tourneeStatut ? (statutBadges[c.tourneeStatut]||['bb',c.tourneeStatut]) : ['bb','Aucune tournée'];
+      return `<tr class="tr-hover">
+        <td><div class="emp-name-cell"><div class="emp-avatar">${initials}</div>${c.prenom||''} ${c.nom}</div></td>
+        <td>${c.zone||'—'}</td>
+        <td>${c.tourneeActive||'—'}</td>
+        <td><div class="progress-track" style="width:100px;"><div class="progress-fill" style="width:${c.progression}%;"></div></div></td>
+        <td><span class="badge ${cls}">${label}</span></td>
+      </tr>`;
+    }).join('');
+  } catch(err){
+    console.error('Erreur chargement collecteurs:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#e53935;">Erreur de connexion au serveur.</td></tr>';
+  }
+}
+
+// ════════════════════════════════════════
+// CLIENTS (pool en attente d'affectation)
+// ════════════════════════════════════════
+async function supLoadClientsPage(){
+  const tbody = document.querySelector('#supClientsTable tbody');
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;">Chargement...</td></tr>';
+  await supLoadZones();
+  const zoneSelect = document.getElementById('supClientsFiltreZone');
+  if(zoneSelect.options.length <= 1){
+    zoneSelect.innerHTML = '<option value="">Zone : Toutes</option>' + SUP_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+  }
+
+  const params = new URLSearchParams();
+  const zone = zoneSelect.value;
+  const search = document.getElementById('supClientsFiltreSearch').value.trim();
+  if(zone) params.set('zone_id', zone);
+  if(search) params.set('search', search);
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/clients-pool?${params.toString()}`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const clients = data.clients || [];
+    document.getElementById('supClientsTotal').textContent = `Total : ${data.total ?? clients.length} client(s) en attente d'affectation`;
+
+    if(clients.length === 0){
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;">Aucun client en attente. Tous les clients actifs sont déjà affectés à une tournée.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = clients.map(c => `
+      <tr class="tr-hover"><td style="font-weight:700;">${c.numero_abonne}</td><td>${c.prenom||''} ${c.nom}</td><td>${c.adresse||'—'}</td><td>${c.zone||'—'}</td></tr>
+    `).join('');
+  } catch(err){
+    console.error('Erreur chargement clients:', err);
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#e53935;">Erreur de connexion au serveur.</td></tr>';
+  }
+}
+
+// ════════════════════════════════════════
+// AFFECTATIONS
+// ════════════════════════════════════════
+let SUP_AFFECT_POOL = [];
+let SUP_AFFECT_SELECTED = new Set();
+let SUP_AFFECT_TOURNEE_ID = null;
+
+async function supLoadAffectPage(){
+  await supLoadZones();
+  await supLoadTourneesForAffect();
+  await supLoadAffectPool();
+}
+
+async function supLoadTourneesForAffect(){
+  const select = document.getElementById('supAffectTournee');
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees?statut=planifiee`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const tournees = data.tournees || [];
+    if(tournees.length === 0){
+      select.innerHTML = '<option value="">Aucune tournée planifiée</option>';
+      return;
+    }
+    select.innerHTML = '<option value="">Choisir une tournée...</option>' + tournees.map(t =>
+      `<option value="${t.id}">${t.nom} – ${t.zone||''} (${new Date(t.date).toLocaleDateString('fr-FR')})</option>`
+    ).join('');
+  } catch(err){ console.error('Erreur chargement tournées (affectation):', err); }
+}
+
+async function supLoadAffectPool(){
+  const zoneSelect = document.getElementById('supAffectFiltreZone');
+  if(zoneSelect.options.length <= 1){
+    zoneSelect.innerHTML = '<option value="">Zone : Toutes</option>' + SUP_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+  }
+  const params = new URLSearchParams();
+  if(zoneSelect.value) params.set('zone_id', zoneSelect.value);
+
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/clients-pool?${params.toString()}`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    SUP_AFFECT_POOL = data.clients || [];
+    supRenderAffectPool();
+  } catch(err){
+    console.error('Erreur chargement pool affectation:', err);
+  }
+}
+
+function supRenderAffectPool(){
+  const search = (document.getElementById('supAffectFiltreSearch').value || '').toLowerCase();
+  let filtered = SUP_AFFECT_POOL;
+  if(search) filtered = filtered.filter(c => `${c.nom} ${c.prenom||''} ${c.numero_abonne}`.toLowerCase().includes(search));
+
+  const liste = document.getElementById('supAffectPoolListe');
+  document.getElementById('supAffectPoolTotal').textContent = `Total : ${filtered.length} client(s)`;
+  if(filtered.length === 0){
+    liste.innerHTML = '<p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Aucun client en attente.</p>';
+    return;
+  }
+  liste.innerHTML = filtered.map(c => `
+    <label class="affect-row" style="cursor:pointer;">
+      <div><div class="affect-client-name">${c.numero_abonne} · ${c.prenom||''} ${c.nom}</div><div class="affect-client-addr">${c.adresse||'—'}${c.zone?' · '+c.zone:''}</div></div>
+      <input type="checkbox" class="affect-check" ${SUP_AFFECT_SELECTED.has(c.id)?'checked':''} onchange="supToggleAffectSelect(${c.id}, this.checked)"/>
+    </label>
+  `).join('');
+}
+
+function supToggleAffectSelect(clientId, checked){
+  if(checked) SUP_AFFECT_SELECTED.add(clientId);
+  else SUP_AFFECT_SELECTED.delete(clientId);
+  supRenderAffectSelected();
+}
+
+function supRenderAffectSelected(){
+  const liste = document.getElementById('supAffectSelectedListe');
+  const count = SUP_AFFECT_SELECTED.size;
+  document.getElementById('supAffectSelectedCount').textContent = count;
+  document.getElementById('affectCount').textContent = count;
+  const btn = document.getElementById('supAffectBtn');
+  btn.disabled = count === 0 || !SUP_AFFECT_TOURNEE_ID;
+
+  if(count === 0){
+    liste.innerHTML = '<p style="color:#999;font-size:12px;padding:10px 0;text-align:center;">Cochez des clients dans la liste de gauche.</p>';
+    return;
+  }
+  const selectedClients = SUP_AFFECT_POOL.filter(c => SUP_AFFECT_SELECTED.has(c.id));
+  liste.innerHTML = selectedClients.map(c => `
+    <div class="affect-row"><span>${c.numero_abonne} · ${c.prenom||''} ${c.nom}</span><span class="chip-remove" onclick="supToggleAffectSelect(${c.id}, false); supRenderAffectPool();">Retirer</span></div>
+  `).join('');
+}
+
+async function supLoadTourneeAssignedClients(){
+  SUP_AFFECT_TOURNEE_ID = document.getElementById('supAffectTournee').value || null;
+  supRenderAffectSelected();
+  const liste = document.getElementById('supAffectAssignedListe');
+  if(!SUP_AFFECT_TOURNEE_ID){
+    liste.innerHTML = '<p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Sélectionnez une tournée.</p>';
+    document.getElementById('supAffectAssignedTotal').textContent = '';
+    return;
+  }
+  liste.innerHTML = '<p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Chargement...</p>';
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees/${SUP_AFFECT_TOURNEE_ID}/clients`, { headers: { 'Authorization': `Bearer ${getSupToken()}` } });
+    const data = await response.json();
+    const clients = data.clients || [];
+    document.getElementById('supAffectAssignedTotal').textContent = `Total : ${clients.length} client(s)`;
+    if(clients.length === 0){
+      liste.innerHTML = '<p style="color:#999;font-size:12.5px;padding:10px 0;text-align:center;">Aucun client affecté pour le moment.</p>';
+      return;
+    }
+    liste.innerHTML = clients.map(c => `
+      <div class="affect-row"><div><div class="affect-client-name">${c.numero_abonne} · ${c.prenom||''} ${c.nom}</div></div>
+      ${c.statut === 'a_venir' ? `<span class="chip-remove" onclick="supRetirerAffectation(${c.tourneeClientId})">Retirer</span>` : `<span class="badge bb">${c.statut}</span>`}</div>
+    `).join('');
+  } catch(err){
+    console.error('Erreur chargement clients affectés:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:12.5px;padding:10px 0;text-align:center;">Erreur de connexion.</p>';
+  }
+}
+
+async function supAffecterClients(){
+  if(!SUP_AFFECT_TOURNEE_ID || SUP_AFFECT_SELECTED.size === 0) return;
+  const btn = document.getElementById('supAffectBtn');
+  btn.disabled = true;
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/tournees/${SUP_AFFECT_TOURNEE_ID}/affecter`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getSupToken()}` },
+      body: JSON.stringify({ subscriber_ids: Array.from(SUP_AFFECT_SELECTED) })
+    });
+    const data = await response.json();
+    if(!response.ok){ showSupToast(data.message || 'Erreur lors de l\'affectation.'); btn.disabled = false; return; }
+    showSupToast(data.message || 'Clients affectés avec succès !');
+    SUP_AFFECT_SELECTED.clear();
+    await supLoadAffectPool();
+    await supLoadTourneeAssignedClients();
+  } catch(err){
+    console.error('Erreur affectation clients:', err);
+    showSupToast('Impossible de contacter le serveur.');
+    btn.disabled = false;
+  }
+}
+
+async function supRetirerAffectation(tourneeClientId){
+  try {
+    const response = await fetch(`${SUP_API_BASE_URL}/api/superviseur/affectations/${tourneeClientId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${getSupToken()}` }
+    });
+    const data = await response.json();
+    if(!response.ok){ showSupToast(data.message || 'Erreur lors du retrait.'); return; }
+    showSupToast('Client retiré de la tournée.');
+    await supLoadAffectPool();
+    await supLoadTourneeAssignedClients();
+  } catch(err){
+    console.error('Erreur retrait affectation:', err);
+    showSupToast('Impossible de contacter le serveur.');
+  }
+}
+
+function showSupToast(msg){
+  let toast = document.getElementById('supGenericToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'supGenericToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:11px 20px;border-radius:8px;font-size:13px;z-index:99999;opacity:0;transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
+}
+
+// ── Vérifie la session au chargement de la page ──
+(async function initSupAuth(){
+  const token = getSupToken();
+  if(token){
+    showSupTransition();
+    setSupLoggedIn(true);
+    nav('dashboard');
+    await loadSupDashboard();
+    hideSupTransition();
+  } else {
+    setSupLoggedIn(false);
+    nav('login');
+  }
+})();
+</script>
+</body>
+</html>

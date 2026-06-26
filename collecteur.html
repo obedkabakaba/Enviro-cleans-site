@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Accès Collecteur – Enviro Cleans</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#3ab54a;--green-dark:#2d8f3c;--green-light:#e8f5e9;
+  --orange:#f59e0b;--orange-light:#fff8e1;
+  --red:#e53935;--red-light:#fdecea;
+  --blue:#1976d2;--blue-light:#e3f2fd;
+  --sidebar:260px;--topbar:64px;
+}
+body{font-family:'Open Sans',sans-serif;background:#f4f6f3;color:#1a1a1a;display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar);background:#111;color:#fff;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+  display:flex;flex-direction:column;overflow-y:auto;
+  transition:transform .3s ease;
+}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px;}
+.sb-logo img{width:34px;height:34px;object-fit:contain;}
+.sb-logo-t span:first-child{display:block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:1.4px;color:#fff;text-transform:uppercase;}
+.sb-logo-t span:last-child{display:block;font-size:8.5px;color:#555;}
+
+.sb-profile{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;}
+.sb-profile-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;color:#fff;}
+.sb-profile-role{font-size:10.5px;color:#666;margin-top:1px;}
+.sb-status{display:inline-flex;align-items:center;gap:4px;background:rgba(58,181,74,.15);color:var(--green);font-size:9.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:2px 7px;border-radius:10px;margin-top:3px;}
+.sb-status::before{content:'';width:5px;height:5px;background:var(--green);border-radius:50%;display:inline-block;}
+
+.sb-nav{padding:10px 12px 4px;flex:1;}
+.sb-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.8px;color:#444;text-transform:uppercase;padding-left:8px;margin-bottom:4px;margin-top:10px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;color:#aaa;transition:all .2s;border:none;background:none;width:100%;text-align:left;}
+.sb-item:hover,.sb-item.active{background:rgba(255,255,255,.08);color:#fff;}
+.sb-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+.sb-pill{margin-left:auto;font-size:9.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:2px 7px;border-radius:10px;color:#fff;}
+.sb-pill.red{background:var(--red);}
+.sb-pill.orange{background:var(--orange);}
+
+.sb-footer{padding:12px 12px 16px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-sync-btn{display:flex;align-items:center;gap:7px;background:rgba(58,181,74,.12);border:1px solid rgba(58,181,74,.22);border-radius:8px;padding:10px 12px;font-size:12px;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--green);cursor:pointer;width:100%;margin-bottom:8px;transition:background .2s;}
+.sb-sync-btn:hover{background:rgba(58,181,74,.22);}
+.sb-sync-btn svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:2.5;}
+.sb-logout{display:flex;align-items:center;gap:8px;background:none;border:none;padding:8px;font-size:12px;color:#555;cursor:pointer;width:100%;font-family:'Open Sans',sans-serif;transition:color .2s;}
+.sb-logout:hover{color:var(--red);}
+.sb-logout svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;transition:margin-left .3s ease;}
+.topbar{height:var(--topbar);background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;}
+.menu-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:4px;display:none;}
+.menu-btn span{display:block;width:20px;height:2px;background:#333;border-radius:2px;}
+.topbar-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#111;}
+.topbar-sub{font-size:10.5px;color:#999;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.tb-time{font-size:12px;color:#666;background:#f5f5f5;padding:5px 10px;border-radius:7px;font-family:'Montserrat',sans-serif;font-weight:600;}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:5px;border-radius:7px;}
+.notif-btn:hover{background:#f5f5f5;}
+.notif-btn svg{width:18px;height:18px;stroke:#555;fill:none;stroke-width:1.8;display:block;}
+.notif-badge{position:absolute;top:1px;right:1px;width:15px;height:15px;background:var(--red);border-radius:50%;font-size:8.5px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+.tb-avatar{width:36px;height:36px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:#fff;cursor:pointer;border:2px solid rgba(58,181,74,.3);}
+
+/* ══ CONTENT ══ */
+.content{padding:24px 28px;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{margin-bottom:22px;}
+.page-header h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#111;}
+.page-header p{font-size:13px;color:#999;margin-top:3px;}
+.page-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+
+/* ── Buttons ── */
+.btn-green{background:var(--green);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-green svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.5;}
+.btn-outline{background:#fff;color:#333;border:1.5px solid #ddd;padding:9px 16px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .2s,color .2s;}
+.btn-outline:hover{border-color:var(--green);color:var(--green);}
+.btn-outline svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+.btn-sm{padding:7px 12px;font-size:11.5px;}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:12px;border:1px solid #eee;padding:20px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-head h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;}
+.voir-tout{font-size:12px;color:var(--green);font-weight:700;cursor:pointer;}
+
+/* ── Badges ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;font-family:'Montserrat',sans-serif;}
+.bg{background:var(--green-light);color:var(--green);}
+.br{background:var(--red-light);color:var(--red);}
+.bo{background:var(--orange-light);color:var(--orange);}
+.bb{background:var(--blue-light);color:var(--blue);}
+.bgr{background:#f0f0f0;color:#888;}
+
+/* ── Detail rows ── */
+.detail-row{padding:10px 0;border-bottom:1px solid #f5f5f5;}
+.detail-row:last-child{border-bottom:none;}
+.detail-lbl{font-size:10.5px;color:#999;font-family:'Montserrat',sans-serif;font-weight:600;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
+.detail-val{font-size:13px;color:#222;font-weight:500;}
+
+/* ── Form ── */
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#444;margin-bottom:6px;}
+.form-group select,.form-group textarea,.form-group input[type=text],.form-group input[type=password]{width:100%;padding:11px 13px;border:1.5px solid #ddd;border-radius:9px;font-size:13.5px;font-family:'Open Sans',sans-serif;outline:none;transition:border-color .2s;background:#fff;color:#222;}
+.form-group select:focus,.form-group textarea:focus,.form-group input:focus{border-color:var(--green);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed #ccc;border-radius:9px;padding:18px;font-size:12.5px;color:#999;font-family:'Montserrat',sans-serif;font-weight:600;cursor:pointer;background:none;width:100%;transition:border-color .2s,color .2s;}
+.photo-btn:hover{border-color:var(--green);color:var(--green);}
+.photo-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+/* ══ STAT CARDS ══ */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;display:flex;align-items:center;gap:13px;}
+.stat-ic{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-ic svg{width:20px;height:20px;fill:none;stroke-width:2;}
+.stat-ic.gr{background:var(--green-light);}  .stat-ic.gr svg{stroke:var(--green);}
+.stat-ic.or{background:var(--orange-light);} .stat-ic.or svg{stroke:var(--orange);}
+.stat-ic.rd{background:var(--red-light);}    .stat-ic.rd svg{stroke:var(--red);}
+.stat-ic.bl{background:var(--blue-light);}   .stat-ic.bl svg{stroke:var(--blue);}
+.stat-lbl{font-size:10.5px;color:#999;margin-bottom:2px;}
+.stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:#111;line-height:1.1;}
+.stat-val.g{color:var(--green);} .stat-val.o{color:var(--orange);} .stat-val.r{color:var(--red);}
+.stat-sub{font-size:10.5px;color:#bbb;margin-top:2px;}
+
+/* ══ PROGRESS RING ══ */
+.ring-wrap{display:flex;align-items:center;justify-content:center;padding:10px 0;}
+.ring-box{position:relative;width:100px;height:100px;}
+.ring-box svg{transform:rotate(-90deg);}
+.ring-track{fill:none;stroke:#f0f0f0;stroke-width:8;}
+.ring-fill{fill:none;stroke:var(--green);stroke-width:8;stroke-linecap:round;stroke-dasharray:251.2;stroke-dashoffset:150.7;transition:stroke-dashoffset 1s ease;}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.ring-pct{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:#111;}
+.ring-lbl{font-size:9px;color:#999;}
+
+/* ══ CLIENT LIST ══ */
+.client-list{display:flex;flex-direction:column;gap:8px;}
+.client-item{background:#fff;border-radius:10px;border:1px solid #eee;padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s,box-shadow .2s;}
+.client-item:hover{border-color:var(--green);box-shadow:0 2px 8px rgba(58,181,74,.1);}
+.cnum{width:30px;height:30px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;color:#666;flex-shrink:0;}
+.cnum.att{background:var(--blue-light);color:var(--blue);}
+.cnum.ok{background:var(--green-light);color:var(--green);}
+.cnum.abs{background:var(--orange-light);color:var(--orange);}
+.cnum.pb{background:var(--red-light);color:var(--red);}
+.cinfo{flex:1;min-width:0;}
+.cname{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.caddr{font-size:11.5px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cmeta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.coffer{font-size:10.5px;color:#999;}
+.ctime{font-size:11px;color:#bbb;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+
+/* ══ SEARCH BAR ══ */
+.search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #eee;border-radius:9px;padding:10px 14px;margin-bottom:14px;}
+.search-bar svg{width:15px;height:15px;stroke:#bbb;fill:none;stroke-width:2;flex-shrink:0;}
+.search-bar input{border:none;outline:none;font-size:13px;color:#333;font-family:'Open Sans',sans-serif;flex:1;background:transparent;min-width:0;}
+
+/* ══ TABS ══ */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid #eee;margin-bottom:16px;overflow-x:auto;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab{padding:9px 16px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s,border-color .2s;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* ══ ACTION CARDS ══ */
+.action-card{border-radius:12px;border:2px solid #eee;padding:15px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:border-color .2s,background .15s;margin-bottom:10px;}
+.action-ic{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.action-ic svg{width:20px;height:20px;fill:none;stroke-width:2.5;}
+.action-ic.gr{background:var(--green-light);}  .action-ic.gr svg{stroke:var(--green);}
+.action-ic.or{background:var(--orange-light);} .action-ic.or svg{stroke:var(--orange);}
+.action-ic.rd{background:var(--red-light);}    .action-ic.rd svg{stroke:var(--red);}
+.action-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13.5px;margin-bottom:2px;}
+.action-desc{font-size:12px;color:#888;}
+.ac-effectue:hover,.ac-effectue.sel{border-color:var(--green);background:var(--green-light);}
+.ac-absent:hover,.ac-absent.sel{border-color:var(--orange);background:var(--orange-light);}
+.ac-probleme:hover,.ac-probleme.sel{border-color:var(--red);background:var(--red-light);}
+
+/* ══ SUCCESS ══ */
+.success-ic{width:72px;height:72px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.success-ic svg{width:34px;height:34px;stroke:var(--green);fill:none;stroke-width:2.5;}
+.sdt{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.sdt:last-child{border-bottom:none;}
+.sdt .sl{color:#888;} .sdt .sv{font-weight:600;color:#222;}
+
+/* ══ MESSAGES ══ */
+.msg-item{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-bottom:1px solid #f0f0f0;cursor:pointer;}
+.msg-item:last-child{border-bottom:none;}
+.msg-av{width:38px;height:38px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:13px;color:var(--green);flex-shrink:0;}
+.msg-av.sys{background:#f0f0f0;color:#888;}
+.msg-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+.msg-prev{font-size:12px;color:#888;line-height:1.4;}
+.msg-unread{width:8px;height:8px;background:var(--green);border-radius:50%;flex-shrink:0;margin-top:6px;}
+
+/* ══ NOTIF ══ */
+.ni{display:flex;align-items:flex-start;gap:10px;padding:13px 0;border-bottom:1px solid #f5f5f5;}
+.ni:last-child{border-bottom:none;}
+.ni-ic{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ni-ic svg{width:17px;height:17px;fill:none;stroke-width:2;}
+.ni-ic.gr{background:var(--green-light);}  .ni-ic.gr svg{stroke:var(--green);}
+.ni-ic.or{background:var(--orange-light);} .ni-ic.or svg{stroke:var(--orange);}
+.ni-ic.bl{background:var(--blue-light);}   .ni-ic.bl svg{stroke:var(--blue);}
+.ni-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+.ni-desc{font-size:12px;color:#777;line-height:1.4;}
+.ni-time{font-size:11px;color:#bbb;margin-top:2px;}
+
+/* ══ RAPPORT STATS ══ */
+.rs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.rs-item{background:#f9f9f9;border-radius:10px;padding:14px;text-align:center;}
+.rs-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;margin-bottom:2px;}
+.rs-lbl{font-size:11px;color:#888;}
+.rs-num.g{color:var(--green);} .rs-num.o{color:var(--orange);} .rs-num.r{color:var(--red);}
+
+/* ══ PROFIL ══ */
+.pmi{display:flex;align-items:center;gap:12px;padding:12px;border-radius:9px;cursor:pointer;transition:background .2s;margin-bottom:2px;}
+.pmi:hover{background:#f5f5f5;}
+.pmi-ic{width:36px;height:36px;border-radius:9px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pmi-ic svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:1.8;}
+.pmi-title{font-size:13px;font-weight:600;color:#222;}
+.pmi-sub{font-size:11px;color:#999;}
+.pmi-arrow{margin-left:auto;} .pmi-arrow svg{width:14px;height:14px;stroke:#ccc;fill:none;stroke-width:2;}
+.pmi.danger .pmi-title{color:var(--red);}
+.pmi.danger .pmi-ic{background:var(--red-light);} .pmi.danger .pmi-ic svg{stroke:var(--red);}
+
+/* ══ SYNC ══ */
+.sync-ic{width:80px;height:80px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.sync-ic svg{width:36px;height:36px;stroke:var(--green);fill:none;stroke-width:2;}
+.sync-bar-wrap{background:#f0f0f0;border-radius:6px;height:8px;overflow:hidden;margin-bottom:16px;}
+.sync-bar{height:100%;background:var(--green);border-radius:6px;width:0;transition:width 3s ease;}
+.sync-check{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;margin-bottom:8px;}
+.sync-check svg{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2.5;flex-shrink:0;}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:500px;width:100%;position:relative;animation:mIn .25s ease;max-height:90vh;overflow-y:auto;}
+@keyframes mIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;}
+.modal-close:hover{color:#333;}
+.modal h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:17px;margin-bottom:4px;}
+.modal .msub{font-size:13px;color:#888;margin-bottom:20px;}
+
+/* ══ TABLE ══ */
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:700;color:#999;text-align:left;padding:0 8px 10px;border-bottom:1px solid #eee;font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.3px;}
+td{padding:10px 8px;font-size:12.5px;color:#333;border-bottom:1px solid #f8f8f8;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+
+/* ══ MISC ══ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.banner{background:var(--green);border-radius:12px;padding:18px 20px;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;overflow:hidden;position:relative;}
+.banner::after{content:'';position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%;}
+.banner-big{font-family:'Montserrat',sans-serif;font-weight:900;font-size:32px;opacity:.2;}
+.overlay-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;}
+.overlay-bg.show{display:block;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  :root{--sidebar:260px;}
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0 !important;}
+  .menu-btn{display:flex !important;}
+  .content{padding:16px;}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .page-top{flex-direction:column;align-items:flex-start;}
+  .banner{flex-direction:column;align-items:flex-start;gap:8px;}
+  .rs-grid{grid-template-columns:1fr 1fr;}
+  table{font-size:11px;}
+  th,td{padding:8px 6px;}
+}
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr;}
+  .btn-green,.btn-outline{font-size:12px;padding:9px 14px;}
+}
+body.logged-out .sidebar,
+body.logged-out .topbar { display:none; }
+body.logged-out .main { margin-left:0; }
+</style>
+</head>
+<body class="logged-out" id="bodyEl">
+<div id="colTransition" style="position:fixed;inset:0;background:#fff;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+  <div style="width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:var(--green);border-radius:50%;animation:colSpin .8s linear infinite;"></div>
+  <p style="font-family:'Montserrat',sans-serif;font-weight:600;color:var(--green);font-size:14px;margin:0;">Connexion en cours...</p>
+</div>
+<style>@keyframes colSpin{to{transform:rotate(360deg);}}</style>
+<div class="overlay-bg" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="data:image/png;base64,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" alt="Enviro Cleans logo"/>
+    <div class="sb-logo-t">
+      <span>ENVIRO CLEANS</span>
+      <span>Espace Collecteur</span>
+    </div>
+  </div>
+
+  <div class="sb-profile">
+    <div class="sb-avatar">JM</div>
+    <div>
+      <div class="sb-profile-name">Jean Mobala</div>
+      <div class="sb-profile-role">Collecteur · Ngaliema</div>
+      <div class="sb-status">En service</div>
+    </div>
+  </div>
+
+  <div class="sb-nav">
+    <div class="sb-lbl">Navigation</div>
+    <button class="sb-item active" onclick="nav('accueil')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Tableau de bord
+    </button>
+    <button class="sb-item" onclick="nav('tournee')">
+      <svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Ma tournée
+      <span class="sb-pill orange" id="colTourneeBadge" style="display:none;">0</span>
+    </button>
+    <button class="sb-item" onclick="nav('clients'); colLoadMesClients();">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Mes clients
+    </button>
+    <button class="sb-item" onclick="nav('messages'); colLoadMessages();">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Messages
+    </button>
+    <button class="sb-item" onclick="nav('rapport'); colLoadRapports();">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Rapport
+    </button>
+    <button class="sb-item" onclick="nav('notifications'); colOpenNotifications();">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notifications
+      <span class="sb-pill red" style="display:none;">0</span>
+    </button>
+    <button class="sb-item" onclick="nav('profil'); colLoadProfil();">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Mon profil
+    </button>
+  </div>
+
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="handleColLogout()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Se déconnecter
+    </button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main" id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+      <div>
+        <div class="topbar-title" id="tb-title">Tableau de bord</div>
+        <div class="topbar-sub" id="tb-sub">Aujourd'hui, 28/05/2025</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-time" id="tbTime">🕐 —:—</div>
+      <button class="notif-btn" onclick="nav('notifications'); colOpenNotifications();">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" style="display:none;">0</span>
+      </button>
+      <div class="tb-avatar" onclick="nav('profil'); colLoadProfil();">—</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ══ PAGE : CONNEXION ══ -->
+  <div class="page active" id="page-login">
+    <div style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.08);">
+        <div style="text-align:center;margin-bottom:28px;">
+          <img src="data:image/png;base64,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" alt="logo" style="width:52px;height:52px;object-fit:contain;margin:0 auto 12px;display:block;"/>
+          <div style="font-family:Montserrat;font-weight:800;font-size:10px;letter-spacing:2px;color:#aaa;text-transform:uppercase;margin-bottom:6px;">ENVIRO CLEANS</div>
+          <h2 style="font-family:Montserrat;font-weight:900;font-size:22px;">Espace Collecteur</h2>
+          <p style="font-size:13px;color:#888;margin-top:4px;">Connectez-vous pour commencer votre tournée</p>
+        </div>
+        <div class="form-group"><label>Téléphone ou Email</label><input type="text" id="colIdentifiant" placeholder="collecteur.jm@envirocleans.cd" autocomplete="off"/></div>
+        <div class="form-group"><label>Mot de passe</label><input type="password" id="colPwd" placeholder="••••••••" autocomplete="new-password"/></div>
+        <div id="colLoginError" style="font-size:12.5px;color:#e53935;margin:-8px 0 14px;display:none;"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#555;margin-bottom:20px;cursor:pointer;"><input type="checkbox" id="colRemember" style="width:auto;accent-color:var(--green);"> Se souvenir de moi</label>
+        <button class="btn-green" id="colLoginBtn" style="width:100%;justify-content:center;padding:13px;" onclick="handleColLogin()">Se connecter</button>
+        <a href="forgot-password.html" style="display:block;text-align:center;margin-top:14px;font-size:12.5px;color:var(--green);text-decoration:none;font-weight:600;">Mot de passe oublié ?</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : ACCUEIL / DASHBOARD ══ -->
+  <div class="page" id="page-accueil">
+    <div class="page-top">
+      <div><h1 id="colGreeting" style="font-family:Montserrat;font-weight:900;font-size:22px;">Bonjour 👋</h1><p style="font-size:13px;color:#999;margin-top:3px;" id="colSousTitre">Collecteur</p></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head"><h3>Tournées du jour</h3></div>
+      <div id="colTourneesChips" style="display:flex;gap:10px;flex-wrap:wrap;">
+        <p style="color:#999;font-size:13px;">Chargement...</p>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+        <button class="btn-outline" id="colVoirTourneeBtn" style="display:none;" onclick="colVoirTournee()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg>Voir la tournée</button>
+        <button class="btn-green" id="colDemarrerBtn" style="display:none;" onclick="colDemarrerTournee()"><svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>Démarrer la tournée</button>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="stat-lbl">Clients à visiter</div><div class="stat-val" id="colClientsTotal">—</div><div class="stat-sub" id="colZoneNom"></div></div></div>
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="stat-lbl">Collectes effectuées</div><div class="stat-val g" id="colEffectuees">—</div><div class="stat-sub">Aujourd'hui</div></div></div>
+      <div class="stat-card"><div class="stat-ic or"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-lbl">En attente</div><div class="stat-val o" id="colAttente">—</div><div class="stat-sub">À effectuer</div></div></div>
+      <div class="stat-card"><div class="stat-ic rd"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div><div class="stat-lbl">Problèmes</div><div class="stat-val r" id="colProblemes">—</div><div class="stat-sub">Signalés</div></div></div>
+      <div class="stat-card"><div class="stat-ic bl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-lbl">Heure de début</div><div class="stat-val" id="colHeureDebut" style="font-size:16px;">—</div><div class="stat-sub" id="colSuperviseurNom">Superviseur : —</div></div></div>
+      <div class="stat-card"><div class="stat-ic gr"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="stat-lbl">Véhicule</div><div class="stat-val" id="colVehiculeVal" style="font-size:15px;">Non renseigné</div><div class="stat-sub" id="colVehiculeSub">À configurer</div></div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head"><h3>Tournées planifiées (demain)</h3></div>
+      <div id="colTourneesPlanifiees"><p style="color:#999;font-size:13px;padding:6px 0;">Chargement...</p></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h3>Progression du jour</h3></div>
+        <div class="ring-wrap">
+          <div class="ring-box">
+            <svg width="100" height="100" viewBox="0 0 100 100"><circle class="ring-track" cx="50" cy="50" r="40"/><circle class="ring-fill" cx="50" cy="50" r="40" id="ring"/></svg>
+            <div class="ring-center"><div class="ring-pct" id="colRingPct">0%</div><div class="ring-lbl">progression</div></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#555;"><span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0;"></span>Effectuées : <strong id="colLegendEffectuees">0</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#555;"><span style="width:10px;height:10px;border-radius:50%;background:var(--orange);display:inline-block;flex-shrink:0;"></span>En attente : <strong id="colLegendAttente">0</strong></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#555;"><span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block;flex-shrink:0;"></span>Problèmes : <strong id="colLegendProblemes">0</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Infos tournée</h3></div>
+        <div class="detail-row"><div class="detail-lbl">Superviseur</div><div class="detail-val" id="colSuperviseurDetail" style="display:flex;align-items:center;gap:8px;">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Zone</div><div class="detail-val" id="colZoneDetail">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Véhicule</div><div class="detail-val" id="colVehiculeDetail">Non renseigné</div></div>
+        <div class="detail-row"><div class="detail-lbl">Heure prévue</div><div class="detail-val" id="colHeurePrevue">—</div></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-head"><h3>Notifications récentes</h3><a class="voir-tout" onclick="nav('notifications')">Voir tout</a></div>
+      <div id="colNotifsRecentes"><p style="color:#999;font-size:13px;padding:10px 0;">Chargement...</p></div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : MA TOURNÉE ══ -->
+  <div class="page" id="page-tournee">
+    <div class="page-top">
+      <div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;" id="colTourneeTitre">Ma tournée</h1><p style="font-size:13px;color:#999;" id="colTourneeSousTitre">Chargement...</p></div>
+    </div>
+    <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="colTourneeSearch" placeholder="Rechercher un client..." oninput="colRenderClientList()"/></div>
+    <div class="tab-bar" id="colTourneeTabs">
+      <button class="tab active" data-filter="tous" onclick="colSetTourneeTab(this)">Tous (0)</button>
+      <button class="tab" data-filter="a_venir" onclick="colSetTourneeTab(this)">En attente (0)</button>
+      <button class="tab" data-filter="effectue" onclick="colSetTourneeTab(this)">Effectués (0)</button>
+      <button class="tab" data-filter="probleme" onclick="colSetTourneeTab(this)">Problèmes (0)</button>
+    </div>
+    <div class="client-list" id="clientList">
+      <p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement de la tournée...</p>
+    </div>
+    <div style="margin-top:20px;text-align:center;">
+      <button class="btn-green" id="colTerminerBtn" style="padding:12px 36px;display:none;" onclick="colTerminerTournee()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Terminer la tournée</button>
+      <p id="colTourneeTermineeMsg" style="display:none;color:var(--green);font-weight:700;font-size:13.5px;">✓ Tournée terminée</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : DÉTAIL CLIENT ══ -->
+  <div class="page" id="page-detail">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <button class="btn-outline btn-sm" onclick="nav('tournee')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button>
+      <div style="flex:1;min-width:0;"><h1 style="font-family:Montserrat;font-weight:900;font-size:18px;" id="dc-name">—</h1><p style="font-size:12px;color:#888;" id="dc-num">—</p></div>
+      <span class="badge bg" id="dc-statut-badge">—</span>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h3>Informations client</h3>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-outline btn-sm" id="dc-call-btn"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>
+            <button class="btn-outline btn-sm" id="dc-itineraire-btn" onclick="colVoirItineraire()"><svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Itinéraire</button>
+          </div>
+        </div>
+        <div class="detail-row"><div class="detail-lbl">Adresse</div><div class="detail-val" id="dc-addr">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Téléphone</div><div class="detail-val" id="dc-tel">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Offre souscrite</div><div class="detail-val" id="dc-offre">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Type de déchet</div><div class="detail-val" id="dc-dechet">—</div></div>
+        <a style="font-size:12.5px;color:var(--green);font-weight:700;cursor:pointer;display:block;margin-top:12px;" onclick="colVoirHistorique()">Voir l'historique des collectes →</a>
+
+        <div class="card-head" style="margin-top:18px;"><h3>Localisation</h3><span id="dc-loc-badge"></span></div>
+        <div class="detail-row"><div class="detail-lbl">Coordonnées</div><div class="detail-val" id="dc-loc-coords">Non disponible</div></div>
+        <div id="dc-loc-actions" style="margin-top:8px;"></div>
+      </div>
+      <div class="card" id="dc-statut-card">
+        <div class="card-head"><h3>Statut de la collecte</h3></div>
+        <div id="dc-statut-selection">
+          <p style="font-size:13px;color:#888;margin-bottom:14px;">Choisissez le statut pour ce client :</p>
+          <div class="action-card ac-effectue" onclick="selectAction(this,'effectue')">
+            <div class="action-ic gr"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div><div class="action-title">Effectué ✓</div><div class="action-desc">La collecte a été faite avec succès</div></div>
+          </div>
+          <div class="action-card ac-absent" onclick="selectAction(this,'absent')">
+            <div class="action-ic or"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div><div class="action-title">Absent ⚠</div><div class="action-desc">Personne absente / non disponible</div></div>
+          </div>
+          <div class="action-card ac-probleme" onclick="selectAction(this,'probleme')">
+            <div class="action-ic rd"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div><div class="action-title">Problème ⚡</div><div class="action-desc">Problème rencontré sur place</div></div>
+          </div>
+          <button class="btn-green" style="width:100%;justify-content:center;margin-top:4px;" id="dc-soumettre-btn" onclick="colOpenCollecteModal()" disabled>Soumettre</button>
+          <button onclick="nav('tournee')" style="width:100%;text-align:center;margin-top:10px;background:none;border:none;font-size:13px;color:#999;cursor:pointer;">Annuler</button>
+        </div>
+        <div id="dc-statut-recap" style="display:none;">
+          <div class="sdt"><span class="sl">Statut</span><span class="sv" id="dc-recap-statut">—</span></div>
+          <div class="sdt"><span class="sl">Heure</span><span class="sv" id="dc-recap-heure">—</span></div>
+          <div class="sdt"><span class="sl">Commentaire</span><span class="sv" id="dc-recap-commentaire">—</span></div>
+          <p style="font-size:11.5px;color:#aaa;margin-top:12px;">Ce statut a déjà été soumis et ne peut plus être modifié.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : SUCCÈS COLLECTE ══ -->
+  <div class="page" id="page-success">
+    <div style="max-width:440px;margin:0 auto;padding-top:20px;">
+      <div class="card" style="text-align:center;padding:30px 24px;">
+        <div class="success-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <h2 style="font-family:Montserrat;font-weight:900;font-size:18px;margin-bottom:4px;">Collecte enregistrée !</h2>
+        <p style="font-size:13px;color:#888;margin-bottom:20px;" id="success-client">—</p>
+        <div style="background:#f9f9f9;border-radius:10px;padding:16px;margin-bottom:18px;text-align:left;">
+          <div class="sdt"><span class="sl">Heure</span><span class="sv" id="success-heure">—</span></div>
+          <div class="sdt"><span class="sl">Date</span><span class="sv" id="success-date">—</span></div>
+          <div class="sdt"><span class="sl">Statut</span><span class="sv" style="color:var(--green);" id="success-statut">—</span></div>
+          <div class="sdt"><span class="sl">Commentaire</span><span class="sv" id="success-commentaire">–</span></div>
+        </div>
+        <div id="success-photo-row" style="background:#f5f5f5;border-radius:8px;height:90px;display:none;align-items:center;justify-content:center;gap:8px;margin-bottom:18px;color:#999;font-size:12.5px;">
+          <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#999;fill:none;stroke-width:1.8;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Preuve photo jointe
+        </div>
+        <button class="btn-green" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="nav('tournee')">Retour à la tournée</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : MES CLIENTS ══ -->
+  <div class="page" id="page-clients">
+    <div class="page-top"><div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Mes clients</h1><p style="font-size:13px;color:#999;" id="colMesClientsSousTitre">Clients déjà visités</p></div></div>
+    <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="colMesClientsSearch" placeholder="Rechercher par nom, adresse, numéro..." oninput="colRenderMesClients()"/></div>
+    <div class="client-list" id="colMesClientsListe">
+      <p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : MESSAGES ══ -->
+  <div class="page" id="page-messages">
+    <div class="page-top"><div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Messages</h1><p style="font-size:13px;color:#999;">Communication avec votre superviseur</p></div></div>
+    <div class="tab-bar" id="colMsgTabs">
+      <button class="tab active" data-cat="tous" onclick="colSetMsgTab(this)">Tous</button>
+      <button class="tab" data-cat="rapport" onclick="colSetMsgTab(this)">Rapports</button>
+      <button class="tab" data-cat="collecte" onclick="colSetMsgTab(this)">Collectes</button>
+      <button class="tab" data-cat="abonnement" onclick="colSetMsgTab(this)">Système</button>
+    </div>
+    <div class="card" style="margin-bottom:14px;" id="colMsgListe">
+      <p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Contact superviseur</h3></div>
+      <div id="colMsgSuperviseurInfo" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;"><div class="msg-av" style="width:46px;height:46px;font-size:15px;">—</div><div><div style="font-family:Montserrat;font-weight:700;font-size:13.5px;" id="colMsgSupNom">—</div><div style="font-size:12px;color:#888;">Superviseur</div></div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-green" id="colMsgAppelerBtn" style="flex:1;justify-content:center;"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Appeler</button>
+        <button class="btn-outline" id="colMsgWhatsappBtn" style="flex:1;justify-content:center;"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : FIN DE TOURNÉE ══ -->
+  <div class="page" id="page-fin-tournee">
+    <div style="max-width:480px;margin:0 auto;padding-top:10px;">
+      <div style="background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%);border-radius:14px;padding:28px;text-align:center;color:#fff;margin-bottom:16px;"><div style="font-size:44px;margin-bottom:8px;">🏁</div><div style="font-family:Montserrat;font-weight:900;font-size:20px;margin-bottom:4px;">Félicitations !</div><div style="font-size:13px;opacity:.85;">Vous avez terminé votre tournée.</div></div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-head"><h3>Résumé de la tournée</h3></div>
+        <div class="rs-grid"><div class="rs-item"><div class="rs-num" id="fin-total">—</div><div class="rs-lbl">Total clients</div></div><div class="rs-item"><div class="rs-num g" id="fin-effectuees">—</div><div class="rs-lbl">Effectuées</div></div><div class="rs-item"><div class="rs-num o" id="fin-absents">—</div><div class="rs-lbl">Absents</div></div><div class="rs-item"><div class="rs-num r" id="fin-problemes">—</div><div class="rs-lbl">Problèmes</div></div></div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-head"><h3>Détails</h3></div>
+        <div class="detail-row"><div class="detail-lbl">Heure de début</div><div class="detail-val" id="fin-heure-debut">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Distance parcourue</div><div class="detail-val" id="fin-distance">—</div></div>
+      </div>
+      <button class="btn-green" id="finSoumettreBtn" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="colSoumettreRapport()">Soumettre au superviseur</button>
+      <p id="finSoumisMsg" style="display:none;text-align:center;color:var(--green);font-weight:700;font-size:13.5px;margin-bottom:10px;">✓ Rapport soumis avec succès</p>
+      <button class="btn-outline" style="width:100%;justify-content:center;" onclick="colProchaineCollecte()"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>Faire la prochaine collecte</button>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : RAPPORT ══ -->
+  <div class="page" id="page-rapport">
+    <div class="page-top"><div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Mes rapports</h1><p style="font-size:13px;color:#999;">Tournées terminées et rapports soumis</p></div></div>
+    <div id="colRapportListe"><p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p></div>
+  </div>
+
+  <!-- ══ PAGE : DÉTAIL D'UN RAPPORT (archive, lecture seule) ══ -->
+  <div class="page" id="page-rapport-detail">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <button class="btn-outline btn-sm" onclick="nav('rapport')"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>Retour</button>
+      <div><h1 style="font-family:Montserrat;font-weight:900;font-size:18px;" id="colRapportDetailTitre">—</h1><p style="font-size:12.5px;color:#999;" id="colRapportDetailDate">—</p></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="rs-grid" id="colRapportDetailStats"></div>
+    </div>
+    <div class="card" style="overflow-x:auto;">
+      <div class="card-head"><h3>Détail des collectes</h3></div>
+      <table>
+        <thead><tr><th>Client</th><th>Heure</th><th>Statut</th><th>Commentaire</th></tr></thead>
+        <tbody id="colRapportDetailTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : NOTIFICATIONS ══ -->
+  <div class="page" id="page-notifications">
+    <div class="page-header"><h1>Notifications</h1><p>Alertes et messages du système</p></div>
+    <div class="card" id="colNotifPageListe">
+      <p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>
+    </div>
+  </div>
+
+  <!-- ══ PAGE : PROFIL ══ -->
+  <div class="page" id="page-profil">
+    <div class="page-header"><h1>Mon profil</h1><p>Informations personnelles et paramètres</p></div>
+
+    <div style="background:#fff;border-radius:12px;border:1px solid #eee;padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+
+      <!-- Avatar (lecture seule — seul le gestionnaire ou l'administrateur peut modifier la photo) -->
+      <div style="position:relative;flex-shrink:0;" title="Seul le gestionnaire ou l'administrateur peut modifier votre photo">
+        <!-- Image (masquée si pas encore de photo) -->
+        <img id="profilPhotoImg" src="" alt="Photo de profil"
+          style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--green);"/>
+        <!-- Initiales fallback -->
+        <div id="profilPhotoInitials" style="width:80px;height:80px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:800;font-size:28px;color:#fff;border:3px solid var(--green-light);">—</div>
+      </div>
+
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:Montserrat;font-weight:800;font-size:17px;" id="colProfilNom">—</div>
+        <div style="font-size:12.5px;color:#888;margin-bottom:6px;">Collecteur · Enviro Cleans</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;"><span class="badge bg" id="colProfilStatut">—</span><span class="badge bb" id="colProfilZoneBadge">—</span><span style="font-size:11px;color:#aaa;padding-top:2px;" id="colProfilMatricule">—</span></div>
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><h3>Informations</h3><button class="btn-outline btn-sm" id="colProfilEditBtn" onclick="colToggleProfilEdit()">Modifier</button></div>
+        <div class="detail-row"><div class="detail-lbl">Nom complet</div><div class="detail-val" id="colProfilNomComplet">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Téléphone</div><div class="detail-val" id="colProfilTelView">—</div></div>
+        <div class="form-group" id="colProfilTelEdit" style="display:none;margin:8px 0;"><label>Téléphone</label><input type="text" id="colProfilTelInput"/></div>
+        <div class="detail-row"><div class="detail-lbl">Email</div><div class="detail-val" id="colProfilEmailView">—</div></div>
+        <div class="form-group" id="colProfilEmailEdit" style="display:none;margin:8px 0;"><label>Email</label><input type="email" id="colProfilEmailInput"/></div>
+        <div id="colProfilSaveRow" style="display:none;margin-top:10px;"><button class="btn-green btn-sm" onclick="colSaveProfil()">Enregistrer</button></div>
+        <div id="colProfilError" style="font-size:12px;color:#e53935;margin-top:8px;display:none;"></div>
+
+        <div class="detail-row" style="margin-top:10px;"><div class="detail-lbl">Matricule</div><div class="detail-val" id="colProfilMatriculeDetail">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Zone affectée</div><div class="detail-val" id="colProfilZone">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Date d'embauche</div><div class="detail-val" id="colProfilEmbauche">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Véhicule assigné</div><div class="detail-val" id="colProfilVehicule">—</div></div>
+        <div class="detail-row"><div class="detail-lbl">Superviseur</div><div class="detail-val" id="colProfilSuperviseur">—</div></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="card-head"><h3>Mes statistiques</h3></div>
+          <div class="rs-grid">
+            <div class="rs-item"><div class="rs-num g" id="colProfilStatRealisees">—</div><div class="rs-lbl">Collectes réalisées</div></div>
+            <div class="rs-item"><div class="rs-num r" id="colProfilStatManquees">—</div><div class="rs-lbl">Manquées</div></div>
+            <div class="rs-item"><div class="rs-num" id="colProfilStatClients">—</div><div class="rs-lbl">Clients desservis</div></div>
+            <div class="rs-item"><div class="rs-num g" id="colProfilStatTaux">—</div><div class="rs-lbl">Taux de réussite</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Paramètres</h3></div>
+          <div class="pmi" onclick="openModal('modalColPassword')"><div class="pmi-ic"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><div><div class="pmi-title">Modifier mot de passe</div><div class="pmi-sub">Changer votre mot de passe</div></div><div class="pmi-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+          <div class="pmi danger" onclick="handleColLogout()"><div class="pmi-ic"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div><div><div class="pmi-title">Se déconnecter</div></div><div class="pmi-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ MODAL COLLECTE ══ -->
+<div class="modal-overlay" id="modalCollecte">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalCollecte')">×</button>
+    <h2>Collecte – <span id="modal-client">—</span></h2>
+    <p class="msub">Enregistrez le résultat de cette collecte. <strong>Cette action est irréversible.</strong></p>
+    <div class="form-group"><label>Statut</label><select id="colModalStatut" disabled></select></div>
+    <div class="form-group"><label>Commentaire (optionnel)</label><textarea id="colModalCommentaire" placeholder="Ex: Client présent, collecte effectuée normalement..."></textarea></div>
+    <div class="form-group">
+      <label>Preuve photo (optionnel)</label>
+      <input type="file" id="colModalPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="colHandlePhotoSelect(event)"/>
+      <button class="photo-btn" type="button" onclick="document.getElementById('colModalPhotoInput').click()"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="colModalPhotoLabel">Prendre une photo / Importer</span></button>
+    </div>
+    <div id="colModalError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-green" id="colModalSaveBtn" style="flex:1;justify-content:center;" onclick="colSubmitCollecte()">Enregistrer</button>
+      <button class="btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('modalCollecte')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL : FICHE CLIENT (Mes clients — consultation + localisation uniquement) ══ -->
+<div class="modal-overlay" id="modalMesClientsDetail">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalMesClientsDetail')">×</button>
+    <h2 id="mc-name">—</h2>
+    <p class="msub" id="mc-num">—</p>
+    <div class="detail-row"><div class="detail-lbl">Téléphone</div><div class="detail-val" id="mc-tel">—</div></div>
+    <div class="detail-row"><div class="detail-lbl">Adresse</div><div class="detail-val" id="mc-addr">—</div></div>
+    <div class="card-head" style="margin-top:14px;"><h3>Localisation</h3><span id="mc-loc-badge"></span></div>
+    <div class="detail-row"><div class="detail-lbl">Coordonnées</div><div class="detail-val" id="mc-loc-coords">—</div></div>
+    <div id="mc-loc-actions" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- ══ MODAL : CHANGER LE MOT DE PASSE ══ -->
+<div class="modal-overlay" id="modalColPassword">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalColPassword')">×</button>
+    <h2>Modifier le mot de passe</h2>
+    <div class="form-group"><label>Mot de passe actuel</label><input type="password" id="colPwdAncien" autocomplete="current-password"/></div>
+    <div class="form-group"><label>Nouveau mot de passe</label><input type="password" id="colPwdNouveau" autocomplete="new-password"/></div>
+    <div class="form-group"><label>Confirmer le nouveau mot de passe</label><input type="password" id="colPwdConfirm" autocomplete="new-password"/></div>
+    <div id="colPwdError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-green" id="colPwdSaveBtn" style="flex:1;justify-content:center;" onclick="colChangePassword()">Enregistrer</button>
+      <button class="btn-outline" style="flex:1;justify-content:center;" onclick="closeModal('modalColPassword')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Navigation ──
+function getTodayFR(){
+  return new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function updateColClock(){
+  const el = document.getElementById('tbTime');
+  if(!el) return;
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  el.textContent = `🕐 ${h}:${m}`;
+}
+updateColClock();
+setInterval(updateColClock, 30000);
+const titles = {
+  login:       {t:'Connexion', s:'Espace Collecteur'},
+  accueil:     {t:'Tableau de bord', s:null},
+  tournee:     {t:'Ma tournée du jour', s:''},
+  detail:      {t:'Détail du client', s:'Informations et collecte'},
+  success:     {t:'Collecte enregistrée', s:'Succès'},
+  clients:     {t:'Mes clients', s:''},
+  messages:    {t:'Messages', s:'Communication superviseur'},
+  'fin-tournee':{t:'Fin de tournée', s:'Résumé de la journée'},
+  rapport:     {t:'Mes rapports', s:'Tournées terminées'},
+  'rapport-detail': {t:'Détail du rapport', s:'Archive'},
+  notifications:{t:'Notifications', s:''},
+  profil:      {t:'Mon profil', s:''}
+};
+const navIndex = {login:null,accueil:0,tournee:1,clients:2,messages:3,rapport:4,notifications:5,profil:6,detail:1,success:1,'fin-tournee':1,'rapport-detail':4};
+
+function nav(id) {
+  // hide all
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  // topbar
+  const info = titles[id] || {t:'', s:''};
+  document.getElementById('tb-title').textContent = info.t;
+  document.getElementById('tb-sub').textContent = info.s === null ? `Aujourd'hui, ${getTodayFR()}` : info.s;
+  // sidebar highlight
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  const idx = navIndex[id];
+  if (idx !== null && idx !== undefined) {
+    const items = document.querySelectorAll('.sb-item');
+    if (items[idx]) items[idx].classList.add('active');
+  }
+  // special
+  if (id === 'accueil') setTimeout(animateRing, 400);
+  closeSidebar();
+  window.scrollTo(0, 0);
+}
+
+const TYPE_DECHET_LABELS_COL = { menager: 'Ménager', recyclable: 'Recyclable', mixte: 'Mixte', industriel: 'Industriel', medical: 'Médical' };
+const STATUT_BADGES_COL = { a_venir: ['bb','En attente'], effectue: ['bg','Effectué'], absent: ['bo','Absent'], probleme: ['br','Problème'] };
+let COL_CURRENT_DETAIL = null;
+let COL_SELECTED_ACTION = null;
+let COL_SELECTED_PHOTO_BASE64 = null;
+
+function colOpenClientDetail(tourneeClientId){
+  const entry = (COL_TOURNEE_DATA && COL_TOURNEE_DATA.clients || []).find(c => c.tourneeClientId === tourneeClientId);
+  if(!entry || !entry.client) return;
+  COL_CURRENT_DETAIL = entry;
+  const cl = entry.client;
+
+  document.getElementById('dc-name').textContent = `${cl.prenom||''} ${cl.nom}`.trim();
+  document.getElementById('dc-num').textContent = cl.numero_abonne;
+  document.getElementById('dc-addr').textContent = cl.adresse || 'Non renseignée';
+  document.getElementById('dc-tel').textContent = cl.telephone || '—';
+  document.getElementById('dc-offre').textContent = cl.offre || '—';
+  document.getElementById('dc-dechet').textContent = TYPE_DECHET_LABELS_COL[cl.type_dechet] || cl.type_dechet || '—';
+  document.getElementById('modal-client').textContent = `${cl.numero_abonne} – ${cl.prenom||''} ${cl.nom}`.trim();
+
+  const callBtn = document.getElementById('dc-call-btn');
+  callBtn.onclick = () => { if(cl.telephone) window.location.href = 'tel:' + cl.telephone; };
+
+  const [cls, label] = STATUT_BADGES_COL[entry.statut] || ['bb','—'];
+  const statutBadge = document.getElementById('dc-statut-badge');
+  statutBadge.className = 'badge ' + cls;
+  statutBadge.textContent = label;
+
+  // ── Localisation ──
+  const locBadge = document.getElementById('dc-loc-badge');
+  const locCoords = document.getElementById('dc-loc-coords');
+  const locActions = document.getElementById('dc-loc-actions');
+  if(cl.location){
+    locCoords.textContent = `${cl.location.latitude.toFixed(6)}, ${cl.location.longitude.toFixed(6)}`;
+    locBadge.innerHTML = cl.locationStatus === 'disponible' ? '🟢 Disponible' : '🟠 À vérifier';
+    locActions.innerHTML = `<button class="btn-outline btn-sm" onclick="colEnregistrerLocalisation(${cl.id}, true)">Modifier la localisation</button>`;
+  } else {
+    locCoords.textContent = 'Non disponible';
+    locBadge.innerHTML = '🔴 Absente';
+    locActions.innerHTML = `<button class="btn-green btn-sm" onclick="colEnregistrerLocalisation(${cl.id}, false)">Enregistrer la localisation</button>`;
+  }
+
+  // ── Statut de la collecte : sélection si en attente, sinon récapitulatif figé ──
+  const selectionDiv = document.getElementById('dc-statut-selection');
+  const recapDiv = document.getElementById('dc-statut-recap');
+  if(entry.statut === 'a_venir'){
+    selectionDiv.style.display = 'block';
+    recapDiv.style.display = 'none';
+    document.querySelectorAll('.action-card').forEach(c => c.classList.remove('sel'));
+    document.getElementById('dc-soumettre-btn').disabled = true;
+    COL_SELECTED_ACTION = null;
+  } else {
+    selectionDiv.style.display = 'none';
+    recapDiv.style.display = 'block';
+    const labels = { effectue: 'Effectué ✓', absent: 'Absent ⚠', probleme: 'Problème ⚡' };
+    document.getElementById('dc-recap-statut').textContent = labels[entry.statut] || entry.statut;
+    document.getElementById('dc-recap-heure').textContent = entry.heure_passage || '—';
+    document.getElementById('dc-recap-commentaire').textContent = entry.commentaire || '—';
+  }
+
+  nav('detail');
+}
+
+function selectAction(el, type) {
+  document.querySelectorAll('.action-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  COL_SELECTED_ACTION = type;
+  document.getElementById('dc-soumettre-btn').disabled = false;
+}
+
+function colOpenCollecteModal(){
+  if(!COL_SELECTED_ACTION) return;
+  const labels = { effectue: 'Effectué ✓', absent: 'Absent ⚠', probleme: 'Problème ⚡' };
+  const sel = document.getElementById('colModalStatut');
+  sel.innerHTML = `<option>${labels[COL_SELECTED_ACTION]}</option>`;
+  document.getElementById('colModalCommentaire').value = '';
+  document.getElementById('colModalPhotoLabel').textContent = 'Prendre une photo / Importer';
+  COL_SELECTED_PHOTO_BASE64 = null;
+  document.getElementById('colModalError').style.display = 'none';
+  openModal('modalCollecte');
+}
+
+function colHandlePhotoSelect(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    COL_SELECTED_PHOTO_BASE64 = e.target.result;
+    document.getElementById('colModalPhotoLabel').textContent = '✓ Photo ajoutée — ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function colSubmitCollecte(){
+  if(!COL_CURRENT_DETAIL || !COL_SELECTED_ACTION) return;
+  const saveBtn = document.getElementById('colModalSaveBtn');
+  const errorBox = document.getElementById('colModalError');
+  errorBox.style.display = 'none';
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Enregistrement...';
+
+  try {
+    const token = getColToken();
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/collectes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({
+        tournee_client_id: COL_CURRENT_DETAIL.tourneeClientId,
+        statut: COL_SELECTED_ACTION,
+        commentaire: document.getElementById('colModalCommentaire').value.trim(),
+        preuve_base64: COL_SELECTED_PHOTO_BASE64,
+      })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de l\'enregistrement.';
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    closeModal('modalCollecte');
+    document.getElementById('success-statut').textContent = ({effectue:'Effectué ✓', absent:'Absent ⚠', probleme:'Problème ⚡'})[COL_SELECTED_ACTION];
+    document.getElementById('success-client').textContent = `${COL_CURRENT_DETAIL.client.numero_abonne} – ${COL_CURRENT_DETAIL.client.prenom||''} ${COL_CURRENT_DETAIL.client.nom}`.trim();
+    document.getElementById('success-heure').textContent = new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('success-date').textContent = new Date().toLocaleDateString('fr-FR');
+    document.getElementById('success-commentaire').textContent = document.getElementById('colModalCommentaire').value.trim() || '–';
+    document.getElementById('success-photo-row').style.display = COL_SELECTED_PHOTO_BASE64 ? 'flex' : 'none';
+    nav('success');
+
+    // Recharge la tournée en arrière-plan pour que la liste reflète le nouveau statut
+    if(COL_CURRENT_TOURNEE_ID) await loadColTourneeDetail(COL_CURRENT_TOURNEE_ID);
+  } catch(err){
+    console.error('Erreur soumission collecte:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Enregistrer';
+  }
+}
+
+// ── Modal ──
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// ── Sidebar ──
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ── Progress ring ──
+function animateRing() {
+  const r = document.getElementById('ring');
+  if (!r) return;
+  const circumference = 2 * Math.PI * 40; // 251.2
+  const pct = 40;
+  r.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+}
+// La progression réelle est appliquée par colApplyStatsView() une fois les données chargées.
+
+// ── (Page Synchronisation supprimée : elle n'était reliée à aucun bouton réel) ──
+
+// ── Tabs ──
+let COL_CURRENT_TOURNEE_ID = null;
+let COL_TOURNEE_DATA = null;
+let COL_ACTIVE_FILTER = 'tous';
+
+function colSetTourneeTab(el) {
+  el.closest('.tab-bar').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  COL_ACTIVE_FILTER = el.dataset.filter;
+  colRenderClientList();
+}
+
+async function loadColTourneeDetail(tourneeId, autoStart){
+  COL_CURRENT_TOURNEE_ID = tourneeId;
+  nav('tournee');
+  document.getElementById('clientList').innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement de la tournée...</p>';
+
+  try {
+    if(autoStart){
+      await fetch(`${COL_API_BASE_URL}/api/collecteur/tournees/${tourneeId}/demarrer`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${getColToken()}` }
+      });
+    }
+
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/tournees/${tourneeId}`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    if(!response.ok){
+      document.getElementById('clientList').innerHTML = '<p style="color:#e53935;font-size:13px;padding:20px 0;text-align:center;">Impossible de charger cette tournée.</p>';
+      return;
+    }
+    COL_TOURNEE_DATA = await response.json();
+
+    document.getElementById('colTourneeTitre').textContent = COL_TOURNEE_DATA.tournee.nom;
+    document.getElementById('colTourneeSousTitre').textContent =
+      `${new Date(COL_TOURNEE_DATA.tournee.date_tournee).toLocaleDateString('fr-FR')} · ${COL_TOURNEE_DATA.clients.length} clients${COL_TOURNEE_DATA.tournee.zone ? ' · Zone ' + COL_TOURNEE_DATA.tournee.zone : ''}`;
+
+    colRenderClientList();
+  } catch(err){
+    console.error('Erreur chargement tournée:', err);
+    document.getElementById('clientList').innerHTML = '<p style="color:#e53935;font-size:13px;padding:20px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+function colRenderClientList(){
+  if(!COL_TOURNEE_DATA) return;
+  const search = (document.getElementById('colTourneeSearch').value || '').toLowerCase();
+  const all = COL_TOURNEE_DATA.clients || [];
+
+  const counts = {
+    tous: all.length,
+    a_venir: all.filter(c => c.statut === 'a_venir').length,
+    effectue: all.filter(c => c.statut === 'effectue').length,
+    probleme: all.filter(c => c.statut === 'probleme' || c.statut === 'absent').length,
+  };
+  const tabs = document.querySelectorAll('#colTourneeTabs .tab');
+  tabs[0].textContent = `Tous (${counts.tous})`;
+  tabs[1].textContent = `En attente (${counts.a_venir})`;
+  tabs[2].textContent = `Effectués (${counts.effectue})`;
+  tabs[3].textContent = `Problèmes (${counts.probleme})`;
+
+  let filtered = all;
+  if(COL_ACTIVE_FILTER === 'a_venir') filtered = all.filter(c => c.statut === 'a_venir');
+  else if(COL_ACTIVE_FILTER === 'effectue') filtered = all.filter(c => c.statut === 'effectue');
+  else if(COL_ACTIVE_FILTER === 'probleme') filtered = all.filter(c => c.statut === 'probleme' || c.statut === 'absent');
+
+  if(search){
+    filtered = filtered.filter(c => {
+      const cl = c.client || {};
+      const hay = `${cl.nom||''} ${cl.prenom||''} ${cl.numero_abonne||''} ${cl.adresse||''}`.toLowerCase();
+      return hay.includes(search);
+    });
+  }
+
+  // Tri : en attente d'abord, puis effectués/problèmes (les clients déjà traités descendent dans la liste)
+  filtered = [...filtered].sort((a,b) => {
+    const order = { a_venir: 0, probleme: 1, absent: 1, effectue: 2 };
+    return (order[a.statut]??3) - (order[b.statut]??3);
+  });
+
+  const list = document.getElementById('clientList');
+  if(filtered.length === 0){
+    list.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucun client dans cette catégorie.</p>';
+  } else {
+    const numClasses = { a_venir: ['att', String(0)], effectue: ['ok','✓'], absent: ['abs','!'], probleme: ['pb','⚠'] };
+    const badgeClasses = { a_venir: ['bb','En attente'], effectue: ['bg','Effectué'], absent: ['bo','Absent'], probleme: ['br','Problème'] };
+    list.innerHTML = filtered.map((c, i) => {
+      const cl = c.client || {};
+      const [numCls, numTxt] = numClasses[c.statut] || ['att', String(i+1)];
+      const [badgeCls, badgeLabel] = badgeClasses[c.statut] || ['bb','—'];
+      const locEmoji = cl.locationStatus === 'disponible' ? '🟢' : (cl.locationStatus === 'a_verifier' ? '🟠' : '🔴');
+      return `<div class="client-item" onclick="colOpenClientDetail(${c.tourneeClientId})">
+        <div class="cnum ${numCls}">${c.statut === 'a_venir' ? (i+1) : numTxt}</div>
+        <div class="cinfo"><div class="cname">${locEmoji} ${cl.prenom||''} ${cl.nom}</div><div class="caddr">${cl.adresse || 'Adresse non renseignée'}</div>
+        <div class="cmeta"><span class="badge ${badgeCls}">${badgeLabel}</span><span class="coffer">${cl.offre || '—'}</span></div></div>
+        <div class="ctime">${c.heure_passage || ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // "Terminer" n'apparaît que lorsque chaque client a un statut enregistré ET que la tournée n'est pas déjà terminée
+  const terminerBtn = document.getElementById('colTerminerBtn');
+  const termineeMsg = document.getElementById('colTourneeTermineeMsg');
+  const dejaTerminee = COL_TOURNEE_DATA && COL_TOURNEE_DATA.tournee && COL_TOURNEE_DATA.tournee.statut === 'terminee';
+  if(dejaTerminee){
+    terminerBtn.style.display = 'none';
+    termineeMsg.textContent = COL_TOURNEE_DATA.tournee.rapportSoumisLe ? '✓ Tournée terminée — rapport déjà soumis au superviseur' : '✓ Tournée terminée';
+    termineeMsg.style.display = 'block';
+  } else {
+    terminerBtn.style.display = counts.a_venir === 0 ? 'inline-flex' : 'none';
+    termineeMsg.style.display = 'none';
+  }
+}
+
+// ── Localisation & itinéraire ──
+function colVoirItineraire(){
+  const cl = COL_CURRENT_DETAIL ? COL_CURRENT_DETAIL.client : null;
+  if(!cl || !cl.location){ showColToast('Localisation du client non disponible.'); return; }
+
+  if(!navigator.geolocation){
+    window.open(`https://www.google.com/maps/search/?api=1&query=${cl.location.latitude},${cl.location.longitude}`, '_blank');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition((pos) => {
+    const { latitude, longitude } = pos.coords;
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${cl.location.latitude},${cl.location.longitude}&travelmode=driving`, '_blank');
+  }, () => {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${cl.location.latitude},${cl.location.longitude}`, '_blank');
+  }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 });
+}
+
+function colEnregistrerLocalisation(subscriberId, isModification){
+  if(!navigator.geolocation){ showColToast('Géolocalisation indisponible sur cet appareil.'); return; }
+  showColToast('Capture de la position en cours...');
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    const token = getColToken();
+    try {
+      const url = isModification
+        ? `${COL_API_BASE_URL}/api/locations/${subscriberId}`
+        : `${COL_API_BASE_URL}/api/locations`;
+      const body = isModification
+        ? { latitude, longitude, accuracy, modification_reason: 'Mise à jour par le collecteur sur le terrain' }
+        : { client_id: subscriberId, latitude, longitude, accuracy };
+      const response = await fetch(url, {
+        method: isModification ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if(!response.ok){ showColToast(data.message || 'Erreur lors de l\'enregistrement.'); return; }
+      showColToast('Localisation enregistrée !');
+      if(COL_CURRENT_TOURNEE_ID) await loadColTourneeDetail(COL_CURRENT_TOURNEE_ID);
+      if(COL_CURRENT_DETAIL) colOpenClientDetail(COL_CURRENT_DETAIL.tourneeClientId);
+    } catch(err){
+      console.error('Erreur enregistrement localisation:', err);
+      showColToast('Impossible de contacter le serveur.');
+    }
+  }, (err) => {
+    const messages = {
+      1: 'Autorisation refusée. Vérifiez les permissions de localisation de votre navigateur.',
+      2: 'Position indisponible. Vérifiez que la localisation est activée sur cet appareil.',
+      3: 'La recherche de position a pris trop de temps. Vérifiez que le service de localisation est activé, puis réessayez.',
+    };
+    showColToast(messages[err.code] || 'Impossible d\'obtenir votre position actuelle.');
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+}
+
+function showColToast(msg){
+  let toast = document.getElementById('colGenericToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'colGenericToast';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:11px 20px;border-radius:8px;font-size:13px;z-index:99999;opacity:0;transition:opacity .3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => { toast.style.opacity = '0'; }, 2800);
+}
+
+// ── Historique des collectes d'un client ──
+// ── Mes rapports (liste des tournées terminées, puis archive en lecture seule) ──
+async function colLoadRapports(){
+  const liste = document.getElementById('colRapportListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p>';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/rapports`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    const rapports = data.rapports || [];
+    if(rapports.length === 0){
+      liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucun rapport soumis pour le moment. Les rapports apparaissent ici une fois une tournée terminée.</p>';
+      return;
+    }
+    liste.innerHTML = rapports.map(r => `
+      <div class="client-item" onclick="colOpenRapportDetail(${r.id})">
+        <div class="cinfo"><div class="cname">${r.nom}</div><div class="caddr">${new Date(r.date).toLocaleDateString('fr-FR')}${r.zone ? ' · Zone ' + r.zone : ''}</div>
+        <div class="cmeta"><span class="badge bg">${r.effectuees}/${r.clientsTotal} effectuées</span></div></div>
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#ccc;fill:none;stroke-width:2;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    `).join('');
+  } catch(err){
+    console.error('Erreur chargement rapports:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:20px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+async function colOpenRapportDetail(tourneeId){
+  nav('rapport-detail');
+  document.getElementById('colRapportDetailTable').innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;">Chargement...</td></tr>';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/rapports/${tourneeId}`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    document.getElementById('colRapportDetailTitre').textContent = data.tournee.nom;
+    document.getElementById('colRapportDetailDate').textContent =
+      `${new Date(data.tournee.date).toLocaleDateString('fr-FR')}${data.tournee.zone ? ' · Zone ' + data.tournee.zone : ''}${data.tournee.heure_debut ? ' · Début ' + data.tournee.heure_debut : ''}`;
+
+    const r = data.resume;
+    document.getElementById('colRapportDetailStats').innerHTML = `
+      <div class="rs-item"><div class="rs-num">${r.clientsTotal}</div><div class="rs-lbl">Total</div></div>
+      <div class="rs-item"><div class="rs-num g">${r.effectuees}</div><div class="rs-lbl">Effectuées</div></div>
+      <div class="rs-item"><div class="rs-num o">${r.absents}</div><div class="rs-lbl">Absents</div></div>
+      <div class="rs-item"><div class="rs-num r">${r.problemes}</div><div class="rs-lbl">Problèmes</div></div>
+    `;
+
+    const labels = { effectue:'Effectué', valide:'Effectué', absent:'Absent', probleme:'Problème', rejete:'Problème', a_venir:'Non traité' };
+    const badgeCls = { effectue:'bg', valide:'bg', absent:'bo', probleme:'br', rejete:'br', a_venir:'bb' };
+    document.getElementById('colRapportDetailTable').innerHTML = data.details.map(d => `
+      <tr><td style="font-weight:600;">${d.client}${d.numero_abonne ? ' · ' + d.numero_abonne : ''}</td><td>${d.heure_passage || '—'}</td><td><span class="badge ${badgeCls[d.statut]||'bb'}">${labels[d.statut]||d.statut}</span></td><td style="color:#888;">${d.commentaire || '—'}</td></tr>
+    `).join('');
+  } catch(err){
+    console.error('Erreur chargement détail rapport:', err);
+    showColToast('Impossible de charger ce rapport.');
+  }
+}
+
+// ── Mon profil ──
+let COL_PROFIL_DATA = null;
+async function colLoadProfil(){
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/profil`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    COL_PROFIL_DATA = data.profil;
+    const p = data.profil;
+    const s = data.stats;
+
+    const nomComplet = `${p.prenom||''} ${p.nom}`.trim();
+    document.getElementById('colProfilNom').textContent = nomComplet;
+    document.getElementById('colProfilNomComplet').textContent = nomComplet;
+    document.getElementById('colProfilStatut').textContent = p.statut === 'actif' ? 'En service' : p.statut;
+    document.getElementById('colProfilZoneBadge').textContent = p.zone ? 'Zone ' + p.zone : 'Aucune zone';
+    document.getElementById('colProfilMatricule').textContent = p.matricule || '—';
+    document.getElementById('colProfilMatriculeDetail').textContent = p.matricule || '—';
+    document.getElementById('colProfilZone').textContent = p.zone || '—';
+    document.getElementById('colProfilEmbauche').textContent = p.date_embauche ? new Date(p.date_embauche).toLocaleDateString('fr-FR') : '—';
+    document.getElementById('colProfilVehicule').textContent = p.vehicule ? `${p.vehicule.type || 'Véhicule'} · ${p.vehicule.matricule}` : 'Non renseigné';
+    document.getElementById('colProfilSuperviseur').textContent = p.superviseur || '—';
+
+    document.getElementById('colProfilTelView').textContent = p.telephone || '—';
+    document.getElementById('colProfilEmailView').textContent = p.email || '—';
+    document.getElementById('colProfilTelInput').value = p.telephone || '';
+    document.getElementById('colProfilEmailInput').value = p.email || '';
+
+    document.getElementById('colProfilStatRealisees').textContent = s.collectesRealisees;
+    document.getElementById('colProfilStatManquees').textContent = s.manquees;
+    document.getElementById('colProfilStatClients').textContent = s.clientsDesservis;
+    document.getElementById('colProfilStatTaux').textContent = s.tauxReussite + '%';
+
+    const initials = `${(p.prenom||'')[0]||''}${(p.nom||'')[0]||''}`.toUpperCase();
+    const initialsEl = document.getElementById('profilPhotoInitials');
+    if(initialsEl && initialsEl.style.display !== 'none') initialsEl.textContent = initials || '—';
+    const tbAvatar = document.querySelector('.tb-avatar');
+    if(tbAvatar && !tbAvatar.querySelector('img')) tbAvatar.textContent = initials || '—';
+  } catch(err){
+    console.error('Erreur chargement profil:', err);
+    showColToast('Impossible de charger le profil.');
+  }
+}
+
+function colToggleProfilEdit(){
+  const telView = document.getElementById('colProfilTelView');
+  const editing = document.getElementById('colProfilTelEdit').style.display !== 'none';
+  document.getElementById('colProfilTelEdit').style.display = editing ? 'none' : 'block';
+  document.getElementById('colProfilEmailEdit').style.display = editing ? 'none' : 'block';
+  telView.style.display = editing ? '' : 'none';
+  document.getElementById('colProfilEmailView').style.display = editing ? '' : 'none';
+  document.getElementById('colProfilSaveRow').style.display = editing ? 'none' : 'block';
+  document.getElementById('colProfilEditBtn').textContent = editing ? 'Modifier' : 'Annuler';
+}
+
+async function colSaveProfil(){
+  const errorBox = document.getElementById('colProfilError');
+  errorBox.style.display = 'none';
+  const telephone = document.getElementById('colProfilTelInput').value.trim();
+  const email = document.getElementById('colProfilEmailInput').value.trim();
+
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/profil`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getColToken()}` },
+      body: JSON.stringify({ telephone, email })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de la mise à jour.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    showColToast('Profil mis à jour !');
+    colToggleProfilEdit();
+    colLoadProfil();
+  } catch(err){
+    console.error('Erreur sauvegarde profil:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  }
+}
+
+async function colChangePassword(){
+  const ancien = document.getElementById('colPwdAncien').value;
+  const nouveau = document.getElementById('colPwdNouveau').value;
+  const confirmPwd = document.getElementById('colPwdConfirm').value;
+  const errorBox = document.getElementById('colPwdError');
+  const btn = document.getElementById('colPwdSaveBtn');
+  errorBox.style.display = 'none';
+
+  if(!ancien || !nouveau || !confirmPwd){
+    errorBox.textContent = 'Veuillez remplir tous les champs.';
+    errorBox.style.display = 'block';
+    return;
+  }
+  if(nouveau !== confirmPwd){
+    errorBox.textContent = 'Les deux nouveaux mots de passe ne correspondent pas.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getColToken()}` },
+      body: JSON.stringify({ ancien_mot_de_passe: ancien, nouveau_mot_de_passe: nouveau })
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors du changement de mot de passe.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    closeModal('modalColPassword');
+    document.getElementById('colPwdAncien').value = '';
+    document.getElementById('colPwdNouveau').value = '';
+    document.getElementById('colPwdConfirm').value = '';
+    showColToast('Mot de passe modifié avec succès !');
+  } catch(err){
+    console.error('Erreur changement mot de passe:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+}
+
+// ── Notifications ──
+// ── Badges de notification (cloche + menu, toujours synchronisés) ──
+function setColNotificationBadges(count){
+  const bellBadge = document.querySelector('.notif-badge');
+  const menuBadge = document.querySelector('.sb-pill.red');
+  [bellBadge, menuBadge].forEach(el => {
+    if(!el) return;
+    if(count > 0){ el.textContent = count; el.style.display = ''; }
+    else { el.style.display = 'none'; }
+  });
+}
+
+let colNotifPollingStarted = false;
+function colStartNotificationPolling(){
+  if(colNotifPollingStarted) return;
+  colNotifPollingStarted = true;
+  setInterval(async () => {
+    const onNotifPage = document.getElementById('page-notifications')?.classList.contains('active');
+    if(onNotifPage) return;
+    try {
+      const response = await fetch(`${COL_API_BASE_URL}/api/notifications/unread-count`, {
+        headers: { 'Authorization': `Bearer ${getColToken()}` }
+      });
+      if(!response.ok) return;
+      const data = await response.json();
+      setColNotificationBadges(data.count || 0);
+    } catch(err){ console.error('Erreur verification notifications:', err); }
+  }, 30000);
+
+  // Et aussi le tableau de bord en arrière-plan, pour refléter les nouvelles affectations/statuts sans rechargement manuel
+  setInterval(() => {
+    const onAccueil = document.getElementById('page-accueil')?.classList.contains('active');
+    if(onAccueil) loadColDashboard();
+  }, 45000);
+}
+
+async function colOpenNotifications(){
+  const liste = document.getElementById('colNotifPageListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>';
+  setColNotificationBadges(0);
+
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/notifications`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    const notifications = data.notifications || [];
+
+    if(notifications.length === 0){
+      liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Aucune notification pour le moment.</p>';
+    } else {
+      const iconMap = { rapport: 'bl', collecte: 'gr' };
+      liste.innerHTML = notifications.map(n => `
+        <div class="ni"><div class="ni-ic ${iconMap[n.type] || 'or'}"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div><div class="ni-title">${n.titre}</div><div class="ni-desc">${n.message}</div><div class="ni-time">${colTimeAgo(n.date)}</div></div></div>
+      `).join('');
+    }
+
+    await fetch(`${COL_API_BASE_URL}/api/notifications/mark-read`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+  } catch(err){
+    console.error('Erreur chargement notifications:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:16px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+// ── Messages (= notifications filtrées par catégorie, + contact superviseur réel) ──
+let COL_MSG_ALL = [];
+let COL_MSG_FILTER = 'tous';
+
+async function colLoadMessages(){
+  // Contact superviseur (déjà chargé via le tableau de bord)
+  const sup = COL_DASHBOARD_DATA ? COL_DASHBOARD_DATA.superviseur : null;
+  const supNomEl = document.getElementById('colMsgSupNom');
+  const avatarEl = document.querySelector('#colMsgSuperviseurInfo .msg-av');
+  const appelerBtn = document.getElementById('colMsgAppelerBtn');
+  const whatsappBtn = document.getElementById('colMsgWhatsappBtn');
+  if(sup){
+    const nomComplet = `${sup.prenom||''} ${sup.nom||''}`.trim();
+    supNomEl.textContent = nomComplet || '—';
+    avatarEl.textContent = `${(sup.prenom||'')[0]||''}${(sup.nom||'')[0]||''}`.toUpperCase() || '—';
+    if(sup.telephone){
+      appelerBtn.onclick = () => { window.location.href = 'tel:' + sup.telephone; };
+      whatsappBtn.onclick = () => { window.open('https://wa.me/' + sup.telephone.replace(/[^0-9]/g,''), '_blank'); };
+    }
+  } else {
+    supNomEl.textContent = 'Aucun superviseur assigné';
+  }
+
+  const liste = document.getElementById('colMsgListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Chargement...</p>';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/notifications`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    COL_MSG_ALL = data.notifications || [];
+    colRenderMsgListe();
+  } catch(err){
+    console.error('Erreur chargement messages:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:16px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+function colSetMsgTab(el){
+  el.closest('.tab-bar').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  COL_MSG_FILTER = el.dataset.cat;
+  colRenderMsgListe();
+}
+
+function colRenderMsgListe(){
+  let filtered = COL_MSG_ALL;
+  if(COL_MSG_FILTER === 'abonnement'){
+    filtered = COL_MSG_ALL.filter(n => !['rapport','collecte'].includes(n.type));
+  } else if(COL_MSG_FILTER !== 'tous'){
+    filtered = COL_MSG_ALL.filter(n => n.type === COL_MSG_FILTER);
+  }
+
+  const liste = document.getElementById('colMsgListe');
+  if(filtered.length === 0){
+    liste.innerHTML = '<p style="color:#999;font-size:13px;padding:16px 0;text-align:center;">Aucun message dans cette catégorie.</p>';
+    return;
+  }
+  liste.innerHTML = filtered.map(n => `
+    <div class="msg-item"><div class="msg-av${n.type==='rapport'||n.type==='collecte'?'':' sys'}">${n.type==='rapport'||n.type==='collecte'?'S':'⚙'}</div>
+    <div style="flex:1;min-width:0;"><div class="msg-name">${n.titre}</div><div class="msg-prev">${n.message}</div><div style="font-size:11px;color:#bbb;margin-top:3px;">${colTimeAgo(n.date)}</div></div>
+    ${!n.lu ? '<div class="msg-unread"></div>' : ''}</div>
+  `).join('');
+}
+
+// ── Mes clients (uniquement déjà visités, consultation + localisation seulement) ──
+let COL_MES_CLIENTS = [];
+async function colLoadMesClients(){
+  const liste = document.getElementById('colMesClientsListe');
+  liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p>';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/mes-clients`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    COL_MES_CLIENTS = data.clients || [];
+    document.getElementById('colMesClientsSousTitre').textContent = `${COL_MES_CLIENTS.length} client(s) déjà visité(s)`;
+    colRenderMesClients();
+  } catch(err){
+    console.error('Erreur chargement mes clients:', err);
+    liste.innerHTML = '<p style="color:#e53935;font-size:13px;padding:20px 0;text-align:center;">Erreur de connexion au serveur.</p>';
+  }
+}
+
+function colRenderMesClients(){
+  const search = (document.getElementById('colMesClientsSearch').value || '').toLowerCase();
+  let filtered = COL_MES_CLIENTS;
+  if(search){
+    filtered = filtered.filter(c => `${c.nom} ${c.prenom||''} ${c.numero_abonne} ${c.adresse||''}`.toLowerCase().includes(search));
+  }
+
+  const liste = document.getElementById('colMesClientsListe');
+  if(filtered.length === 0){
+    liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucun client trouvé.</p>';
+    return;
+  }
+  liste.innerHTML = filtered.map(c => {
+    const locEmoji = c.locationStatus === 'disponible' ? '🟢' : (c.locationStatus === 'a_verifier' ? '🟠' : '🔴');
+    return `<div class="client-item" onclick="colOpenMesClientsDetail(${c.id})">
+      <div class="cinfo"><div class="cname">${locEmoji} ${c.prenom||''} ${c.nom} <span style="font-size:10.5px;color:#aaa;font-weight:400;">· ${c.numero_abonne}</span></div><div class="caddr">${c.adresse || 'Adresse non renseignée'}</div></div>
+      <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:#ccc;fill:none;stroke-width:2;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
+  }).join('');
+}
+
+function colOpenMesClientsDetail(clientId){
+  const c = COL_MES_CLIENTS.find(x => x.id === clientId);
+  if(!c) return;
+  document.getElementById('mc-name').textContent = `${c.prenom||''} ${c.nom}`.trim();
+  document.getElementById('mc-num').textContent = c.numero_abonne;
+  document.getElementById('mc-tel').textContent = c.telephone || '—';
+  document.getElementById('mc-addr').textContent = c.adresse || 'Non renseignée';
+
+  const locBadge = document.getElementById('mc-loc-badge');
+  const locCoords = document.getElementById('mc-loc-coords');
+  const locActions = document.getElementById('mc-loc-actions');
+  if(c.locationStatus !== 'absente'){
+    locBadge.innerHTML = c.locationStatus === 'disponible' ? '🟢 Disponible' : '🟠 À vérifier';
+    locCoords.textContent = 'Enregistrée';
+    locActions.innerHTML = `<button class="btn-outline btn-sm" onclick="colEnregistrerLocalisationMesClients(${c.id})">Modifier la localisation</button>`;
+  } else {
+    locBadge.innerHTML = '🔴 Absente';
+    locCoords.textContent = 'Non disponible';
+    locActions.innerHTML = `<button class="btn-green btn-sm" onclick="colEnregistrerLocalisationMesClients(${c.id})">Enregistrer la localisation</button>`;
+  }
+
+  openModal('modalMesClientsDetail');
+}
+
+function colEnregistrerLocalisationMesClients(clientId){
+  const c = COL_MES_CLIENTS.find(x => x.id === clientId);
+  const isModification = c && c.locationStatus !== 'absente';
+  if(!navigator.geolocation){ showColToast('Géolocalisation indisponible sur cet appareil.'); return; }
+  showColToast('Capture de la position en cours...');
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude, accuracy } = pos.coords;
+    try {
+      const url = isModification ? `${COL_API_BASE_URL}/api/locations/${clientId}` : `${COL_API_BASE_URL}/api/locations`;
+      const body = isModification
+        ? { latitude, longitude, accuracy, modification_reason: 'Mise à jour par le collecteur sur le terrain' }
+        : { client_id: clientId, latitude, longitude, accuracy };
+      const response = await fetch(url, {
+        method: isModification ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getColToken()}` },
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if(!response.ok){ showColToast(data.message || 'Erreur lors de l\'enregistrement.'); return; }
+      showColToast('Localisation enregistrée !');
+      closeModal('modalMesClientsDetail');
+      await colLoadMesClients();
+    } catch(err){
+      console.error('Erreur enregistrement localisation:', err);
+      showColToast('Impossible de contacter le serveur.');
+    }
+  }, (err) => {
+    const messages = {
+      1: 'Autorisation refusée. Vérifiez les permissions de localisation de votre navigateur.',
+      2: 'Position indisponible. Vérifiez que la localisation est activée sur cet appareil.',
+      3: 'La recherche de position a pris trop de temps. Vérifiez que le service de localisation est activé, puis réessayez.',
+    };
+    showColToast(messages[err.code] || 'Impossible d\'obtenir votre position actuelle.');
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+}
+
+async function colVoirHistorique(){
+  if(!COL_CURRENT_DETAIL) return;
+  const cl = COL_CURRENT_DETAIL.client;
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/clients/${cl.id}/historique`, {
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    const labels = { effectuee: 'Effectué ✓', absent: 'Absent ⚠', probleme: 'Problème ⚡', manquee: 'Manquée', a_venir: 'À venir' };
+    const lignes = (data.historique || []).map(h =>
+      `${new Date(h.date).toLocaleDateString('fr-FR')} ${h.heure||''} — ${labels[h.statut]||h.statut}${h.commentaire ? ' (' + h.commentaire + ')' : ''}`
+    );
+    alert(lignes.length ? `Historique des collectes :\n\n${lignes.join('\n')}` : 'Aucune collecte enregistrée pour ce client.');
+  } catch(err){
+    console.error('Erreur historique:', err);
+    showColToast('Impossible de charger l\'historique.');
+  }
+}
+
+// ── Terminer la tournée ──
+async function colTerminerTournee(){
+  if(!COL_CURRENT_TOURNEE_ID) return;
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/tournees/${COL_CURRENT_TOURNEE_ID}/terminer`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    const data = await response.json();
+    if(!response.ok){ showColToast(data.message || 'Impossible de terminer la tournée.'); return; }
+
+    const r = data.resume;
+    document.getElementById('fin-total').textContent = r.clientsTotal;
+    document.getElementById('fin-effectuees').textContent = r.effectuees;
+    document.getElementById('fin-absents').textContent = r.absents;
+    document.getElementById('fin-problemes').textContent = r.problemes;
+    document.getElementById('fin-distance').textContent = r.distanceKm + ' km' + (r.distanceEstimee ? ' (estimée)' : '');
+    document.getElementById('fin-heure-debut').textContent = COL_TOURNEE_DATA.tournee.heure_debut || '—';
+    document.getElementById('finSoumettreBtn').style.display = '';
+    document.getElementById('finSoumettreBtn').disabled = false;
+    document.getElementById('finSoumisMsg').style.display = 'none';
+    nav('fin-tournee');
+  } catch(err){
+    console.error('Erreur terminer tournée:', err);
+    showColToast('Impossible de contacter le serveur.');
+  }
+}
+
+async function colSoumettreRapport(){
+  if(!COL_CURRENT_TOURNEE_ID) return;
+  const btn = document.getElementById('finSoumettreBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/tournees/${COL_CURRENT_TOURNEE_ID}/soumettre`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${getColToken()}` }
+    });
+    if(!response.ok){ const d = await response.json(); showColToast(d.message || 'Erreur lors de la soumission.'); btn.disabled = false; btn.textContent = 'Soumettre au superviseur'; return; }
+
+    btn.style.display = 'none';
+    document.getElementById('finSoumisMsg').style.display = 'block';
+    await loadColDashboard();
+  } catch(err){
+    console.error('Erreur soumission rapport:', err);
+    showColToast('Impossible de contacter le serveur.');
+    btn.disabled = false;
+    btn.textContent = 'Soumettre au superviseur';
+  }
+}
+
+function colProchaineCollecte(){
+  COL_SELECTED_TOURNEE_ID = null;
+  nav('accueil');
+  loadColDashboard();
+}
+
+// ── Photo de profil ──
+// ════════════════════════════════════════
+// CONNEXION À L'API – ESPACE COLLECTEUR
+// ════════════════════════════════════════
+const COL_API_BASE_URL = 'https://enviro-cleans-api.onrender.com';
+
+function setColLoggedIn(isLoggedIn){
+  document.getElementById('bodyEl').classList.toggle('logged-out', !isLoggedIn);
+}
+
+let COL_TOKEN_MEMORY = null;
+function getColToken(){ return COL_TOKEN_MEMORY || localStorage.getItem('colAccessToken'); }
+function showColTransition(){ document.getElementById('colTransition').style.display = 'flex'; }
+function hideColTransition(){ document.getElementById('colTransition').style.display = 'none'; }
+
+async function handleColLogin(){
+  const identifiant = document.getElementById('colIdentifiant').value.trim();
+  const mot_de_passe = document.getElementById('colPwd').value;
+  const errorBox = document.getElementById('colLoginError');
+  const btn = document.getElementById('colLoginBtn');
+  const remember = document.getElementById('colRemember').checked;
+  errorBox.style.display = 'none';
+
+  if(!identifiant || !mot_de_passe){
+    errorBox.textContent = 'Veuillez remplir tous les champs.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Connexion...';
+
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifiant, mot_de_passe })
+    });
+    const data = await response.json();
+
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Identifiant ou mot de passe incorrect.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    if(data.user.role !== 'collecteur'){
+      errorBox.textContent = "Ce compte n'a pas accès à l'espace collecteur.";
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    if(remember){
+      localStorage.setItem('colAccessToken', data.accessToken);
+      localStorage.setItem('colRefreshToken', data.refreshToken);
+      localStorage.setItem('colUser', JSON.stringify(data.user));
+    } else {
+      COL_TOKEN_MEMORY = data.accessToken;
+      localStorage.removeItem('colAccessToken');
+      localStorage.removeItem('colRefreshToken');
+      localStorage.removeItem('colUser');
+    }
+
+    showColTransition();
+    setColLoggedIn(true);
+    nav('accueil');
+    await loadColDashboard();
+    hideColTransition();
+  } catch (err) {
+    console.error('Erreur connexion collecteur:', err);
+    errorBox.textContent = "Impossible de contacter le serveur. Réessayez dans un instant (le serveur peut prendre 30 à 50 secondes à démarrer s'il était inactif).";
+    errorBox.style.display = 'block';
+    hideColTransition();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function handleColLogout(){
+  COL_TOKEN_MEMORY = null;
+  localStorage.removeItem('colAccessToken');
+  localStorage.removeItem('colRefreshToken');
+  localStorage.removeItem('colUser');
+  setColLoggedIn(false);
+  nav('login');
+  const idField = document.getElementById('colIdentifiant');
+  const pwdField = document.getElementById('colPwd');
+  if(idField) idField.value = '';
+  if(pwdField) pwdField.value = '';
+}
+
+function colTimeAgo(dateStr){
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if(mins < 1) return "à l'instant";
+  if(mins < 60) return `Il y a ${mins} min`;
+  const heures = Math.floor(mins / 60);
+  if(heures < 24) return `Il y a ${heures} h`;
+  return `Il y a ${Math.floor(heures/24)} j`;
+}
+
+async function loadColDashboard(){
+  const token = getColToken();
+  if(!token) return;
+
+  try {
+    const response = await fetch(`${COL_API_BASE_URL}/api/collecteur/dashboard`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(response.status === 401){
+      handleColLogout();
+      return;
+    }
+    if(!response.ok){
+      console.error('Erreur API dashboard collecteur:', await response.text());
+      return;
+    }
+    const data = await response.json();
+    renderColDashboard(data);
+
+    // Badge de notification + actualisation automatique en arrière-plan
+    fetch(`${COL_API_BASE_URL}/api/notifications/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if(d) setColNotificationBadges(d.count || 0); })
+      .catch(() => {});
+    colStartNotificationPolling();
+  } catch(err){
+    console.error('Impossible de charger le tableau de bord collecteur:', err);
+  }
+}
+
+let COL_DASHBOARD_DATA = null;
+let COL_SELECTED_TOURNEE_ID = null;
+
+function renderColDashboard(data){
+  COL_DASHBOARD_DATA = data;
+  const c = data.collecteur || {};
+  const zone = data.zone;
+  const superviseur = data.superviseur;
+  const vehicule = data.vehicule;
+  const notifications = data.notifications || [];
+
+  const greeting = document.getElementById('colGreeting');
+  if(greeting) greeting.textContent = `Bonjour ${c.prenom || c.nom || ''} 👋`;
+
+  const sousTitre = document.getElementById('colSousTitre');
+  if(sousTitre){
+    const parts = ['Collecteur'];
+    if(zone) parts.push('Zone ' + zone.nom);
+    parts.push(new Date().toLocaleDateString('fr-FR'));
+    sousTitre.textContent = parts.join(' · ');
+  }
+
+  const profileName = document.querySelector('.sb-profile-name');
+  if(profileName) profileName.textContent = `${c.prenom||''} ${c.nom||''}`.trim();
+  const sbAvatar = document.querySelector('.sb-avatar');
+  if(sbAvatar && !sbAvatar.querySelector('img')){
+    const initials = `${(c.prenom||'')[0]||''}${(c.nom||'')[0]||''}`.toUpperCase();
+    sbAvatar.textContent = initials || 'C';
+  }
+
+  document.getElementById('colZoneDetail').textContent = zone ? zone.nom : '—';
+  const superviseurNomComplet = superviseur ? `${superviseur.prenom||''} ${superviseur.nom||''}`.trim() : '—';
+  document.getElementById('colSuperviseurNom').textContent = 'Superviseur : ' + (superviseurNomComplet || '—');
+  document.getElementById('colSuperviseurDetail').textContent = superviseurNomComplet || '—';
+
+  const vehiculeTxt = vehicule ? `${vehicule.type || 'Véhicule'} · ${vehicule.matricule}` : 'Non renseigné';
+  document.getElementById('colVehiculeVal').textContent = vehicule ? vehicule.matricule : 'Non renseigné';
+  document.getElementById('colVehiculeSub').textContent = vehicule ? (vehicule.type || '') : 'À configurer';
+  document.getElementById('colVehiculeDetail').textContent = vehiculeTxt;
+
+  // ── Tournées du jour : chips sélectionnables ──
+  const chipsContainer = document.getElementById('colTourneesChips');
+  const tournees = data.tourneesAujourdhui || [];
+  if(tournees.length === 0){
+    chipsContainer.innerHTML = '<p style="color:#999;font-size:13px;">Aucune tournée organisée pour aujourd\'hui.</p>';
+  } else {
+    chipsContainer.innerHTML = tournees.map(t => `
+      <button class="col-tournee-chip" data-tournee-id="${t.id}" onclick="colSelectTournee(${t.id})"
+        style="padding:10px 16px;border-radius:10px;border:1.5px solid ${COL_SELECTED_TOURNEE_ID===t.id?'var(--green)':'#ddd'};background:${COL_SELECTED_TOURNEE_ID===t.id?'var(--green-light)':'#fff'};cursor:pointer;text-align:left;font-family:'Open Sans',sans-serif;">
+        <div style="font-weight:700;font-size:13px;color:#222;">${t.nom}</div>
+        <div style="font-size:11px;color:#888;margin-top:2px;">${t.effectuees}/${t.clientsTotal} effectuées · ${t.statut}</div>
+      </button>
+    `).join('');
+  }
+
+  // ── Tournées planifiées (demain) ──
+  const planifieesContainer = document.getElementById('colTourneesPlanifiees');
+  const planifiees = data.tourneesPlanifiees || [];
+  if(planifiees.length === 0){
+    planifieesContainer.innerHTML = '<p style="color:#999;font-size:13px;padding:6px 0;">Aucune tournée planifiée pour demain pour le moment.</p>';
+  } else {
+    planifieesContainer.innerHTML = planifiees.map(t => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;">
+        <div><div style="font-weight:700;font-size:13px;">${t.nom}</div><div style="font-size:11.5px;color:#999;">${t.clientsTotal} clients${t.heure_debut ? ' · ' + t.heure_debut : ''}</div></div>
+        <span class="badge bb">Demain</span>
+      </div>
+    `).join('');
+  }
+
+  colApplyStatsView();
+
+  const notifContainer = document.getElementById('colNotifsRecentes');
+  if(notifContainer){
+    if(notifications.length === 0){
+      notifContainer.innerHTML = '<p style="color:#999;font-size:13px;padding:10px 0;">Aucune notification pour le moment.</p>';
+    } else {
+      notifContainer.innerHTML = notifications.map(n => `
+        <div class="ni"><div class="ni-ic gr"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div><div class="ni-title">${n.titre}</div><div class="ni-desc">${n.message}</div><div class="ni-time">${colTimeAgo(n.date)}</div></div></div>
+      `).join('');
+    }
+  }
+}
+
+// Sélectionne (ou désélectionne si on reclique) une tournée et adapte tout l'affichage
+function colSelectTournee(id){
+  COL_SELECTED_TOURNEE_ID = (COL_SELECTED_TOURNEE_ID === id) ? null : id;
+  renderColDashboard(COL_DASHBOARD_DATA);
+}
+
+function colApplyStatsView(){
+  if(!COL_DASHBOARD_DATA) return;
+  const tournees = COL_DASHBOARD_DATA.tourneesAujourdhui || [];
+  const selected = COL_SELECTED_TOURNEE_ID ? tournees.find(t => t.id === COL_SELECTED_TOURNEE_ID) : null;
+  const view = selected || COL_DASHBOARD_DATA.agregat || { clientsTotal:0, effectuees:0, attente:0, problemes:0, progression:0, heure_debut:null };
+
+  // Badge "Ma tournée" dans le menu : nombre réel de clients en attente sur l'ensemble des tournées du jour
+  const tourneeBadge = document.getElementById('colTourneeBadge');
+  if(tourneeBadge){
+    const enAttenteTotal = (COL_DASHBOARD_DATA.agregat || {}).attente || 0;
+    if(enAttenteTotal > 0){ tourneeBadge.textContent = enAttenteTotal; tourneeBadge.style.display = ''; }
+    else { tourneeBadge.style.display = 'none'; }
+  }
+
+  document.getElementById('colClientsTotal').textContent = view.clientsTotal;
+  document.getElementById('colEffectuees').textContent = view.effectuees;
+  document.getElementById('colAttente').textContent = view.attente;
+  document.getElementById('colProblemes').textContent = view.problemes;
+  document.getElementById('colHeureDebut').textContent = view.heure_debut || '—';
+  document.getElementById('colHeurePrevue').textContent = view.heure_debut || (tournees.length ? '—' : 'Aucune tournée aujourd\'hui');
+  document.getElementById('colZoneNom').textContent = selected ? selected.nom : 'Vue générale (toutes tournées)';
+
+  document.getElementById('colRingPct').textContent = view.progression + '%';
+  document.getElementById('colLegendEffectuees').textContent = `${view.effectuees} (${view.progression}%)`;
+  document.getElementById('colLegendAttente').textContent = view.attente;
+  document.getElementById('colLegendProblemes').textContent = view.problemes;
+
+  const ring = document.getElementById('ring');
+  if(ring){
+    const circumference = 251.2;
+    const offset = circumference * (1 - view.progression / 100);
+    ring.style.strokeDashoffset = offset;
+  }
+
+  // Les commandes "Voir"/"Démarrer" n'apparaissent que si une tournée précise est sélectionnée
+  const voirBtn = document.getElementById('colVoirTourneeBtn');
+  const demarrerBtn = document.getElementById('colDemarrerBtn');
+  if(selected){
+    voirBtn.style.display = 'inline-flex';
+    if(selected.statut === 'terminee'){
+      demarrerBtn.style.display = 'none';
+    } else {
+      demarrerBtn.style.display = 'inline-flex';
+      demarrerBtn.innerHTML = selected.statut === 'en_cours'
+        ? '<svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>Continuer la tournée'
+        : '<svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>Démarrer la tournée';
+    }
+  } else {
+    voirBtn.style.display = 'none';
+    demarrerBtn.style.display = 'none';
+  }
+
+  // Re-applique le style des chips (surlignage de la sélection)
+  document.querySelectorAll('.col-tournee-chip').forEach(chip => {
+    const isSel = parseInt(chip.dataset.tourneeId,10) === COL_SELECTED_TOURNEE_ID;
+    chip.style.borderColor = isSel ? 'var(--green)' : '#ddd';
+    chip.style.background = isSel ? 'var(--green-light)' : '#fff';
+  });
+}
+
+function colVoirTournee(){
+  if(!COL_SELECTED_TOURNEE_ID) return;
+  nav('tournee');
+  loadColTourneeDetail(COL_SELECTED_TOURNEE_ID);
+}
+
+async function colDemarrerTournee(){
+  if(!COL_SELECTED_TOURNEE_ID) return;
+  nav('tournee');
+  await loadColTourneeDetail(COL_SELECTED_TOURNEE_ID, true);
+}
+
+// ── Vérifie la session au chargement de la page ──
+(async function initColAuth(){
+  const token = getColToken();
+  if(token){
+    showColTransition();
+    setColLoggedIn(true);
+    nav('accueil');
+    await loadColDashboard();
+    hideColTransition();
+  } else {
+    setColLoggedIn(false);
+    nav('login');
+  }
+})();
+</script>
+</body>
+</html>
