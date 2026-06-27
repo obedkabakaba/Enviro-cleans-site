@@ -1156,6 +1156,9 @@ body.logged-out .main { margin-left:0; }
       <div class="form-group"><label>Zone affectée</label><select id="neZone"><option value="">—</option></select></div>
     </div>
     <div class="form-row">
+      <div class="form-group"><label>Superviseur (pour un collecteur)</label><select id="neSuperviseur"><option value="">—</option></select></div>
+    </div>
+    <div class="form-row">
       <div class="form-group"><label>Date d'embauche *</label><input type="date" id="neDateEmbauche"/></div>
       <div class="form-group"><label>Sexe</label><select id="neSexe"><option value="">—</option><option value="M">Masculin</option><option value="F">Féminin</option></select></div>
     </div>
@@ -2303,6 +2306,16 @@ async function gestOpenNewEmployee(){
   await gestLoadZones();
   const zoneSelect = document.getElementById('neZone');
   zoneSelect.innerHTML = '<option value="">—</option>' + GEST_ZONES.map(z => `<option value="${z.id}">${z.nom}</option>`).join('');
+
+  const superviseurSelect = document.getElementById('neSuperviseur');
+  superviseurSelect.innerHTML = '<option value="">—</option>';
+  try {
+    const response = await fetch(`${GEST_API_BASE_URL}/api/gestionnaire/personnel?role=superviseur`, { headers: { 'Authorization': `Bearer ${getGestToken()}` } });
+    const data = await response.json();
+    const superviseurs = data.employes || [];
+    superviseurSelect.innerHTML += superviseurs.map(s => `<option value="${s.id}">${s.prenom || ''} ${s.nom}</option>`).join('');
+  } catch(err){ console.error('Erreur chargement superviseurs:', err); }
+
   ['neNom','nePostNom','nePrenom','neTelephone','neEmail','neDateEmbauche','neDateNaissance','neNationalite','neAdresse','neCv'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('neRole').value = 'agent_marketing';
   document.getElementById('neSexe').value = '';
@@ -2321,6 +2334,7 @@ async function gestSubmitNewEmployee(){
     telephone: document.getElementById('neTelephone').value.trim(),
     email: document.getElementById('neEmail').value.trim(),
     zone_id: document.getElementById('neZone').value || null,
+    superviseur_id: document.getElementById('neSuperviseur').value || null,
     date_embauche: document.getElementById('neDateEmbauche').value,
     sexe: document.getElementById('neSexe').value || null,
     date_naissance: document.getElementById('neDateNaissance').value || null,
