@@ -1672,6 +1672,10 @@ async function supLoadProfilPage(){
     document.getElementById('supProfilNom').textContent = nomComplet;
     document.getElementById('supProfilNomComplet').textContent = nomComplet;
     document.getElementById('supProfilEmailSub').textContent = p.email || '—';
+
+    const supPhotoEl = document.getElementById('supPhotoView');
+    if(p.photo_url){ supPhotoEl.innerHTML = `<img src="${p.photo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>`; }
+    else { supPhotoEl.textContent = `${(p.prenom||'')[0]||''}${(p.nom||'')[0]||''}`.toUpperCase() || '—'; }
     document.getElementById('supProfilTelView').textContent = p.telephone || '—';
     document.getElementById('supProfilEmailView').textContent = p.email || '—';
     document.getElementById('supProfilTelInput').value = p.telephone || '';

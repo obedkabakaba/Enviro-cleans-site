@@ -1242,6 +1242,18 @@ async function colLoadProfil(){
     document.getElementById('colProfilTelInput').value = p.telephone || '';
     document.getElementById('colProfilEmailInput').value = p.email || '';
 
+    const photoImg = document.getElementById('profilPhotoImg');
+    const photoInitials = document.getElementById('profilPhotoInitials');
+    if(p.photo_url){
+      photoImg.src = p.photo_url;
+      photoImg.style.display = 'block';
+      photoInitials.style.display = 'none';
+    } else {
+      photoImg.style.display = 'none';
+      photoInitials.style.display = 'flex';
+      photoInitials.textContent = (nomComplet.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()) || '—';
+    }
+
     document.getElementById('colProfilStatRealisees').textContent = s.collectesRealisees;
     document.getElementById('colProfilStatManquees').textContent = s.manquees;
     document.getElementById('colProfilStatClients').textContent = s.clientsDesservis;
