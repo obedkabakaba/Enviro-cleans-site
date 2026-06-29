@@ -738,7 +738,7 @@ tr:last-child td{border-bottom:none;}
     <div style="margin-top:10px;">
       <div class="sd-info-item"><label>Comment savoir quand passe mon agent ?</label><span style="font-weight:400;">La date et l'heure de votre prochaine collecte apparaissent sur votre tableau de bord et dans l'onglet "Mes collectes".</span></div>
       <div class="sd-info-item"><label>Que faire si l'agent n'est pas passé ?</label><span style="font-weight:400;">Utilisez le bouton "Signaler un problème" dans l'onglet Collectes, ou contactez le support directement.</span></div>
-      <div class="sd-info-item"><label>Comment changer d'offre ?</label><span style="font-weight:400;">Rendez-vous dans "Mon abonnement" puis "Changer de plan". Cette fonctionnalité arrive très bientôt.</span></div>
+      <div class="sd-info-item"><label>Comment changer d'offre ?</label><span style="font-weight:400;">Rendez-vous dans "Mon abonnement" puis "Changer de plan".</span></div>
       <div class="sd-info-item"><label>Mes paiements sont-ils sécurisés ?</label><span style="font-weight:400;">Oui, tous les paiements transitent par des prestataires Mobile Money reconnus en RDC.</span></div>
     </div>
     <button class="btn-green" style="width:100%;justify-content:center;margin-top:16px;" onclick="closeModal('faqModal')">Fermer</button>
@@ -1928,10 +1928,11 @@ function wireExtraFeatures(data){
 
   // ── Boutons encore en attente de backend : message clair plutôt qu'un clic mort ──
   bindByText('#page-profil button', 'Modifier le profil', openEditProfilModal);
-  document.querySelectorAll('#page-profil .cam-btn').forEach(b => b.addEventListener('click', (e)=>{ e.preventDefault(); comingSoon(); }));
+  // Le bouton photo de profil déclenche déjà le sélecteur de fichier via son onclick HTML —
+  // l'envoi fonctionne réellement, pas besoin (et pas correct) d'afficher "arrive bientôt" en plus.
   bindByText('#page-abonnement button', 'Changer de plan', openChangerOffreModal);
   bindByText('#page-abonnement button', 'Souscrire à une offre', openChangerOffreModal);
-  document.querySelectorAll('.changer-link').forEach(a => a.addEventListener('click', (e)=>{ e.preventDefault(); comingSoon(); }));
+  document.querySelectorAll('.changer-link').forEach(a => a.addEventListener('click', (e)=>{ e.preventDefault(); openChangerOffreModal(); }));
 
   // ── Mot de passe : champs vides au départ + vraie action ──
   ['pwd1','pwd2','pwd3'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
