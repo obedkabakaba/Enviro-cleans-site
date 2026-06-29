@@ -3060,6 +3060,17 @@ async function gestSaveZone(){
 // ════════════════════════════════════════
 // DISPATCH
 // ════════════════════════════════════════
+// Calcule la date du lundi de la semaine de dispatch en cours, exactement comme le fait
+// le serveur (prochainLundi côté backend) — calculé ici directement pour ne jamais dépendre
+// de ce que renvoie l'API, et donc toujours afficher une date correcte.
+function prochainLundiTexte(){
+  const d = new Date();
+  const jour = d.getDay(); // 0=dimanche, 1=lundi, ...
+  const decalage = jour === 1 ? 0 : ((8 - jour) % 7) || 7;
+  const lundi = new Date(d.getFullYear(), d.getMonth(), d.getDate() + decalage);
+  return lundi.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
 async function gestLoadDispatchApercu(){
   const tbody = document.getElementById('gestDispatchTable');
   tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;">Calcul en cours...</td></tr>';
@@ -3069,9 +3080,7 @@ async function gestLoadDispatchApercu(){
     const response = await fetch(`${GEST_API_BASE_URL}/api/gestionnaire/dispatch/apercu`, { headers: { 'Authorization': `Bearer ${getGestToken()}` } });
     const data = await response.json();
     const apercu = data.apercu || [];
-    const semaineDate = data.semaineDebut ? new Date(data.semaineDebut) : null;
-    document.getElementById('gestDispatchSemaine').textContent =
-      (semaineDate && !isNaN(semaineDate)) ? semaineDate.toLocaleDateString('fr-FR') : 'cette semaine';
+    document.getElementById('gestDispatchSemaine').textContent = prochainLundiTexte();
 
     if(apercu.length === 0){
       tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#999;">Aucun collecteur actif avec une zone affectée.</td></tr>';
