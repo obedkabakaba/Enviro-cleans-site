@@ -1340,8 +1340,13 @@ async function supOpenSuiviDetail(id){
     const soumettreRow = document.getElementById('supSuiviSoumettreRow');
     if(data.tournee.statut === 'terminee'){
       soumettreRow.style.display = 'block';
-      document.getElementById('supSuiviSoumisMsg').style.display = 'none';
-      document.querySelector('#supSuiviSoumettreRow button').style.display = '';
+      if(data.tournee.rapportGestionnaireSoumisLe){
+        document.getElementById('supSuiviSoumisMsg').style.display = 'block';
+        document.querySelector('#supSuiviSoumettreRow button').style.display = 'none';
+      } else {
+        document.getElementById('supSuiviSoumisMsg').style.display = 'none';
+        document.querySelector('#supSuiviSoumettreRow button').style.display = '';
+      }
     } else {
       soumettreRow.style.display = 'none';
     }
