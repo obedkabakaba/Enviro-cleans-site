@@ -383,6 +383,9 @@
       if(!response.ok){
         errorBox.textContent = data.message || 'Identifiant ou mot de passe incorrect.';
         errorBox.style.display = 'block';
+        if(data.emailNonVerifie){
+          errorBox.innerHTML += ' <a href="javascript:void(0)" onclick="renvoyerLienVerification()" style="color:var(--green);text-decoration:underline;font-weight:600;">Renvoyer le lien</a>';
+        }
         return;
       }
 
@@ -406,6 +409,26 @@
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
+    }
+  }
+
+  async function renvoyerLienVerification(){
+    const identifiant = document.getElementById('identifiant').value.trim();
+    const errorBoxLocal = document.getElementById('loginError');
+    if(!identifiant) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifiant })
+      });
+      const data = await response.json();
+      if(errorBoxLocal){
+        errorBoxLocal.textContent = data.message || 'Lien envoyé.';
+        errorBoxLocal.style.display = 'block';
+      }
+    } catch(err){
+      console.error('Erreur renvoi du lien de vérification:', err);
     }
   }
 
