@@ -1,0 +1,646 @@
+:root {
+  --green: #2fb85a;
+  --green-dark: #0d7449;
+  --green-light: #63dc7d;
+  --green-pale: #e9f8ed;
+  --ec-bg: #f4f7f3;
+  --ec-surface: #ffffff;
+  --ec-surface-soft: #edf4ee;
+  --ec-text: #102219;
+  --ec-muted: #607267;
+  --ec-line: rgba(16, 53, 31, .11);
+  --ec-nav: rgba(7, 25, 16, .9);
+  --ec-shadow: 0 24px 70px rgba(23, 58, 36, .11);
+  --ec-radius: 22px;
+  --ec-radius-sm: 14px;
+}
+
+html[data-theme="dark"] {
+  --green: #50d778;
+  --green-dark: #24ad62;
+  --green-light: #76e895;
+  --green-pale: #132c1d;
+  --ec-bg: #07110b;
+  --ec-surface: #0d1c13;
+  --ec-surface-soft: #11261a;
+  --ec-text: #edf7f0;
+  --ec-muted: #a2b6a8;
+  --ec-line: rgba(201, 236, 212, .12);
+  --ec-nav: rgba(3, 12, 7, .92);
+  --ec-shadow: 0 26px 76px rgba(0, 0, 0, .34);
+}
+
+html { background: var(--ec-bg); }
+body {
+  background: var(--ec-bg);
+  color: var(--ec-text);
+  font-family: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; }
+h1, h2, h3, h4, .logo-text span:first-child,
+.btn-nav, .btn-primary, .btn-outline, .btn-cta,
+.offer-label, .offer-price, .stat-card .num {
+  font-family: "Segoe UI", Inter, system-ui, sans-serif !important;
+}
+
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  display: inline-grid;
+  place-items: center;
+  margin-left: 10px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .09);
+  color: #fff;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+.theme-toggle:hover { transform: translateY(-2px); background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.34); }
+.theme-toggle:focus-visible { outline: 3px solid rgba(80, 215, 120, .42); outline-offset: 3px; }
+.theme-toggle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.theme-toggle-floating {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 3000;
+  margin: 0;
+  background: #0c2c1d;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+}
+.topbar .theme-toggle {
+  width: 38px;
+  height: 38px;
+  flex-basis: 38px;
+  margin: 0 2px 0 0;
+  color: var(--ec-text);
+  border-color: var(--ec-line);
+  background: var(--ec-surface-soft);
+}
+
+/* Shared public navigation and footer */
+body[data-page="index"] > nav,
+body[data-page="apropos"] > nav,
+body[data-page="nos-services"] > nav,
+body[data-page="agents"] > nav,
+body[data-page="contact"] > nav,
+body[data-page="politique-confidentialite"] > nav,
+body[data-page="espace-client"] > nav,
+body[data-page="inscription"] > nav {
+  height: 78px;
+  padding-inline: clamp(20px, 5vw, 72px);
+  gap: 12px;
+  background: var(--ec-nav);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 10px 35px rgba(0,0,0,.12);
+}
+nav .logo img { width: 43px; height: 43px; }
+nav .logo-text span:first-child { font-size: 13px; letter-spacing: 1.35px; }
+.nav-links { gap: clamp(18px, 2.4vw, 34px); }
+.nav-links a { font-size: 12.5px; }
+.btn-nav { border-radius: 999px; padding: 11px 22px; box-shadow: 0 10px 24px rgba(47,184,90,.2); }
+.mobile-menu { background: rgba(4, 16, 9, .98); backdrop-filter: blur(20px); }
+
+footer { background: #05130c !important; }
+footer .logo-text span:first-child { color: #fff !important; }
+footer a[href="acces-personnel.html"] {
+  color: rgba(255,255,255,.18) !important;
+  font-size: 9px !important;
+  opacity: .45;
+}
+
+/* Homepage: same sections, new visual system */
+body[data-page="index"] #accueil { min-height: min(900px, 96vh); }
+body[data-page="index"] .hero-bg { background-image: url("../images/hero-kinshasa-enviro.webp") !important; background-position: center; }
+body[data-page="index"] .hero-bg::before {
+  background: linear-gradient(90deg, rgba(3,18,10,.91) 0%, rgba(3,18,10,.77) 38%, rgba(3,18,10,.12) 78%) !important;
+}
+body[data-page="index"] .hero-content { padding-inline: clamp(24px, 6vw, 92px); max-width: 770px; }
+body[data-page="index"] .hero-content h1 { font-size: clamp(43px, 6vw, 78px); letter-spacing: -.045em; max-width: 680px; }
+body[data-page="index"] .hero-content p { max-width: 570px; font-size: clamp(15px, 1.35vw, 18px); }
+.btn-primary, .btn-cta, .btn-submit, .btn-login, .btn-signup, .btn-green {
+  border-radius: 999px !important;
+  box-shadow: 0 12px 28px rgba(47,184,90,.22);
+}
+body[data-page="index"] #valeurs {
+  width: min(1180px, calc(100% - 40px));
+  margin: -45px auto 0;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  position: relative;
+  z-index: 5;
+  border: 1px solid var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: var(--ec-shadow);
+}
+body[data-page="index"] .val-item { max-width: none; min-width: 0; padding: 13px 18px; border-color: var(--ec-line); }
+body[data-page="index"] .val-item h3 { color: var(--ec-text); }
+body[data-page="index"] .val-item p { color: var(--ec-muted); }
+body[data-page="index"] .val-icon { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 17px; background: var(--green-pale); }
+body[data-page="index"] .val-icon img { width: 38px; height: 38px; mix-blend-mode: multiply; }
+html[data-theme="dark"] body[data-page="index"] .val-icon img { filter: brightness(1.6) saturate(.8); mix-blend-mode: screen; }
+
+body[data-page="index"] #pourquoi,
+body[data-page="index"] #mission {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 110px 0;
+  gap: clamp(44px, 7vw, 96px);
+  background: var(--ec-bg);
+}
+body[data-page="index"] .why-text,
+body[data-page="index"] .mission-text { max-width: 540px; }
+body[data-page="index"] .why-text h2,
+body[data-page="index"] .mission-text h2 { color: var(--ec-text); letter-spacing: -.035em; }
+body[data-page="index"] .why-text > p,
+body[data-page="index"] .mission-text > p { color: var(--ec-muted); }
+body[data-page="index"] .check-list li { color: var(--ec-text); }
+body[data-page="index"] .why-img {
+  display: grid;
+  place-items: end center;
+  height: 560px;
+  border-radius: 34px;
+  background: radial-gradient(circle at 50% 45%, rgba(89,216,123,.4), rgba(89,216,123,.08) 48%, transparent 70%), var(--ec-surface-soft);
+  overflow: hidden;
+}
+body[data-page="index"] .why-img img { width: auto; height: 95%; max-width: 100%; object-fit: contain; object-position: bottom center; }
+body[data-page="index"] #services { background: var(--ec-surface-soft); padding-block: 100px; }
+body[data-page="index"] #services h2 { color: var(--ec-text); font-size: clamp(31px, 4vw, 50px); letter-spacing: -.04em; }
+body[data-page="index"] .services-grid { max-width: 1100px; gap: 22px; }
+body[data-page="index"] .service-card {
+  padding: 34px;
+  text-align: left;
+  border-color: var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: 0 14px 38px rgba(29,66,42,.06);
+}
+body[data-page="index"] .service-card .s-icon { width: 76px; height: 76px; display: grid; place-items: center; margin-bottom: 26px; border-radius: 20px; background: var(--green-pale); }
+body[data-page="index"] .service-card .s-icon img { width: 54px; height: 54px; margin: 0; mix-blend-mode: multiply; }
+body[data-page="index"] .service-card h3 { color: var(--ec-text); font-size: 17px; }
+body[data-page="index"] .service-card p { color: var(--ec-muted); }
+html[data-theme="dark"] body[data-page="index"] .service-card .s-icon img { filter: brightness(1.65); mix-blend-mode: screen; }
+body[data-page="index"] #mission { min-height: 650px; }
+body[data-page="index"] .mission-img { max-width: 48%; }
+body[data-page="index"] #contact { background: linear-gradient(135deg, #0a6c45, #123f2b); }
+
+/* About */
+body[data-page="apropos"] #hero-apropos .hero-bg { background-position: center 42%; }
+body[data-page="apropos"] #histoire,
+body[data-page="apropos"] #mvv,
+body[data-page="apropos"] #equipe,
+body[data-page="apropos"] #partenaires { background: var(--ec-bg); }
+body[data-page="apropos"] #histoire { width: min(1180px, calc(100% - 48px)); margin: 0 auto; gap: 70px; padding-inline: 0; }
+body[data-page="apropos"] .histoire-text h2,
+body[data-page="apropos"] #mvv h3,
+body[data-page="apropos"] #equipe h2,
+body[data-page="apropos"] #partenaires h2 { color: var(--ec-text); }
+body[data-page="apropos"] .histoire-text p,
+body[data-page="apropos"] .mvv-card p,
+body[data-page="apropos"] .membre p { color: var(--ec-muted); }
+body[data-page="apropos"] .histoire-img,
+body[data-page="apropos"] .mvv-card,
+body[data-page="apropos"] .membre-card,
+body[data-page="apropos"] .partenaires-box {
+  border-color: var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: 0 16px 48px rgba(28,67,42,.07);
+}
+body[data-page="apropos"] .histoire-img img { width: 100%; height: 430px; object-fit: cover; object-position: center; }
+body[data-page="apropos"] .equipe-grid { max-width: 1180px; gap: 24px; }
+body[data-page="apropos"] .membre-card { overflow: hidden; background: linear-gradient(180deg, var(--ec-surface-soft), var(--ec-surface)); }
+body[data-page="apropos"] .membre-card img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+body[data-page="apropos"] .membre h4 { color: var(--ec-text); }
+
+/* Services */
+body[data-page="nos-services"] .hero-bg { background-image: url("../images/services-tri-enviro.webp") !important; background-position: center 54%; }
+body[data-page="nos-services"] .hero-bg::before { background: linear-gradient(90deg, rgba(3,18,10,.9), rgba(3,18,10,.57) 48%, rgba(3,18,10,.1)) !important; }
+body[data-page="nos-services"] .services-section,
+body[data-page="nos-services"] .offres-section { background: var(--ec-bg); }
+body[data-page="nos-services"] .svc-card,
+body[data-page="nos-services"] .offer-card,
+body[data-page="nos-services"] .engagement-banner {
+  border-color: var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: 0 16px 46px rgba(28,67,42,.07);
+}
+body[data-page="nos-services"] .svc-card h3,
+body[data-page="nos-services"] .offres-section h2,
+body[data-page="nos-services"] .offre-group-title,
+body[data-page="nos-services"] .offer-body { color: var(--ec-text); }
+body[data-page="nos-services"] .svc-card p,
+body[data-page="nos-services"] .svc-list,
+body[data-page="nos-services"] .offer-tagline,
+body[data-page="nos-services"] .offer-feat { color: var(--ec-muted); }
+body[data-page="nos-services"] .svc-ico { background: var(--green-pale); }
+body[data-page="nos-services"] .svc-card { overflow: hidden; }
+body[data-page="nos-services"] .svc-photo {
+  width: calc(100% + 44px);
+  height: 190px;
+  margin: -26px -22px 22px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform .45s ease;
+}
+body[data-page="nos-services"] .svc-card:hover .svc-photo { transform: scale(1.035); }
+body[data-page="nos-services"] .offer-card { overflow: hidden; }
+body[data-page="nos-services"] .offer-top { min-height: 210px; isolation: isolate; overflow: hidden; }
+body[data-page="nos-services"] .offer-top.basic { background: linear-gradient(135deg, #0b5134, #2eaa58); }
+body[data-page="nos-services"] .offer-top.standard { background: linear-gradient(135deg, #b96b13, #f5ad3e); }
+body[data-page="nos-services"] .offer-top.premium { background: linear-gradient(135deg, #183b2d, #708c7d); }
+body[data-page="nos-services"] .offer-bg-img {
+  inset: 0 0 0 auto;
+  width: 68%;
+  height: 100%;
+  object-fit: contain;
+  object-position: right bottom;
+  opacity: 1;
+  z-index: 1;
+  filter: drop-shadow(0 18px 24px rgba(0,0,0,.2));
+}
+body[data-page="nos-services"] .offer-top-content { width: 48%; z-index: 2; }
+body[data-page="nos-services"] .offer-label,
+body[data-page="nos-services"] .offer-price { text-shadow: 0 2px 18px rgba(0,0,0,.3); }
+body[data-page="nos-services"] .avenir-box {
+  min-height: 260px;
+  border: 1px solid var(--ec-line);
+  border-radius: var(--ec-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(90deg, rgba(4,24,14,.9), rgba(4,24,14,.43)),
+    url("../images/service-entreprise-enviro.webp") center 48% / cover no-repeat;
+  box-shadow: 0 16px 46px rgba(28,67,42,.08);
+}
+body[data-page="nos-services"] .avenir-box .bientot {
+  margin: 0;
+  padding: 12px 22px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(4,24,14,.58);
+  backdrop-filter: blur(10px);
+}
+
+/* Agents */
+body[data-page="agents"] .page-header {
+  min-height: 420px;
+  background:
+    linear-gradient(90deg, rgba(2,18,10,.96) 0%, rgba(4,28,17,.88) 42%, rgba(4,26,16,.64) 100%),
+    url("../images/equipe-agents-enviro.webp") center 44% / cover no-repeat;
+  padding-top: 132px;
+}
+body[data-page="agents"] .page-header-inner { min-height: 245px; }
+body[data-page="agents"] .stat-card { backdrop-filter: blur(10px); background: rgba(5,25,15,.62); }
+body[data-page="agents"] .filter-section,
+body[data-page="agents"] .table-section { background: var(--ec-bg); }
+body[data-page="agents"] .filter-bar,
+body[data-page="agents"] .table-wrap {
+  padding: 16px;
+  border: 1px solid var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: 0 12px 38px rgba(28,67,42,.06);
+}
+body[data-page="agents"] .table-wrap { padding: 0; }
+body[data-page="agents"] input,
+body[data-page="agents"] select,
+body[data-page="agents"] .page-btn,
+body[data-page="agents"] .action-btn { color: var(--ec-text); border-color: var(--ec-line); background: var(--ec-surface-soft); }
+body[data-page="agents"] thead tr { background: var(--ec-surface-soft); }
+body[data-page="agents"] th,
+body[data-page="agents"] td { color: var(--ec-text); border-color: var(--ec-line); }
+body[data-page="agents"] tbody tr:hover { background: var(--ec-surface-soft); }
+
+/* Contact and privacy */
+body[data-page="contact"] .contact-hero,
+body[data-page="politique-confidentialite"] .pc-hero { background: linear-gradient(135deg, #061a10, #0e5736); }
+body[data-page="contact"] .help-bar {
+  min-height: 300px;
+  justify-content: flex-start;
+  padding: 42px 64px;
+  background:
+    linear-gradient(90deg, rgba(247,250,247,.98) 0%, rgba(247,250,247,.94) 40%, rgba(247,250,247,.34) 65%, rgba(247,250,247,.06) 100%),
+    url("../images/accompagnement-client-enviro.webp") center / cover no-repeat;
+}
+body[data-page="contact"] .help-left { max-width: 470px; }
+body[data-page="contact"] .help-left h4 { color: #15251b; }
+body[data-page="contact"] .help-left p { color: #435048; }
+body[data-page="contact"] .help-left p strong { color: #15251b; }
+body[data-page="contact"] .btn-call { margin-right: auto; }
+html[data-theme="dark"] body[data-page="contact"] .help-bar {
+  background:
+    linear-gradient(90deg, rgba(13,26,19,.98) 0%, rgba(13,26,19,.94) 40%, rgba(13,26,19,.48) 68%, rgba(13,26,19,.16) 100%),
+    url("../images/accompagnement-client-enviro.webp") center / cover no-repeat;
+}
+html[data-theme="dark"] body[data-page="contact"] .help-left h4,
+html[data-theme="dark"] body[data-page="contact"] .help-left p strong { color: #f1f7f3; }
+html[data-theme="dark"] body[data-page="contact"] .help-left p { color: #b9c9bf; }
+body[data-page="contact"] .contact-wrap,
+body[data-page="politique-confidentialite"] .pc-wrap { background: var(--ec-bg); }
+body[data-page="contact"] .info-card,
+body[data-page="contact"] .form-card,
+body[data-page="contact"] .hours-card,
+body[data-page="politique-confidentialite"] .pc-card,
+body[data-page="politique-confidentialite"] .pc-toc,
+body[data-page="politique-confidentialite"] .pc-contact {
+  color: var(--ec-text);
+  border-color: var(--ec-line);
+  border-radius: var(--ec-radius);
+  background: var(--ec-surface);
+  box-shadow: 0 16px 46px rgba(28,67,42,.07);
+}
+body[data-page="contact"] .info-item p,
+body[data-page="contact"] .form-card p,
+body[data-page="contact"] .hours-row,
+body[data-page="politique-confidentialite"] .pc-section p,
+body[data-page="politique-confidentialite"] .pc-section li,
+body[data-page="politique-confidentialite"] .pc-intro { color: var(--ec-muted); }
+body[data-page="contact"] input,
+body[data-page="contact"] textarea,
+body[data-page="politique-confidentialite"] .pc-table { color: var(--ec-text); border-color: var(--ec-line); background: var(--ec-surface-soft); }
+body[data-page="politique-confidentialite"] .pc-hero { position: relative; overflow: hidden; }
+body[data-page="politique-confidentialite"] .pc-hero-inner { position: relative; padding-right: 330px; }
+body[data-page="politique-confidentialite"] .pc-hero-visual {
+  position: absolute;
+  right: 34px;
+  bottom: -54px;
+  width: 280px;
+  height: 280px;
+  object-fit: contain;
+  filter: drop-shadow(0 28px 38px rgba(0,0,0,.34));
+}
+
+/* Client auth and password pages */
+body[data-page="espace-client"],
+body[data-page="inscription"] { background: var(--ec-bg); }
+body[data-page="espace-client"] .page-wrapper,
+body[data-page="inscription"] .page-wrapper { background: var(--ec-bg); }
+body[data-page="espace-client"] .login-side,
+body[data-page="inscription"] .signup-side { background: var(--ec-surface); color: var(--ec-text); }
+body[data-page="espace-client"] .contact-side,
+body[data-page="inscription"] .contact-side {
+  background:
+    linear-gradient(90deg, rgba(3,28,17,.98) 0%, rgba(3,28,17,.9) 37%, rgba(3,28,17,.36) 65%, rgba(3,28,17,.06) 100%),
+    url("../images/connexion-client-enviro.webp") 63% center / cover no-repeat;
+}
+body[data-page="espace-client"] .leaves-bg,
+body[data-page="inscription"] .leaves-bg,
+body[data-page="espace-client"] .agent-img,
+body[data-page="inscription"] .agent-img { display: none; }
+body[data-page="espace-client"] .contact-side h2,
+body[data-page="inscription"] .contact-side h2,
+body[data-page="espace-client"] .c-text h4,
+body[data-page="inscription"] .c-text h4 { color: #fff; }
+body[data-page="espace-client"] .contact-side .intro,
+body[data-page="inscription"] .contact-side .intro,
+body[data-page="espace-client"] .c-text p,
+body[data-page="inscription"] .c-text p { color: rgba(255,255,255,.76); }
+body[data-page="espace-client"] .contact-items,
+body[data-page="inscription"] .contact-items { max-width: 330px; }
+body[data-page="espace-client"] .c-icon,
+body[data-page="inscription"] .c-icon { background: rgba(4,31,19,.56); backdrop-filter: blur(8px); }
+body[data-page="espace-client"] input,
+body[data-page="inscription"] input,
+body[data-page="forgot-password"] input,
+body[data-page="reset-password"] input,
+body[data-page="acces-personnel"] input {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface-soft) !important;
+}
+body[data-page="espace-client"] h1,
+body[data-page="inscription"] h1,
+body[data-page="forgot-password"] h2,
+body[data-page="reset-password"] h2 { color: var(--ec-text); }
+body[data-page="espace-client"] .subtitle,
+body[data-page="inscription"] .subtitle,
+body[data-page="forgot-password"] .sub,
+body[data-page="reset-password"] .sub { color: var(--ec-muted); }
+body[data-page="forgot-password"],
+body[data-page="reset-password"],
+body[data-page="acces-personnel"] { background: radial-gradient(circle at 15% 15%, rgba(70,207,108,.18), transparent 32%), var(--ec-bg); }
+body[data-page="forgot-password"] .card,
+body[data-page="reset-password"] .card,
+body[data-page="acces-personnel"] .box {
+  color: var(--ec-text);
+  border: 1px solid var(--ec-line);
+  border-radius: 24px;
+  background: var(--ec-surface);
+  box-shadow: var(--ec-shadow);
+}
+body[data-page="forgot-password"] .security-visual,
+body[data-page="reset-password"] .security-visual {
+  width: 118px;
+  height: 118px;
+  margin: -12px auto 18px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 22px rgba(25,84,49,.2));
+}
+
+/* Client dashboard visuals */
+body[data-page="dashboard"] .support-hero {
+  min-height: 265px;
+  padding: 42px;
+  border-radius: var(--ec-radius);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(3,24,14,.94) 0%, rgba(3,24,14,.78) 44%, rgba(3,24,14,.08) 74%),
+    url("../images/support-client-enviro.webp") center / cover no-repeat;
+  box-shadow: 0 18px 46px rgba(19,65,39,.15);
+}
+body[data-page="dashboard"] .support-hero h1 { color: #fff !important; font-size: clamp(25px, 3vw, 38px); }
+body[data-page="dashboard"] .support-hero p { max-width: 390px; color: rgba(255,255,255,.76) !important; font-size: 14px; line-height: 1.6; }
+body[data-page="dashboard"] .plan-actuel-box { position: relative; overflow: hidden; padding-right: 170px; }
+body[data-page="dashboard"] .abo-plan-visual {
+  position: absolute;
+  right: 6px;
+  bottom: 8px;
+  width: 154px;
+  height: 154px;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 20px rgba(14,76,39,.17));
+}
+body[data-page="dashboard"] .co-plan-meta { display: flex; align-items: center; gap: 12px; min-width: 0; }
+body[data-page="dashboard"] .co-plan-img { width: 62px; height: 54px; object-fit: contain; flex: 0 0 auto; }
+body[data-page="dashboard"] #page-password { position: relative; min-height: 520px; }
+body[data-page="dashboard"] .pwd-page-visual {
+  position: absolute;
+  left: 540px;
+  top: 76px;
+  width: min(31vw, 340px);
+  max-height: 340px;
+  object-fit: contain;
+  filter: drop-shadow(0 24px 34px rgba(18,83,44,.18));
+}
+
+/* Dashboards: preserve structure, harmonize surfaces and enable dark mode */
+body[data-page="admin"],
+body[data-page="administrateur"],
+body[data-page="dashboard"],
+body[data-page="collecteur"],
+body[data-page="gestionnaire"],
+body[data-page="superviseur"] { background: var(--ec-bg) !important; color: var(--ec-text); }
+body[data-page="admin"] .main,
+body[data-page="administrateur"] .main,
+body[data-page="dashboard"] .main,
+body[data-page="collecteur"] .main,
+body[data-page="gestionnaire"] .main,
+body[data-page="superviseur"] .main { background: var(--ec-bg); }
+body[data-page="admin"] .topbar,
+body[data-page="administrateur"] .topbar,
+body[data-page="dashboard"] .topbar,
+body[data-page="collecteur"] .topbar,
+body[data-page="gestionnaire"] .topbar,
+body[data-page="superviseur"] .topbar {
+  color: var(--ec-text);
+  border-color: var(--ec-line);
+  background: color-mix(in srgb, var(--ec-surface) 94%, transparent);
+  backdrop-filter: blur(18px);
+}
+html[data-theme="dark"] body[data-page="admin"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea),
+html[data-theme="dark"] body[data-page="administrateur"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea),
+html[data-theme="dark"] body[data-page="dashboard"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea),
+html[data-theme="dark"] body[data-page="collecteur"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea),
+html[data-theme="dark"] body[data-page="gestionnaire"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea),
+html[data-theme="dark"] body[data-page="superviseur"] :is(.content,.dashboard-content,.page-content,.card,.stat-card,.panel,.table-wrap,.modal-content,input,select,textarea) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background-color: var(--ec-surface) !important;
+}
+html[data-theme="dark"] body[data-page="admin"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box),
+html[data-theme="dark"] body[data-page="administrateur"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box),
+html[data-theme="dark"] body[data-page="dashboard"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box),
+html[data-theme="dark"] body[data-page="collecteur"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box),
+html[data-theme="dark"] body[data-page="gestionnaire"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box),
+html[data-theme="dark"] body[data-page="superviseur"] :is(.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background-color: var(--ec-surface) !important;
+}
+html[data-theme="dark"] body[data-page="admin"] :is(table,thead,tbody,tr,th,td),
+html[data-theme="dark"] body[data-page="administrateur"] :is(table,thead,tbody,tr,th,td),
+html[data-theme="dark"] body[data-page="dashboard"] :is(table,thead,tbody,tr,th,td),
+html[data-theme="dark"] body[data-page="collecteur"] :is(table,thead,tbody,tr,th,td),
+html[data-theme="dark"] body[data-page="gestionnaire"] :is(table,thead,tbody,tr,th,td),
+html[data-theme="dark"] body[data-page="superviseur"] :is(table,thead,tbody,tr,th,td) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+}
+html[data-theme="dark"] body[data-page="admin"] thead tr,
+html[data-theme="dark"] body[data-page="administrateur"] thead tr,
+html[data-theme="dark"] body[data-page="dashboard"] thead tr,
+html[data-theme="dark"] body[data-page="collecteur"] thead tr,
+html[data-theme="dark"] body[data-page="gestionnaire"] thead tr,
+html[data-theme="dark"] body[data-page="superviseur"] thead tr { background: var(--ec-surface-soft) !important; }
+html[data-theme="dark"] body[data-page="admin"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
+html[data-theme="dark"] body[data-page="administrateur"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
+html[data-theme="dark"] body[data-page="dashboard"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
+html[data-theme="dark"] body[data-page="collecteur"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
+html[data-theme="dark"] body[data-page="gestionnaire"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
+html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3,h4,th,td,label) { color: var(--ec-text) !important; }
+
+@media (max-width: 900px) {
+  .theme-toggle { margin-left: auto; }
+  .hamburger { margin-left: 0; }
+  body[data-page="index"] #valeurs { grid-template-columns: repeat(2, 1fr); }
+  body[data-page="index"] .val-item { border-right: 0; }
+  body[data-page="index"] #pourquoi,
+  body[data-page="index"] #mission { width: min(100% - 40px, 720px); padding-block: 78px; }
+  body[data-page="index"] .why-img { height: 500px; width: 100%; }
+  body[data-page="index"] .mission-img { max-width: 100%; }
+  body[data-page="apropos"] .histoire-img img { height: 360px; }
+  body[data-page="agents"] .page-header { min-height: 500px; background-position: 60% center; }
+  body[data-page="agents"] .page-header-inner { min-height: 350px; }
+  body[data-page="contact"] .help-bar,
+  html[data-theme="dark"] body[data-page="contact"] .help-bar {
+    min-height: 430px;
+    padding: 38px 24px;
+    align-content: flex-end;
+    background:
+      linear-gradient(0deg, rgba(7,25,15,.97) 0%, rgba(7,25,15,.88) 46%, rgba(7,25,15,.16) 100%),
+      url("../images/accompagnement-client-enviro.webp") 65% center / cover no-repeat;
+  }
+  body[data-page="contact"] .help-left h4,
+  body[data-page="contact"] .help-left p strong { color: #f1f7f3; }
+  body[data-page="contact"] .help-left p { color: #d3dfd7; }
+  body[data-page="politique-confidentialite"] .pc-hero-inner { padding-right: 230px; }
+  body[data-page="politique-confidentialite"] .pc-hero-visual { right: 0; width: 220px; height: 220px; }
+  body[data-page="espace-client"] .contact-side,
+  body[data-page="inscription"] .contact-side {
+    min-height: 520px;
+    background:
+      linear-gradient(90deg, rgba(3,28,17,.98) 0%, rgba(3,28,17,.93) 48%, rgba(3,28,17,.42) 75%, rgba(3,28,17,.12) 100%),
+      url("../images/connexion-client-enviro.webp") 70% center / cover no-repeat;
+  }
+  body[data-page="dashboard"] .support-hero { background-position: 62% center; }
+  body[data-page="dashboard"] .pwd-page-visual { left: 505px; width: 280px; }
+}
+
+@media (max-width: 560px) {
+  .theme-toggle { width: 38px; height: 38px; flex-basis: 38px; }
+  body[data-page="index"] #accueil { min-height: 760px; }
+  body[data-page="index"] .hero-bg { background-position: 64% center; }
+  body[data-page="index"] .hero-bg::before { background: linear-gradient(0deg, rgba(3,18,10,.96), rgba(3,18,10,.66) 65%, rgba(3,18,10,.18)) !important; }
+  body[data-page="index"] .hero-content { align-self: flex-end; padding-bottom: 78px; }
+  body[data-page="index"] #valeurs { grid-template-columns: 1fr; margin-top: 0; width: 100%; border-radius: 0; }
+  body[data-page="index"] .val-item { flex-direction: row; text-align: left; align-items: center; }
+  body[data-page="index"] .val-item p { display: none; }
+  body[data-page="index"] .why-img { height: 430px; }
+  body[data-page="apropos"] .equipe-grid { grid-template-columns: 1fr 1fr; }
+  body[data-page="apropos"] .histoire-img img { height: 300px; }
+  body[data-page="nos-services"] .svc-photo { height: 180px; }
+  body[data-page="nos-services"] .offer-top { min-height: 190px; }
+  body[data-page="nos-services"] .offer-bg-img { width: 65%; }
+  body[data-page="agents"] .page-header { min-height: 560px; background-position: 66% center; }
+  body[data-page="agents"] .page-header-inner { min-height: 405px; }
+  body[data-page="politique-confidentialite"] .pc-hero-inner { padding-right: 0; }
+  body[data-page="politique-confidentialite"] .pc-hero-visual { display: none; }
+  body[data-page="espace-client"] .contact-side,
+  body[data-page="inscription"] .contact-side {
+    min-height: 520px;
+    justify-content: flex-end;
+    background:
+      linear-gradient(0deg, rgba(3,24,15,.98) 0%, rgba(3,24,15,.91) 52%, rgba(3,24,15,.16) 100%),
+      url("../images/connexion-client-enviro.webp") 69% center / cover no-repeat;
+  }
+  body[data-page="espace-client"] .contact-items,
+  body[data-page="inscription"] .contact-items { gap: 16px; }
+  body[data-page="dashboard"] .support-hero {
+    min-height: 250px;
+    padding: 28px 22px;
+    background:
+      linear-gradient(90deg, rgba(3,24,14,.95), rgba(3,24,14,.66) 66%, rgba(3,24,14,.18)),
+      url("../images/support-client-enviro.webp") 68% center / cover no-repeat;
+  }
+  body[data-page="dashboard"] .plan-actuel-box { padding-right: 120px; }
+  body[data-page="dashboard"] .abo-plan-visual { width: 116px; height: 116px; opacity: .9; }
+  body[data-page="dashboard"] .pwd-page-visual {
+    position: static;
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 20px;
+    display: block;
+  }
+}
+
+@media (max-width: 420px) {
+  body[data-page="apropos"] .equipe-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
