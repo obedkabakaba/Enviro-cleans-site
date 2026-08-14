@@ -1,33 +1,49 @@
 :root {
-  --green: #2fb85a;
-  --green-dark: #0d7449;
-  --green-light: #63dc7d;
-  --green-pale: #e9f8ed;
-  --ec-bg: #f4f7f3;
+  --green: #2fbd62;
+  --green-dark: #0d8f72;
+  --green-light: #dff3e4;
+  --green-pale: #eaf6ec;
+  --ec-bg: #f5f7f5;
   --ec-surface: #ffffff;
-  --ec-surface-soft: #edf4ee;
-  --ec-text: #102219;
-  --ec-muted: #607267;
-  --ec-line: rgba(16, 53, 31, .11);
-  --ec-nav: rgba(7, 25, 16, .9);
-  --ec-shadow: 0 24px 70px rgba(23, 58, 36, .11);
+  --ec-surface-soft: #eef2ef;
+  --ec-text: #17211b;
+  --ec-muted: #647068;
+  --ec-line: rgba(23, 33, 27, .12);
+  --ec-nav: rgba(8, 14, 10, .96);
+  --ec-shadow: 0 18px 48px rgba(21, 31, 24, .09);
   --ec-radius: 22px;
   --ec-radius-sm: 14px;
+  --white: var(--ec-surface);
+  --light: var(--ec-surface-soft);
+  --dark: #101411;
+  --gray: var(--ec-muted);
 }
 
 html[data-theme="dark"] {
-  --green: #50d778;
-  --green-dark: #24ad62;
-  --green-light: #76e895;
-  --green-pale: #132c1d;
-  --ec-bg: #07110b;
-  --ec-surface: #0d1c13;
-  --ec-surface-soft: #11261a;
-  --ec-text: #edf7f0;
-  --ec-muted: #a2b6a8;
-  --ec-line: rgba(201, 236, 212, .12);
-  --ec-nav: rgba(3, 12, 7, .92);
-  --ec-shadow: 0 26px 76px rgba(0, 0, 0, .34);
+  --green: #63c66d;
+  --green-dark: #43ae61;
+  --green-light: rgba(99, 198, 109, .16);
+  --green-pale: rgba(99, 198, 109, .12);
+  --ec-bg: #0c0f0d;
+  --ec-surface: #151916;
+  --ec-surface-soft: #1b201c;
+  --ec-text: #f3f6f4;
+  --ec-muted: #aeb8b1;
+  --ec-line: rgba(240, 247, 242, .13);
+  --ec-nav: rgba(8, 11, 9, .97);
+  --ec-shadow: 0 18px 48px rgba(0, 0, 0, .26);
+  --white: var(--ec-surface);
+  --light: var(--ec-surface-soft);
+  --dark: #090b0a;
+  --gray: var(--ec-muted);
+  --orange: #ffb74d;
+  --orange-light: rgba(255, 183, 77, .14);
+  --red: #ff6b6b;
+  --red-light: rgba(255, 107, 107, .14);
+  --blue: #64b5f6;
+  --blue-light: rgba(100, 181, 246, .14);
+  --purple: #b39ddb;
+  --purple-light: rgba(179, 157, 219, .14);
 }
 
 html { background: var(--ec-bg); }
@@ -58,7 +74,7 @@ h1, h2, h3, h4, .logo-text span:first-child,
   cursor: pointer;
   transition: transform .2s ease, background .2s ease, border-color .2s ease;
 }
-.theme-toggle:hover { transform: translateY(-2px); background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.34); }
+.theme-toggle:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.3); }
 .theme-toggle:focus-visible { outline: 3px solid rgba(80, 215, 120, .42); outline-offset: 3px; }
 .theme-toggle svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .theme-toggle-floating {
@@ -100,7 +116,7 @@ nav .logo img { width: 43px; height: 43px; }
 nav .logo-text span:first-child { font-size: 13px; letter-spacing: 1.35px; }
 .nav-links { gap: clamp(18px, 2.4vw, 34px); }
 .nav-links a { font-size: 12.5px; }
-.btn-nav { border-radius: 999px; padding: 11px 22px; box-shadow: 0 10px 24px rgba(47,184,90,.2); }
+.btn-nav { border-radius: 999px; padding: 11px 22px; box-shadow: none; }
 .mobile-menu { background: rgba(4, 16, 9, .98); backdrop-filter: blur(20px); }
 
 footer { background: #05130c !important; }
@@ -122,7 +138,7 @@ body[data-page="index"] .hero-content h1 { font-size: clamp(43px, 6vw, 78px); le
 body[data-page="index"] .hero-content p { max-width: 570px; font-size: clamp(15px, 1.35vw, 18px); }
 .btn-primary, .btn-cta, .btn-submit, .btn-login, .btn-signup, .btn-green {
   border-radius: 999px !important;
-  box-shadow: 0 12px 28px rgba(47,184,90,.22);
+  box-shadow: none !important;
 }
 body[data-page="index"] #valeurs {
   width: min(1180px, calc(100% - 40px));
@@ -142,7 +158,7 @@ body[data-page="index"] .val-item h3 { color: var(--ec-text); }
 body[data-page="index"] .val-item p { color: var(--ec-muted); }
 body[data-page="index"] .val-icon { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 17px; background: var(--green-pale); }
 body[data-page="index"] .val-icon img { width: 38px; height: 38px; mix-blend-mode: multiply; }
-html[data-theme="dark"] body[data-page="index"] .val-icon img { filter: brightness(1.6) saturate(.8); mix-blend-mode: screen; }
+html[data-theme="dark"] body[data-page="index"] .val-icon img { filter: none; mix-blend-mode: normal; }
 
 body[data-page="index"] #pourquoi,
 body[data-page="index"] #mission {
@@ -164,7 +180,7 @@ body[data-page="index"] .why-img {
   place-items: end center;
   height: 560px;
   border-radius: 34px;
-  background: radial-gradient(circle at 50% 45%, rgba(89,216,123,.4), rgba(89,216,123,.08) 48%, transparent 70%), var(--ec-surface-soft);
+  background: var(--ec-surface-soft);
   overflow: hidden;
 }
 body[data-page="index"] .why-img img { width: auto; height: 95%; max-width: 100%; object-fit: contain; object-position: bottom center; }
@@ -183,7 +199,7 @@ body[data-page="index"] .service-card .s-icon { width: 76px; height: 76px; displ
 body[data-page="index"] .service-card .s-icon img { width: 54px; height: 54px; margin: 0; mix-blend-mode: multiply; }
 body[data-page="index"] .service-card h3 { color: var(--ec-text); font-size: 17px; }
 body[data-page="index"] .service-card p { color: var(--ec-muted); }
-html[data-theme="dark"] body[data-page="index"] .service-card .s-icon img { filter: brightness(1.65); mix-blend-mode: screen; }
+html[data-theme="dark"] body[data-page="index"] .service-card .s-icon img { filter: none; mix-blend-mode: normal; }
 body[data-page="index"] #mission { min-height: 650px; }
 body[data-page="index"] .mission-img { max-width: 48%; }
 body[data-page="index"] #contact { background: linear-gradient(135deg, #0a6c45, #123f2b); }
@@ -553,6 +569,280 @@ html[data-theme="dark"] body[data-page="collecteur"] :is(.topbar-title,h1,h2,h3,
 html[data-theme="dark"] body[data-page="gestionnaire"] :is(.topbar-title,h1,h2,h3,h4,th,td,label),
 html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3,h4,th,td,label) { color: var(--ec-text) !important; }
 
+/* Theme correction: neutral surfaces, readable contrast and deliberate framing */
+.btn-primary:hover,
+.btn-cta:hover,
+.btn-nav:hover,
+.btn-submit:hover,
+.btn-login:hover,
+.btn-signup:hover,
+.btn-green:hover,
+.service-card:hover,
+body[data-page="nos-services"] .svc-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+body[data-page="index"] .service-card,
+body[data-page="apropos"] :is(.histoire-img,.mvv-card,.membre-card,.partenaires-box),
+body[data-page="nos-services"] :is(.svc-card,.offer-card,.engagement-banner),
+body[data-page="contact"] :is(.info-card,.form-card,.hours-card),
+body[data-page="politique-confidentialite"] :is(.pc-card,.pc-toc,.pc-contact) {
+  box-shadow: 0 12px 34px rgba(21, 31, 24, .07);
+}
+
+body[data-page="nos-services"] .svc-photo {
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  object-position: center;
+  background: var(--ec-surface-soft);
+}
+body[data-page="nos-services"] .svc-card:nth-child(2) .svc-photo {
+  object-fit: contain;
+}
+body[data-page="nos-services"] .offer-body {
+  color: var(--ec-text);
+  background: var(--ec-surface);
+}
+body[data-page="nos-services"] .engagement-banner h4 { color: var(--ec-text); }
+body[data-page="nos-services"] .engagement-banner p { color: var(--ec-muted); }
+
+body[data-page="apropos"] .partenaires-box img {
+  padding: 10px 14px;
+  border: 1px solid rgba(23, 33, 27, .1);
+  border-radius: 10px;
+  background: #fff;
+}
+
+body[data-page="agents"] .page-header {
+  min-height: 510px;
+  background-color: #0c2117;
+  background-image:
+    linear-gradient(90deg, #0c2117 0%, #0c2117 34%, rgba(12,33,23,.9) 50%, rgba(12,33,23,.18) 100%),
+    url("../images/equipe-agents-enviro.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 100%;
+  background-repeat: no-repeat;
+}
+body[data-page="dashboard"] .support-hero {
+  min-height: 360px;
+  background-color: #0b291d;
+  background-image:
+    linear-gradient(90deg, #0b291d 0%, #0b291d 42%, rgba(11,41,29,.88) 57%, rgba(11,41,29,.12) 100%),
+    url("../images/support-client-enviro.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 100%;
+  background-repeat: no-repeat;
+  box-shadow: none;
+}
+body[data-page="contact"] .help-bar,
+html[data-theme="dark"] body[data-page="contact"] .help-bar {
+  min-height: 360px;
+  background-color: var(--ec-surface);
+  background-image:
+    linear-gradient(90deg, var(--ec-surface) 0%, var(--ec-surface) 44%, color-mix(in srgb, var(--ec-surface) 88%, transparent) 58%, transparent 100%),
+    url("../images/accompagnement-client-enviro.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 100%;
+  background-repeat: no-repeat;
+}
+body[data-page="contact"] .help-left h4,
+body[data-page="contact"] .help-left p strong { color: var(--ec-text); }
+body[data-page="contact"] .help-left p { color: var(--ec-muted); }
+
+html[data-theme="dark"] body[data-page="index"] :is(#valeurs,#pourquoi,#mission) {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="index"] #services {
+  background: var(--ec-surface-soft) !important;
+}
+html[data-theme="dark"] body[data-page="index"] :is(.service-card,.why-img) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="index"] :is(.val-icon,.s-icon) {
+  background: #dfe9e1 !important;
+}
+html[data-theme="dark"] body[data-page="index"] :is(.val-icon img,.s-icon img) {
+  filter: none !important;
+  mix-blend-mode: multiply !important;
+}
+html[data-theme="dark"] body[data-page="index"] :is(.val-item h3,.service-card h3,.why-text h2,.mission-text h2,.check-list li) {
+  color: var(--ec-text) !important;
+}
+html[data-theme="dark"] body[data-page="index"] :is(.val-item p,.service-card p,.why-text > p,.mission-text > p) {
+  color: var(--ec-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="apropos"] :is(#histoire,#mvv,#equipe,#partenaires) {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="apropos"] :is(.histoire-img,.mvv-card,.membre-card,.partenaires-box) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="apropos"] :is(.histoire-text h2,.mvv-card h3,.membre h4,#equipe h2,#partenaires h2) {
+  color: var(--ec-text) !important;
+}
+html[data-theme="dark"] body[data-page="apropos"] :is(.histoire-text p,.mvv-card p,.mvv-card li,.membre p) {
+  color: var(--ec-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="nos-services"] :is(.services-section,.offres-section) {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="nos-services"] :is(.svc-card,.offer-card,.offer-body,.engagement-banner) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background-color: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="nos-services"] :is(.svc-card h3,.engagement-banner h4,.offres-section h2,.offre-group-title,.offer-body) {
+  color: var(--ec-text) !important;
+}
+html[data-theme="dark"] body[data-page="nos-services"] :is(.svc-card p,.svc-list,.engagement-banner p,.offres-section .sub,.offer-feat,.offer-tagline) {
+  color: var(--ec-muted) !important;
+}
+html[data-theme="dark"] body[data-page="nos-services"] .entreprise-divider { border-color: var(--ec-line) !important; }
+
+html[data-theme="dark"] body[data-page="agents"] :is(.filter-section,.table-section) {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="agents"] :is(.filter-bar,.table-wrap) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="agents"] :is(input,select,.page-btn,.action-btn) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface-soft) !important;
+}
+html[data-theme="dark"] body[data-page="agents"] :is(th,td,.agent-cell .name,.email-cell,.pagination-info) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+}
+html[data-theme="dark"] body[data-page="agents"] tbody tr:hover { background: var(--ec-surface-soft) !important; }
+html[data-theme="dark"] body[data-page="agents"] #agentDetailOverlay > div {
+  color: var(--ec-text) !important;
+  border: 1px solid var(--ec-line);
+  background: var(--ec-surface) !important;
+  box-shadow: var(--ec-shadow) !important;
+}
+html[data-theme="dark"] body[data-page="agents"] #agentDetailOverlay > div > div:nth-of-type(2) > div {
+  border-color: var(--ec-line) !important;
+}
+html[data-theme="dark"] body[data-page="agents"] #agentDetailOverlay span[style*="color:#888"] {
+  color: var(--ec-muted) !important;
+}
+
+html[data-theme="dark"] body[data-page="contact"] :is(.contact-wrap,.pc-wrap),
+html[data-theme="dark"] body[data-page="politique-confidentialite"] :is(.contact-wrap,.pc-wrap) {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="contact"] :is(.info-card,.form-card,.hours-card),
+html[data-theme="dark"] body[data-page="politique-confidentialite"] :is(.pc-card,.pc-toc,.pc-contact) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="contact"] :is(h2,h3,h4,label,strong),
+html[data-theme="dark"] body[data-page="politique-confidentialite"] :is(h2,h3,h4,label,strong) {
+  color: var(--ec-text) !important;
+}
+
+html[data-theme="dark"] body[data-page="acces-personnel"] {
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body[data-page="acces-personnel"] :is(h2,#portalList a) {
+  color: var(--ec-text) !important;
+}
+html[data-theme="dark"] body[data-page="acces-personnel"] :is(p,#portalList .sub) {
+  color: var(--ec-muted) !important;
+}
+html[data-theme="dark"] body[data-page="acces-personnel"] #portalList a {
+  background: var(--ec-surface-soft) !important;
+}
+
+html[data-theme="dark"] body:is([data-page="espace-client"],[data-page="inscription"],[data-page="forgot-password"],[data-page="reset-password"]) :is(.login-side,.signup-side,.card) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body:is([data-page="espace-client"],[data-page="inscription"],[data-page="forgot-password"],[data-page="reset-password"]) :is(h1,h2,h3,label,strong) {
+  color: var(--ec-text) !important;
+}
+
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.main,.content,.page,.page-content,.dashboard-content) {
+  color: var(--ec-text) !important;
+  background: var(--ec-bg) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.card,.stat-card,.action-card,.alert-card,.co-offre-card,.mini-stat,.modal,.modal-content,.panel,.pay-stat,.plan-actuel-box,.prochaine-box,.role-card,.rule-box,.sec-card,.sub-card,.besoin-box,.table-wrap,.ring-box,.zone-item,.tournee-item,.client-item,.decision-row,.affect-row,.info-row,.detail-row,.form-card,.filter-row,.profile-dropdown,.res-item,.agent-row,.support-opt,.pwd-rules,.pref-ico,.abonne-badge,.dropdown-menu,.pg-btn) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.search-bar,.tb-search,input,select,textarea,.filter-select,.btn-outline,.dl-btn,.action-btn) {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface-soft) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(h1,h2,h3,h4,h5,h6,label,th,td,strong,.topbar-title,.card-head,.stat-val,.mini-stat-val,.detail-val,.ntitle,.agent-name,.emp-name,.name,.tb-uname,.tb-date,.zone-name,.res-num,.pref-lbl,.info-item .val,.section-title,.moyen-name,.agent-row-name,.support-opt-title,.demande-title,.nfi-title,.mci-title,.sd-info-item span,.dd-item) {
+  color: var(--ec-text) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(p,.sub,.subtitle,.stat-lbl,.stat-sub,.mini-stat-lbl,.detail-lbl,.ndesc,.ndate,.page-sub,.muted,.topbar-sub,.alert-lbl,.zone-count,.feat,.pref-sub,.profil-stat-item,.price-mo,.renew-lbl,.moyen-num,.agent-row-role,.agent-row-tel,.nfi-desc,.nfi-date,.support-opt-sub,.demande-date,.mci-val,.sd-info-item label,.msub) {
+  color: var(--ec-muted) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) .content [style*="background:#f9f9f9"],
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) .content [style*="background:#fff"] {
+  color: var(--ec-text) !important;
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface-soft) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.tb-date,.profile-dropdown,.dropdown-menu,.pg-btn) {
+  border-color: var(--ec-line) !important;
+  background: var(--ec-surface-soft) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.tab-bar,.notif-tabs,.modal-contact-right,.audit-row,.notif-item2,.notif-full-item,.pref-item,.moyen-item,.demande-item) {
+  border-color: var(--ec-line) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.zone-item:hover,.dd-item:hover,tr.tr-hover:hover) {
+  background: var(--ec-surface-soft) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(table,thead,tbody,tr,th,td) {
+  border-color: var(--ec-line) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) thead tr {
+  background: var(--ec-surface-soft) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(input,textarea)::placeholder {
+  color: #89938c !important;
+  opacity: 1;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.modal-overlay,#agentDetailOverlay) {
+  background: rgba(0, 0, 0, .7) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.g,.voir-tout,.alert-link,.status-online) {
+  color: var(--green) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.stat-val.o,.alert-num.o) {
+  color: var(--orange) !important;
+}
+html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"],[data-page="dashboard"],[data-page="collecteur"],[data-page="gestionnaire"],[data-page="superviseur"]) :is(.stat-val.r,.alert-num.r) {
+  color: var(--red) !important;
+}
+
 @media (max-width: 900px) {
   .theme-toggle { margin-left: auto; }
   .hamburger { margin-left: 0; }
@@ -563,16 +853,24 @@ html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3
   body[data-page="index"] .why-img { height: 500px; width: 100%; }
   body[data-page="index"] .mission-img { max-width: 100%; }
   body[data-page="apropos"] .histoire-img img { height: 360px; }
-  body[data-page="agents"] .page-header { min-height: 500px; background-position: 60% center; }
+  body[data-page="agents"] .page-header {
+    min-height: 500px;
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+  }
   body[data-page="agents"] .page-header-inner { min-height: 350px; }
   body[data-page="contact"] .help-bar,
   html[data-theme="dark"] body[data-page="contact"] .help-bar {
     min-height: 430px;
     padding: 38px 24px;
     align-content: flex-end;
-    background:
-      linear-gradient(0deg, rgba(7,25,15,.97) 0%, rgba(7,25,15,.88) 46%, rgba(7,25,15,.16) 100%),
-      url("../images/accompagnement-client-enviro.webp") 65% center / cover no-repeat;
+    background-color: var(--ec-surface);
+    background-image:
+      linear-gradient(0deg, var(--ec-surface) 0%, color-mix(in srgb, var(--ec-surface) 88%, transparent) 48%, transparent 100%),
+      url("../images/accompagnement-client-enviro.webp");
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+    background-repeat: no-repeat;
   }
   body[data-page="contact"] .help-left h4,
   body[data-page="contact"] .help-left p strong { color: #f1f7f3; }
@@ -582,11 +880,18 @@ html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3
   body[data-page="espace-client"] .contact-side,
   body[data-page="inscription"] .contact-side {
     min-height: 520px;
-    background:
-      linear-gradient(90deg, rgba(3,28,17,.98) 0%, rgba(3,28,17,.93) 48%, rgba(3,28,17,.42) 75%, rgba(3,28,17,.12) 100%),
-      url("../images/connexion-client-enviro.webp") 70% center / cover no-repeat;
+    background-color: #0b291d;
+    background-image:
+      linear-gradient(90deg, rgba(11,41,29,.98) 0%, rgba(11,41,29,.9) 48%, rgba(11,41,29,.3) 100%),
+      url("../images/connexion-client-enviro.webp");
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+    background-repeat: no-repeat;
   }
-  body[data-page="dashboard"] .support-hero { background-position: 62% center; }
+  body[data-page="dashboard"] .support-hero {
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+  }
   body[data-page="dashboard"] .pwd-page-visual { left: 505px; width: 280px; }
 }
 
@@ -602,10 +907,14 @@ html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3
   body[data-page="index"] .why-img { height: 430px; }
   body[data-page="apropos"] .equipe-grid { grid-template-columns: 1fr 1fr; }
   body[data-page="apropos"] .histoire-img img { height: 300px; }
-  body[data-page="nos-services"] .svc-photo { height: 180px; }
+  body[data-page="nos-services"] .svc-photo { height: auto; }
   body[data-page="nos-services"] .offer-top { min-height: 190px; }
   body[data-page="nos-services"] .offer-bg-img { width: 65%; }
-  body[data-page="agents"] .page-header { min-height: 560px; background-position: 66% center; }
+  body[data-page="agents"] .page-header {
+    min-height: 560px;
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+  }
   body[data-page="agents"] .page-header-inner { min-height: 405px; }
   body[data-page="politique-confidentialite"] .pc-hero-inner { padding-right: 0; }
   body[data-page="politique-confidentialite"] .pc-hero-visual { display: none; }
@@ -613,18 +922,26 @@ html[data-theme="dark"] body[data-page="superviseur"] :is(.topbar-title,h1,h2,h3
   body[data-page="inscription"] .contact-side {
     min-height: 520px;
     justify-content: flex-end;
-    background:
-      linear-gradient(0deg, rgba(3,24,15,.98) 0%, rgba(3,24,15,.91) 52%, rgba(3,24,15,.16) 100%),
-      url("../images/connexion-client-enviro.webp") 69% center / cover no-repeat;
+    background-color: #0b291d;
+    background-image:
+      linear-gradient(0deg, rgba(11,41,29,.98) 0%, rgba(11,41,29,.9) 52%, rgba(11,41,29,.12) 100%),
+      url("../images/connexion-client-enviro.webp");
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+    background-repeat: no-repeat;
   }
   body[data-page="espace-client"] .contact-items,
   body[data-page="inscription"] .contact-items { gap: 16px; }
   body[data-page="dashboard"] .support-hero {
-    min-height: 250px;
+    min-height: 340px;
     padding: 28px 22px;
-    background:
-      linear-gradient(90deg, rgba(3,24,14,.95), rgba(3,24,14,.66) 66%, rgba(3,24,14,.18)),
-      url("../images/support-client-enviro.webp") 68% center / cover no-repeat;
+    background-color: #0b291d;
+    background-image:
+      linear-gradient(0deg, rgba(11,41,29,.98) 0%, rgba(11,41,29,.86) 52%, rgba(11,41,29,.08) 100%),
+      url("../images/support-client-enviro.webp");
+    background-position: center, right center;
+    background-size: 100% 100%, auto 100%;
+    background-repeat: no-repeat;
   }
   body[data-page="dashboard"] .plan-actuel-box { padding-right: 120px; }
   body[data-page="dashboard"] .abo-plan-visual { width: 116px; height: 116px; opacity: .9; }
