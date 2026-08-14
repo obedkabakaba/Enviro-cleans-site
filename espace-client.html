@@ -191,6 +191,7 @@
     @keyframes spin{to{transform:rotate(360deg);}}
   </style>
   <script src="assets/js/theme-init.js"></script>
+  <script src="assets/js/enviro-api.js"></script>
   <link rel="stylesheet" href="assets/css/site-refresh.css"/>
 </head>
 <body>
@@ -341,16 +342,22 @@
   // ── Connexion à l'API Enviro Cleans ──
   const API_BASE_URL = 'https://enviro-cleans-api.onrender.com';
 
-  // Redirection selon le rôle renvoyé par l'API.
-  // Seul le tableau de bord client existe pour le moment (dashboard.html).
-  // Les autres seront ajoutés au fur et à mesure.
-  const REDIRECTS = {
+  // ── Redirection après connexion ──
+  // Cette table pointait vers cinq fichiers qui N'EXISTENT PAS dans le dépôt
+  // (admin-dashboard.html, gestionnaire-dashboard.html, superviseur-dashboard.html,
+  // collecteur-dashboard.html, agent-dashboard.html) : tout membre du personnel qui se
+  // connectait atterrissait sur un 404 GitHub Pages.
+  //
+  // La destination est désormais décidée par le backend (src/config/espaces.js) et
+  // renvoyée dans `data.espace.page`. La table ci-dessous ne sert plus que de repli
+  // si l'API est plus ancienne que cette page.
+  const REDIRECTS_REPLI = {
     client: 'dashboard.html',
-    administrateur: 'admin-dashboard.html',
-    gestionnaire: 'gestionnaire-dashboard.html',
-    superviseur: 'superviseur-dashboard.html',
-    collecteur: 'collecteur-dashboard.html',
-    agent_marketing: 'agent-dashboard.html',
+    administrateur: 'administrateur.html',
+    gestionnaire: 'gestionnaire.html',
+    superviseur: 'superviseur.html',
+    collecteur: 'collecteur.html',
+    agent_marketing: 'dashboard.html',
   };
 
   async function handleLogin(){
@@ -390,17 +397,26 @@
         return;
       }
 
-      // Connexion réussie : on garde le token et les infos utilisateur
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Connexion réussie. Le stockage passe par EnviroAPI pour que TOUS les espaces
+      // lisent la même clé : chaque page avait auparavant la sienne (gestAccessToken,
+      // supAccessToken, colAccessToken, admAccessToken…), ce qui rendait la connexion
+      // unique inopérante et obligeait chaque espace à reproposer un formulaire.
+      EnviroAPI.Session.enregistrer(data);
 
-      const destination = REDIRECTS[data.user.role] || 'dashboard.html';
+      // Le backend fait autorité sur la destination.
+      const destination = (data.espace && data.espace.page)
+        || REDIRECTS_REPLI[data.user.role]
+        || 'dashboard.html';
+
+      // Si l'utilisateur avait été renvoyé ici depuis une page protégée, on l'y ramène,
+      // à condition que la cible soit bien une page locale (jamais une URL externe).
+      const suite = new URLSearchParams(location.search).get('suite');
+      const cible = (suite && /^[a-z0-9-]+\.html$/i.test(suite)) ? suite : destination;
 
       // Petite transition pour que le client voie bien que la connexion a réussi
       const transition = document.getElementById('loginTransition');
       transition.classList.add('show');
-      setTimeout(() => { window.location.href = destination; }, 650);
+      setTimeout(() => { window.location.replace(cible); }, 650);
       return;
 
     } catch (err) {
