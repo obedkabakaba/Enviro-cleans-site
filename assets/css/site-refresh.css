@@ -180,7 +180,9 @@ body[data-page="index"] .why-img {
   place-items: end center;
   height: 560px;
   border-radius: 34px;
-  background: var(--ec-surface-soft);
+  background:
+    radial-gradient(circle at 54% 46%, rgba(75, 190, 103, .34) 0%, rgba(75, 190, 103, .13) 38%, transparent 69%),
+    linear-gradient(145deg, #e7f3e9, #f8faf8);
   overflow: hidden;
 }
 body[data-page="index"] .why-img img { width: auto; height: 95%; max-width: 100%; object-fit: contain; object-position: bottom center; }
@@ -200,8 +202,33 @@ body[data-page="index"] .service-card .s-icon img { width: 54px; height: 54px; m
 body[data-page="index"] .service-card h3 { color: var(--ec-text); font-size: 17px; }
 body[data-page="index"] .service-card p { color: var(--ec-muted); }
 html[data-theme="dark"] body[data-page="index"] .service-card .s-icon img { filter: none; mix-blend-mode: normal; }
-body[data-page="index"] #mission { min-height: 650px; }
-body[data-page="index"] .mission-img { max-width: 48%; }
+body[data-page="index"] #mission { min-height: 680px; }
+body[data-page="index"] .mission-img {
+  right: clamp(0px, 2.5vw, 42px);
+  width: min(54vw, 680px);
+  height: 100%;
+  max-width: 54%;
+}
+body[data-page="index"] .mission-img img {
+  width: auto;
+  height: min(650px, 96%);
+  max-width: 100%;
+  max-height: none;
+  object-fit: contain;
+  object-position: bottom right;
+}
+body[data-page="index"] .cta-img {
+  flex-basis: min(36vw, 470px);
+  display: flex;
+  justify-content: center;
+}
+body[data-page="index"] .cta-img img {
+  width: auto;
+  max-width: 100%;
+  height: 535px;
+  max-height: none;
+  object-position: bottom center;
+}
 body[data-page="index"] #contact { background: linear-gradient(135deg, #0a6c45, #123f2b); }
 
 /* About */
@@ -599,7 +626,8 @@ body[data-page="nos-services"] .svc-photo {
   background: var(--ec-surface-soft);
 }
 body[data-page="nos-services"] .svc-card:nth-child(2) .svc-photo {
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center 54%;
 }
 body[data-page="nos-services"] .offer-body {
   color: var(--ec-text);
@@ -607,6 +635,31 @@ body[data-page="nos-services"] .offer-body {
 }
 body[data-page="nos-services"] .engagement-banner h4 { color: var(--ec-text); }
 body[data-page="nos-services"] .engagement-banner p { color: var(--ec-muted); }
+body[data-page="nos-services"] .eng-ico {
+  width: 54px;
+  height: 54px;
+  padding: 9px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--green-pale);
+}
+body[data-page="nos-services"] .eng-ico img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+body[data-page="nos-services"] .avenir-box {
+  min-height: 380px;
+  background-color: #0b1f16;
+  background-image:
+    linear-gradient(90deg, #0b1f16 0%, rgba(11,31,22,.96) 28%, rgba(11,31,22,.64) 55%, rgba(11,31,22,.1) 100%),
+    url("../images/service-entreprise-enviro.webp");
+  background-position: center, right center;
+  background-size: 100% 100%, auto 100%;
+  background-repeat: no-repeat;
+}
 
 body[data-page="apropos"] .partenaires-box img {
   padding: 10px 14px;
@@ -639,13 +692,14 @@ body[data-page="dashboard"] .support-hero {
 body[data-page="contact"] .help-bar,
 html[data-theme="dark"] body[data-page="contact"] .help-bar {
   min-height: 360px;
-  background-color: var(--ec-surface);
-  background-image:
-    linear-gradient(90deg, var(--ec-surface) 0%, var(--ec-surface) 44%, color-mix(in srgb, var(--ec-surface) 88%, transparent) 58%, transparent 100%),
-    url("../images/accompagnement-client-enviro.webp");
-  background-position: center, right center;
-  background-size: 100% 100%, auto 100%;
-  background-repeat: no-repeat;
+  background:
+    linear-gradient(90deg, rgba(247,250,247,.99) 0%, rgba(247,250,247,.96) 38%, rgba(247,250,247,.78) 56%, rgba(247,250,247,.18) 78%, rgba(247,250,247,.04) 100%),
+    url("../images/accompagnement-client-enviro.webp") center 48% / cover no-repeat;
+}
+html[data-theme="dark"] body[data-page="contact"] .help-bar {
+  background:
+    linear-gradient(90deg, rgba(12,15,13,.99) 0%, rgba(12,15,13,.96) 38%, rgba(12,15,13,.76) 58%, rgba(12,15,13,.22) 82%, rgba(12,15,13,.06) 100%),
+    url("../images/accompagnement-client-enviro.webp") center 48% / cover no-repeat;
 }
 body[data-page="contact"] .help-left h4,
 body[data-page="contact"] .help-left p strong { color: var(--ec-text); }
@@ -662,6 +716,11 @@ html[data-theme="dark"] body[data-page="index"] :is(.service-card,.why-img) {
   border-color: var(--ec-line) !important;
   background: var(--ec-surface) !important;
   box-shadow: none !important;
+}
+html[data-theme="dark"] body[data-page="index"] .why-img {
+  background:
+    radial-gradient(circle at 54% 44%, rgba(73, 222, 116, .42) 0%, rgba(39, 145, 77, .2) 40%, transparent 70%),
+    linear-gradient(145deg, #14271b, #0f1511) !important;
 }
 html[data-theme="dark"] body[data-page="index"] :is(.val-icon,.s-icon) {
   background: #dfe9e1 !important;
@@ -850,8 +909,17 @@ html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"]
   body[data-page="index"] .val-item { border-right: 0; }
   body[data-page="index"] #pourquoi,
   body[data-page="index"] #mission { width: min(100% - 40px, 720px); padding-block: 78px; }
+  body[data-page="index"] #mission { flex-direction: column; align-items: stretch; }
+  body[data-page="index"] .mission-text { max-width: 100%; }
   body[data-page="index"] .why-img { height: 500px; width: 100%; }
-  body[data-page="index"] .mission-img { max-width: 100%; }
+  body[data-page="index"] .mission-img {
+    position: static;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    justify-content: center;
+  }
+  body[data-page="index"] .mission-img img { width: auto; height: auto; max-height: 560px; }
   body[data-page="apropos"] .histoire-img img { height: 360px; }
   body[data-page="agents"] .page-header {
     min-height: 500px;
@@ -864,13 +932,9 @@ html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"]
     min-height: 430px;
     padding: 38px 24px;
     align-content: flex-end;
-    background-color: var(--ec-surface);
-    background-image:
-      linear-gradient(0deg, var(--ec-surface) 0%, color-mix(in srgb, var(--ec-surface) 88%, transparent) 48%, transparent 100%),
-      url("../images/accompagnement-client-enviro.webp");
-    background-position: center, right center;
-    background-size: 100% 100%, auto 100%;
-    background-repeat: no-repeat;
+    background:
+      linear-gradient(0deg, rgba(12,15,13,.99) 0%, rgba(12,15,13,.92) 44%, rgba(12,15,13,.32) 76%, rgba(12,15,13,.08) 100%),
+      url("../images/accompagnement-client-enviro.webp") 68% center / cover no-repeat;
   }
   body[data-page="contact"] .help-left h4,
   body[data-page="contact"] .help-left p strong { color: #f1f7f3; }
@@ -910,6 +974,11 @@ html[data-theme="dark"] body:is([data-page="admin"],[data-page="administrateur"]
   body[data-page="nos-services"] .svc-photo { height: auto; }
   body[data-page="nos-services"] .offer-top { min-height: 190px; }
   body[data-page="nos-services"] .offer-bg-img { width: 65%; }
+  body[data-page="nos-services"] .avenir-box {
+    min-height: 330px;
+    background-position: center, 70% center;
+    background-size: 100% 100%, auto 100%;
+  }
   body[data-page="agents"] .page-header {
     min-height: 560px;
     background-position: center, right center;
