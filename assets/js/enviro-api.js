@@ -1,0 +1,226 @@
+/**
+ * ════════════════════════════════════════
+ * CLIENT API PARTAGÉ — Enviro Cleans
+ * ════════════════════════════════════════
+ *
+ * Avant ce fichier, chaque espace embarquait sa propre copie de la logique d'appel API,
+ * avec sa PROPRE clé de stockage :
+ *
+ *     espace-client.html → accessToken        dashboard.html    → accessToken
+ *     gestionnaire.html  → gestAccessToken    superviseur.html  → supAccessToken
+ *     collecteur.html    → colAccessToken     admin*.html       → admAccessToken
+ *
+ * Conséquence (audit §4.4) : la « connexion unique » n'existait pas. Se connecter depuis
+ * espace-client.html écrivait `accessToken`, que gestionnaire.html ne lisait jamais —
+ * chaque espace devait donc reproposer un formulaire de connexion.
+ *
+ * Ce module unifie le stockage sous UNE clé, tout en migrant automatiquement les anciennes
+ * (voir `migrerAnciennesCles`) pour ne déconnecter personne au déploiement.
+ *
+ * Chargement : <script src="assets/js/enviro-api.js"></script> — aucun build, aucune
+ * dépendance externe, compatible GitHub Pages et CSP stricte.
+ */
+(function (global) {
+  'use strict';
+
+  var BASE_URL = 'https://enviro-cleans-api.onrender.com';
+
+  var CLES = {
+    access: 'ec.accessToken',
+    refresh: 'ec.refreshToken',
+    user: 'ec.user',
+    permissions: 'ec.permissions',
+  };
+
+  // Anciennes clés, par espace. Lues une seule fois puis effacées.
+  var ANCIENNES = [
+    { access: 'accessToken', refresh: 'refreshToken', user: 'user' },
+    { access: 'gestAccessToken', refresh: 'gestRefreshToken', user: 'gestUser' },
+    { access: 'supAccessToken', refresh: 'supRefreshToken', user: 'supUser' },
+    { access: 'colAccessToken', refresh: 'colRefreshToken', user: 'colUser' },
+    { access: 'admAccessToken', refresh: 'admRefreshToken', user: 'admUser' },
+  ];
+
+  /**
+   * Reprend une session ouverte sous une ancienne clé et la bascule vers la nouvelle.
+   * Sans cela, le déploiement déconnecterait tout le monde d'un coup.
+   */
+  function migrerAnciennesCles() {
+    if (localStorage.getItem(CLES.access)) return;
+
+    for (var i = 0; i < ANCIENNES.length; i += 1) {
+      var jeu = ANCIENNES[i];
+      var token = localStorage.getItem(jeu.access);
+      if (!token) continue;
+
+      localStorage.setItem(CLES.access, token);
+      if (localStorage.getItem(jeu.refresh)) {
+        localStorage.setItem(CLES.refresh, localStorage.getItem(jeu.refresh));
+      }
+      if (localStorage.getItem(jeu.user)) {
+        localStorage.setItem(CLES.user, localStorage.getItem(jeu.user));
+      }
+      break;
+    }
+
+    // Purge : laisser traîner les anciennes clés recréerait la divergence.
+    ANCIENNES.forEach(function (jeu) {
+      localStorage.removeItem(jeu.access);
+      localStorage.removeItem(jeu.refresh);
+      localStorage.removeItem(jeu.user);
+    });
+  }
+
+  migrerAnciennesCles();
+
+  // ── Session ────────────────────────────────────────────────────────────────
+  var Session = {
+    accessToken: function () { return localStorage.getItem(CLES.access); },
+    refreshToken: function () { return localStorage.getItem(CLES.refresh); },
+
+    user: function () {
+      try { return JSON.parse(localStorage.getItem(CLES.user) || 'null'); } catch (e) { return null; }
+    },
+
+    permissions: function () {
+      try { return JSON.parse(localStorage.getItem(CLES.permissions) || '[]'); } catch (e) { return []; }
+    },
+
+    /** `true` si la permission est accordée. Confort d'affichage UNIQUEMENT. */
+    peut: function (code) { return Session.permissions().indexOf(code) !== -1; },
+
+    enregistrer: function (data) {
+      if (data.accessToken) localStorage.setItem(CLES.access, data.accessToken);
+      if (data.refreshToken) localStorage.setItem(CLES.refresh, data.refreshToken);
+      if (data.user) localStorage.setItem(CLES.user, JSON.stringify(data.user));
+      if (data.permissions) localStorage.setItem(CLES.permissions, JSON.stringify(data.permissions));
+    },
+
+    effacer: function () {
+      Object.keys(CLES).forEach(function (k) { localStorage.removeItem(CLES[k]); });
+      ANCIENNES.forEach(function (jeu) {
+        localStorage.removeItem(jeu.access);
+        localStorage.removeItem(jeu.refresh);
+        localStorage.removeItem(jeu.user);
+      });
+    },
+  };
+
+  // ── Appels API ─────────────────────────────────────────────────────────────
+  var renouvellementEnCours = null;
+
+  /**
+   * Renouvelle l'access token. Mutualisé : si dix appels expirent en même temps,
+   * un seul renouvellement part et les autres attendent son résultat.
+   */
+  function renouveler() {
+    if (renouvellementEnCours) return renouvellementEnCours;
+
+    var refresh = Session.refreshToken();
+    if (!refresh) return Promise.reject(new Error('SESSION_EXPIREE'));
+
+    renouvellementEnCours = fetch(BASE_URL + '/api/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refresh }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('SESSION_EXPIREE');
+        return r.json();
+      })
+      .then(function (data) {
+        Session.enregistrer(data);
+        return data.accessToken;
+      })
+      .finally(function () { renouvellementEnCours = null; });
+
+    return renouvellementEnCours;
+  }
+
+  /**
+   * Appel API authentifié.
+   *
+   * - 401 → tente UN renouvellement, rejoue l'appel, puis déconnecte si ça échoue.
+   * - 403 → remonte l'erreur avec les permissions manquantes renvoyées par le backend.
+   */
+  function appel(chemin, options) {
+    options = options || {};
+
+    function envoyer(token) {
+      var entetes = Object.assign(
+        { 'Content-Type': 'application/json' },
+        options.headers || {}
+      );
+      if (token) entetes.Authorization = 'Bearer ' + token;
+
+      return fetch(BASE_URL + chemin, {
+        method: options.method || 'GET',
+        headers: entetes,
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+    }
+
+    return envoyer(Session.accessToken()).then(function (reponse) {
+      if (reponse.status !== 401) return traiter(reponse);
+
+      return renouveler()
+        .then(function (nouveauToken) { return envoyer(nouveauToken).then(traiter); })
+        .catch(function () {
+          Session.effacer();
+          rediriger('espace-client.html?expire=1');
+          throw new Error('Session expirée. Reconnectez-vous.');
+        });
+    });
+  }
+
+  function traiter(reponse) {
+    var typeContenu = reponse.headers.get('content-type') || '';
+
+    if (typeContenu.indexOf('application/json') === -1) {
+      if (!reponse.ok) throw new Error('Erreur ' + reponse.status);
+      return reponse.text();
+    }
+
+    return reponse.json().then(function (corps) {
+      if (reponse.ok) return corps;
+
+      var err = new Error(corps.message || 'Erreur ' + reponse.status);
+      err.statut = reponse.status;
+      err.permissionsRequises = corps.permissions_requises || null;
+      throw err;
+    });
+  }
+
+  function rediriger(page) {
+    // `replace` plutôt que `href` : la page protégée ne doit pas rester dans l'historique.
+    global.location.replace(page);
+  }
+
+  var API = {
+    BASE_URL: BASE_URL,
+    CLES: CLES,
+    Session: Session,
+    appel: appel,
+    get: function (chemin) { return appel(chemin); },
+    post: function (chemin, body) { return appel(chemin, { method: 'POST', body: body }); },
+    put: function (chemin, body) { return appel(chemin, { method: 'PUT', body: body }); },
+    supprimer: function (chemin) { return appel(chemin, { method: 'DELETE' }); },
+    rediriger: rediriger,
+
+    /** Déconnexion globale : révoque le refresh token côté serveur puis nettoie. */
+    deconnecter: function () {
+      var refresh = Session.refreshToken();
+      var fin = function () { Session.effacer(); rediriger('espace-client.html'); };
+
+      if (!refresh) return fin();
+
+      return fetch(BASE_URL + '/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      }).then(fin).catch(fin);
+    },
+  };
+
+  global.EnviroAPI = API;
+}(window));

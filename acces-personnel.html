@@ -60,67 +60,70 @@
   }
   button:hover{ background:#2d9a3c; }
   .error{ color:#e53935; font-size:12.5px; margin-top:12px; display:none; }
-  #portalList{ display:none; margin-top:8px; text-align:left; }
-  #portalList a{
-    display:flex;
-    align-items:center;
-    padding:14px 16px;
-    background:#f7f7f7;
-    border-radius:10px;
-    margin-bottom:10px;
-    color:#0f1b2d;
-    text-decoration:none;
+  .cta{
+    display:block;
+    width:100%;
+    padding:13px;
+    background:#3ab54a;
+    color:#fff;
+    border:none;
+    border-radius:8px;
     font-weight:700;
     font-size:14px;
+    cursor:pointer;
     font-family:'Montserrat', sans-serif;
-    transition:background .2s;
+    text-decoration:none;
+    box-sizing:border-box;
   }
-  #portalList a:hover{ background:#eee; }
-  #portalList .sub{
-    display:block;
-    font-family:'Open Sans', sans-serif;
-    font-weight:400;
-    font-size:11.5px;
-    color:#999;
-    margin-top:2px;
-  }
+  .cta:hover{ background:#2d9a3c; }
+  .note{ font-size:12px; color:#999; margin:18px 0 0; }
 </style>
   <script src="assets/js/theme-init.js"></script>
+  <script src="assets/js/enviro-api.js"></script>
   <link rel="stylesheet" href="assets/css/site-refresh.css"/>
 </head>
 <body>
   <div class="box">
     <h2>Accès personnel</h2>
-    <p>Cette section est réservée aux employés Enviro Cleans.</p>
-
-    <div id="gateForm">
-      <input type="text" id="codeInput" placeholder="Code d'accès" maxlength="20" autocomplete="off"/>
-      <button onclick="checkCode()">Entrer</button>
-      <p class="error" id="errorMsg">Code incorrect. Réessayez.</p>
-    </div>
-
-    <div id="portalList">
-      <a href="gestionnaire.html">🗂️ Espace Gestionnaire<span class="sub">Clients, abonnements, personnel</span></a>
-      <a href="superviseur.html">🧭 Espace Superviseur<span class="sub">Tournées et zones</span></a>
-      <a href="collecteur.html">🚛 Espace Collecteur<span class="sub">Tournées du jour</span></a>
-      <a href="administrateur.html">📊 Espace Administrateur<span class="sub">Vue globale et performances</span></a>
-    </div>
+    <p>
+      Cette section est réservée aux employés Enviro Cleans.
+      Connectez-vous avec vos identifiants : votre espace s'ouvrira automatiquement
+      selon votre rôle.
+    </p>
+    <a class="cta" href="espace-client.html">Se connecter</a>
+    <p class="note">
+      Vous n'avez pas encore d'identifiants&nbsp;? Contactez votre responsable
+      hiérarchique ou les ressources humaines.
+    </p>
   </div>
 
 <script>
-function checkCode(){
-  const val = document.getElementById('codeInput').value.trim().toUpperCase();
-  const errorMsg = document.getElementById('errorMsg');
-  if(val === 'MAJOR'){
-    document.getElementById('gateForm').style.display = 'none';
-    document.getElementById('portalList').style.display = 'block';
-  } else {
-    errorMsg.style.display = 'block';
-  }
-}
-document.getElementById('codeInput').addEventListener('keypress', function(e){
-  if(e.key === 'Enter') checkCode();
-});
+  // ════════════════════════════════════════
+  // Cette page ne protège plus rien — et c'est volontaire.
+  // ════════════════════════════════════════
+  //
+  // Elle comparait auparavant une saisie au littéral 'MAJOR', écrit en clair dans le
+  // JavaScript de la page, puis se contentait d'AFFICHER une liste de liens. Les pages
+  // cibles (gestionnaire.html, superviseur.html…) restaient accessibles par URL directe :
+  // la « garde » n'écartait personne, elle donnait seulement l'illusion d'une protection
+  // et diffusait un code d'accès à quiconque ouvrait la source (audit §S1).
+  //
+  // Le vrai contrôle vit désormais à deux endroits :
+  //   1. le backend, qui refuse toute requête sans permission (authorizePermission) ;
+  //   2. EnviroAuth.proteger(), qui revalide le rôle auprès de /api/auth/me à chaque
+  //      chargement d'une page protégée.
+  //
+  // Cette page n'est plus qu'un point d'entrée. Un employé déjà connecté est envoyé
+  // directement vers son espace.
+  (function () {
+    if (!window.EnviroAPI || !EnviroAPI.Session.accessToken()) return;
+
+    EnviroAPI.get('/api/auth/me')
+      .then(function (data) {
+        if (data.espace && data.espace.page) location.replace(data.espace.page);
+      })
+      .catch(function () { /* session invalide : on laisse l'utilisateur se reconnecter */ });
+  }());
 </script>
   <script src="assets/js/theme.js" defer></script>
 </body>
