@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centre technique &amp; maintenance - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<style>
+  :root{
+    --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
+    --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+    --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
+    --alerte:#d9534f; --attention:#e08a1e; --info:#4a90d9;
+    --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+      --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+      --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--fond); color:var(--texte);
+    font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+
+  .shell{ display:grid; grid-template-columns:242px 1fr; min-height:100vh; }
+  .sidebar{
+    background:var(--surface); border-right:1px solid var(--bordure);
+    padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .marque{ padding:0 20px 18px; border-bottom:1px solid var(--bordure); margin-bottom:12px; }
+  .marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
+  .marque span{ font-size:11.5px; color:var(--texte-faible); }
+  .menu a{
+    display:block; padding:10px 20px; color:var(--texte-doux);
+    text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
+  }
+  .menu a:hover{ background:var(--surface-2); color:var(--texte); }
+  .menu a.actif{ color:var(--teal); border-left-color:var(--teal); background:var(--surface-2); font-weight:600; }
+
+  .principal{ padding:22px 26px 60px; min-width:0; }
+  .topbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
+  .sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
+
+  button.action{
+    padding:7px 14px; border:none; border-radius:7px; background:var(--teal);
+    color:#fff; font-weight:600; font-size:13px; cursor:pointer;
+  }
+  button.action:hover{ filter:brightness(1.08); }
+  button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
+
+  /* ── Bandeau d'état global ── */
+  .bandeau{
+    padding:14px 17px; border-radius:11px; margin-bottom:18px;
+    display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+  }
+  .bandeau.ok{ background:rgba(58,181,74,.10); border:1px solid rgba(58,181,74,.32); }
+  .bandeau.degrade{ background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); }
+  .bandeau .pastille{ width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+  .bandeau.ok .pastille{ background:var(--vert); }
+  .bandeau.degrade .pastille{ background:var(--alerte); }
+  .bandeau strong{ font-family:'Montserrat',sans-serif; font-size:14.5px; }
+
+  /* ── Sondes ── */
+  .panneau{
+    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+    box-shadow:var(--ombre); margin-bottom:18px; overflow:hidden;
+  }
+  .panneau > header{ padding:13px 17px; border-bottom:1px solid var(--bordure); }
+  .panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14px; margin:0; }
+  .panneau > header small{ color:var(--texte-faible); font-size:12px; }
+
+  .sonde{
+    display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start;
+    padding:13px 17px; border-bottom:1px solid var(--bordure);
+  }
+  .sonde:last-child{ border-bottom:none; }
+  .sonde .pastille{ width:9px; height:9px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+  .sonde .nom{ font-weight:600; font-size:13.5px; }
+  .sonde .msg{ font-size:12.5px; color:var(--texte-doux); margin-top:3px; }
+  .sonde .meta{ font-size:11.5px; color:var(--texte-faible); text-align:right; white-space:nowrap; }
+
+  .p-ok{ background:var(--vert); }
+  .p-configure{ background:var(--info); }
+  .p-non_configure{ background:var(--texte-faible); }
+  .p-indisponible{ background:var(--texte-faible); }
+  .p-echec{ background:var(--alerte); }
+
+  .etiquette{ display:inline-block; padding:1px 8px; border-radius:99px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .e-ok{ background:rgba(58,181,74,.14); color:var(--vert); }
+  .e-configure{ background:rgba(74,144,217,.14); color:var(--info); }
+  .e-non_configure{ background:var(--surface-2); color:var(--texte-faible); }
+  .e-indisponible{ background:var(--surface-2); color:var(--texte-faible); }
+  .e-echec{ background:rgba(217,83,79,.14); color:var(--alerte); }
+
+  .legende{
+    background:var(--surface-2); border-radius:9px; padding:13px 16px;
+    font-size:12.5px; color:var(--texte-doux); margin-bottom:18px;
+  }
+  .legende dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 11px; }
+  .legende dt{ font-weight:700; }
+  .legende dd{ margin:0; }
+
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; min-width:520px; }
+  th{ text-align:left; padding:9px 11px; font-size:11px; text-transform:uppercase; color:var(--texte-faible); border-bottom:1px solid var(--bordure); white-space:nowrap; }
+  td{ padding:9px 11px; border-bottom:1px solid var(--bordure); }
+  tbody tr:last-child td{ border-bottom:none; }
+  code{ font-size:11.5px; background:var(--surface-2); padding:1px 5px; border-radius:4px; }
+
+  .squelette{ background:var(--surface-2); border-radius:6px; height:15px; animation:pulse 1.4s ease-in-out infinite; margin-bottom:9px; }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
+  .etat-vide{ padding:26px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
+  .erreur{ padding:13px 15px; border-radius:9px; font-size:13.5px; background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte); }
+
+  @media (max-width:900px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
+    .menu{ display:flex; overflow-x:auto; }
+    .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
+    .menu a.actif{ border-left:none; border-bottom-color:var(--teal); }
+    .principal{ padding:18px 15px 50px; }
+    .sonde{ grid-template-columns:auto 1fr; }
+    .sonde .meta{ grid-column:2; text-align:left; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Centre technique</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="cockpit">Cockpit</a>
+      <a href="#" data-vue="integrations">Intégrations</a>
+      <a href="#" data-vue="jobs">Jobs &amp; cron</a>
+      <a href="#" data-vue="securite">Sécurité &amp; sessions</a>
+      <a href="#" data-vue="audit">Audit technique</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Cockpit technique</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div>
+        <button class="action" id="rafraichir">Actualiser</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * CENTRE TECHNIQUE & MAINTENANCE
+ * ════════════════════════════════════════
+ *
+ * Exigence §15 : « Ne simule pas la santé d'un service avec une constante. »
+ * Aucune pastille verte n'est écrite en dur ici. Chaque état vient d'une sonde
+ * exécutée à l'instant par /api/tech/*.
+ *
+ * Quatre états, volontairement distincts — les confondre est précisément ce qui rend
+ * un tableau de bord technique inutile :
+ *
+ *   ok             testé, réponse correcte, latence mesurée
+ *   configuré      configuré, mais aucun test non destructif n'existe
+ *   non configuré  variable absente. Fonctionnalité désactivée, PAS en panne
+ *   échec          testé, et le test a échoué
+ *
+ * Cet espace est celui de l'administrateur technique, qui ne possède AUCUNE permission
+ * finance, RH, marketing ou stratégie. Il surveille la plateforme ; il n'accède pas à
+ * son contenu.
+ */
+(function () {
+  'use strict';
+
+  var etat = { vue: 'cockpit' };
+  var elContenu = document.getElementById('contenu');
+  var elTitre = document.getElementById('titreVue');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    cockpit: 'Cockpit technique',
+    integrations: 'Intégrations',
+    jobs: 'Jobs & cron',
+    securite: 'Sécurité & sessions',
+    audit: 'Audit technique',
+  };
+
+  var LIBELLES_ETAT = {
+    ok: 'OK', configure: 'Configuré', non_configure: 'Non configuré',
+    indisponible: 'Indisponible', echec: 'Échec',
+  };
+
+  function echapper(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function squelette(n) {
+    var h = '';
+    for (var i = 0; i < (n || 4); i += 1) h += '<div class="squelette" style="width:' + (100 - i * 7) + '%"></div>';
+    return h;
+  }
+
+  function ligneSonde(s) {
+    var etatCode = s.etat || 'indisponible';
+    return '<div class="sonde">'
+      + '<span class="pastille p-' + etatCode + '"></span>'
+      + '<div>'
+      + '<div class="nom">' + echapper(s.nom) + ' '
+      + '<span class="etiquette e-' + etatCode + '">' + echapper(LIBELLES_ETAT[etatCode] || etatCode) + '</span>'
+      + '</div>'
+      + (s.message ? '<div class="msg">' + echapper(s.message) + '</div>' : '')
+      + '</div>'
+      + '<div class="meta">'
+      + (s.latence_ms !== null && s.latence_ms !== undefined ? s.latence_ms + ' ms' : '—')
+      + '</div>'
+      + '</div>';
+  }
+
+  function panneauSondes(titre, sondes, sousTitre) {
+    if (!sondes || sondes.length === 0) {
+      return '<div class="panneau"><header><h2>' + echapper(titre) + '</h2></header>'
+        + '<div class="etat-vide">Aucune sonde.</div></div>';
+    }
+    return '<div class="panneau"><header><h2>' + echapper(titre) + '</h2>'
+      + (sousTitre ? '<small>' + echapper(sousTitre) + '</small>' : '')
+      + '</header>' + sondes.map(ligneSonde).join('') + '</div>';
+  }
+
+  function blocLegende(legende) {
+    if (!legende) return '';
+    var lignes = Object.keys(legende).map(function (k) {
+      return '<dt><span class="etiquette e-' + k + '">' + echapper(LIBELLES_ETAT[k] || k) + '</span></dt>'
+        + '<dd>' + echapper(legende[k]) + '</dd>';
+    }).join('');
+    return '<div class="legende"><dl>' + lignes + '</dl></div>';
+  }
+
+  function afficherErreur(err) {
+    elContenu.innerHTML = '<div class="erreur">' + echapper(err.message || 'Erreur de chargement.')
+      + (err.permissionsRequises
+        ? '<br><small>Permission requise : ' + echapper(err.permissionsRequises.join(', ')) + '</small>'
+        : '') + '</div>';
+  }
+
+  // ── Cockpit ────────────────────────────────────────────────────────────────
+
+  function vueCockpit() {
+    elContenu.innerHTML = '<div class="panneau"><div style="padding:17px">' + squelette(6) + '</div></div>';
+
+    return EnviroAPI.get('/api/tech/cockpit').then(function (d) {
+      elSousTitre.textContent = 'Vérifié à '
+        + new Date(d.verifie_a).toLocaleTimeString('fr-FR');
+
+      var bandeau = '<div class="bandeau ' + d.etat_global + '">'
+        + '<span class="pastille"></span>'
+        + '<div><strong>'
+        + (d.etat_global === 'ok'
+          ? 'Tous les services répondent'
+          : d.en_panne + ' service(s) en défaut')
+        + '</strong>'
+        + '<div style="font-size:12.5px;color:var(--texte-doux);margin-top:2px">'
+        + Object.keys(d.resume).map(function (k) {
+          return d.resume[k] + ' ' + (LIBELLES_ETAT[k] || k).toLowerCase();
+        }).join(' · ')
+        + '</div></div></div>';
+
+      elContenu.innerHTML = bandeau
+        + blocLegende(d.legende)
+        + panneauSondes('Infrastructure', d.infrastructure)
+        + panneauSondes('Intégrations externes', d.integrations,
+          '« Configuré » ne veut pas dire « fonctionnel » : un jeton peut être présent et révoqué.')
+        + panneauSondes('Sécurité', d.securite);
+    }).catch(afficherErreur);
+  }
+
+  // ── Intégrations ───────────────────────────────────────────────────────────
+
+  function vueIntegrations() {
+    elContenu.innerHTML = '<div class="panneau"><div style="padding:17px">' + squelette(6) + '</div></div>';
+
+    return EnviroAPI.get('/api/tech/integrations').then(function (d) {
+      var nonConfigurees = d.integrations.filter(function (i) { return i.etat === 'non_configure'; });
+      elSousTitre.textContent = d.integrations.length + ' intégration(s), '
+        + nonConfigurees.length + ' non configurée(s)';
+
+      elContenu.innerHTML = panneauSondes('Intégrations externes', d.integrations,
+        'Une intégration non configurée n’est pas en panne : sa fonctionnalité est simplement désactivée.');
+    }).catch(afficherErreur);
+  }
+
+  // ── Jobs ───────────────────────────────────────────────────────────────────
+
+  function vueJobs() {
+    elContenu.innerHTML = '<div class="panneau"><div style="padding:17px">' + squelette(4) + '</div></div>';
+
+    return EnviroAPI.get('/api/tech/jobs').then(function (d) {
+      var enDefaut = d.jobs.filter(function (j) {
+        return ['en_retard', 'en_echec', 'jamais_execute'].indexOf(j.etat) !== -1;
+      });
+      elSousTitre.textContent = d.jobs.length + ' job(s), ' + enDefaut.length + ' en défaut';
+
+      if (d.jobs.length === 0) {
+        elContenu.innerHTML = '<div class="panneau"><div class="etat-vide">Aucun job déclaré.</div></div>';
+        return;
+      }
+
+      var ETATS_JOB = {
+        ok: 'ok', en_retard: 'echec', en_echec: 'echec',
+        jamais_execute: 'echec', desactive: 'non_configure',
+      };
+
+      var lignes = d.jobs.map(function (j) {
+        var minutes = j.minutes_depuis_succes !== null
+          ? Math.round(j.minutes_depuis_succes) + ' min' : 'jamais';
+        return '<tr>'
+          + '<td><code>' + echapper(j.code) + '</code><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(j.nom) + '</small></td>'
+          + '<td><span class="etiquette e-' + (ETATS_JOB[j.etat] || 'indisponible') + '">'
+          + echapper(j.etat) + '</span></td>'
+          + '<td>toutes les ' + j.intervalle_minutes + ' min</td>'
+          + '<td>' + echapper(minutes) + '</td>'
+          + '<td>' + (j.derniere_duree_ms !== null ? j.derniere_duree_ms + ' ms' : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      // Message explicite quand rien n'a jamais tourné : c'est le cas le plus probable
+      // au premier déploiement, et le plus silencieusement dommageable.
+      var jamais = d.jobs.filter(function (j) { return j.etat === 'jamais_execute'; });
+      var alerte = jamais.length > 0
+        ? '<div class="bandeau degrade"><span class="pastille"></span><div>'
+          + '<strong>Le déclencheur externe n’est pas configuré</strong>'
+          + '<div style="font-size:12.5px;color:var(--texte-doux);margin-top:3px">'
+          + 'Aucune exécution enregistrée. Tant que ce job ne tourne pas, les abonnements '
+          + 'n’expirent pas et les tournées manquées ne remontent pas. Configurez un service '
+          + 'de cron externe sur <code>/api/cron/check-expirations</code> avec l’en-tête '
+          + '<code>X-Cron-Key</code>.</div></div></div>'
+        : '';
+
+      elContenu.innerHTML = alerte
+        + '<div class="panneau"><header><h2>Jobs planifiés</h2>'
+        + '<small>Un job est « en retard » après deux intervalles manqués : un retard '
+        + 'ponctuel n’est pas une panne, deux consécutifs le sont.</small></header>'
+        + '<div style="padding:0 17px 14px"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Job</th><th>État</th><th>Fréquence attendue</th>'
+        + '<th>Dernier succès</th><th>Durée</th></tr></thead><tbody>'
+        + lignes + '</tbody></table></div></div></div>';
+    }).catch(afficherErreur);
+  }
+
+  // ── Sécurité ───────────────────────────────────────────────────────────────
+
+  function vueSecurite() {
+    elContenu.innerHTML = '<div class="panneau"><div style="padding:17px">' + squelette(5) + '</div></div>';
+
+    return EnviroAPI.get('/api/tech/securite').then(function (d) {
+      var problemes = d.controles.filter(function (c) { return c.etat === 'echec'; });
+      elSousTitre.textContent = d.controles.length + ' contrôle(s), '
+        + problemes.length + ' point(s) d’attention';
+
+      elContenu.innerHTML = panneauSondes('Contrôles de sécurité', d.controles);
+    }).catch(afficherErreur);
+  }
+
+  // ── Audit ──────────────────────────────────────────────────────────────────
+
+  function vueAudit(page) {
+    elContenu.innerHTML = '<div class="panneau"><div style="padding:17px">' + squelette(6) + '</div></div>';
+
+    return EnviroAPI.get('/api/tech/audit?page=' + (page || 1)).then(function (d) {
+      elSousTitre.textContent = d.pagination.total + ' événement(s) audité(s)';
+
+      if (d.etat_vide) {
+        elContenu.innerHTML = '<div class="panneau"><div class="etat-vide">'
+          + echapper(d.etat_vide) + '</div></div>';
+        return;
+      }
+
+      var lignes = d.entrees.map(function (e) {
+        return '<tr>'
+          + '<td>' + new Date(e.created_at).toLocaleString('fr-FR') + '</td>'
+          + '<td><code>' + echapper(e.action) + '</code></td>'
+          + '<td>' + echapper(e.auteur || 'système')
+          + (e.role_auteur ? ' <small style="color:var(--texte-faible)">(' + echapper(e.role_auteur) + ')</small>' : '')
+          + '</td>'
+          + '<td>' + echapper(e.entite_type || '—')
+          + (e.entite_id ? ' #' + e.entite_id : '') + '</td>'
+          + '<td>' + echapper(e.ip_address || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var p = d.pagination;
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Journal d’audit</h2><small>' + echapper(d.note) + '</small></header>'
+        + '<div style="padding:0 17px 14px"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Date</th><th>Action</th><th>Auteur</th><th>Entité</th><th>IP</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
+        + '<div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;padding-top:12px">'
+        + '<button class="action secondaire" ' + (p.page <= 1 ? 'disabled' : '') + ' data-page="' + (p.page - 1) + '">Précédent</button>'
+        + '<span style="font-size:12.5px;color:var(--texte-faible)">Page ' + p.page + ' / ' + p.pages + '</span>'
+        + '<button class="action secondaire" ' + (p.page >= p.pages ? 'disabled' : '') + ' data-page="' + (p.page + 1) + '">Suivant</button>'
+        + '</div></div></div>';
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-page]'), function (b) {
+        b.addEventListener('click', function () {
+          if (!b.disabled) vueAudit(parseInt(b.getAttribute('data-page'), 10));
+        });
+      });
+    }).catch(afficherErreur);
+  }
+
+  // ── Routage ────────────────────────────────────────────────────────────────
+
+  var VUES = {
+    cockpit: vueCockpit, integrations: vueIntegrations,
+    jobs: vueJobs, securite: vueSecurite, audit: vueAudit,
+  };
+
+  function allerA(vue) {
+    etat.vue = vue;
+    elTitre.textContent = TITRES[vue];
+    elSousTitre.textContent = 'Chargement…';
+    Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+      a.classList.toggle('actif', a.getAttribute('data-vue') === vue);
+    });
+    (VUES[vue] || vueCockpit)();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); allerA(a.getAttribute('data-vue')); });
+  });
+
+  document.getElementById('rafraichir').addEventListener('click', function () { allerA(etat.vue); });
+  document.getElementById('deconnexion').addEventListener('click', function () { EnviroAPI.deconnecter(); });
+
+  EnviroAuth.proteger({ permissions: ['technical.health.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('cockpit');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>
