@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Espace Client – Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{--green:#3ab54a;--green-dark:#2d8f3c;--green-light:#e8f5e9;--sidebar:260px;--topbar:64px;}
+body{font-family:'Open Sans',sans-serif;background:#f4f6f3;color:#1a1a1a;display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:var(--sidebar);background:#111;color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;overflow-y:auto;transition:transform .3s;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px;}
+.sb-logo img{width:34px;height:34px;object-fit:contain;}
+.sb-logo-t span:first-child{display:block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11.5px;letter-spacing:1.4px;color:#fff;text-transform:uppercase;}
+.sb-logo-t span:last-child{display:block;font-size:8.5px;color:#666;}
+.sb-dash{margin:12px 12px 4px;}
+.sb-dash-btn{display:flex;align-items:center;gap:9px;background:var(--green);border-radius:8px;padding:10px 13px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;color:#fff;cursor:pointer;border:none;width:100%;}
+.sb-dash-btn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;}
+.sb-section{padding:10px 12px 2px;}
+.sb-lbl{font-size:9.5px;font-weight:700;letter-spacing:1.8px;color:#444;text-transform:uppercase;padding-left:8px;margin-bottom:4px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;color:#aaa;transition:all .2s;border:none;background:none;width:100%;text-align:left;}
+.sb-item:hover,.sb-item.active{background:rgba(255,255,255,.08);color:#fff;}
+.sb-item.active{color:#fff;}
+.sb-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+.sb-cta{margin:auto 12px 0;padding-bottom:14px;padding-top:8px;}
+.sb-cta-box{background:#1c1c1c;border-radius:10px;padding:14px;}
+.sb-cta-box h4{font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:#fff;margin-bottom:5px;}
+.sb-cta-box p{font-size:11px;color:#777;margin-bottom:10px;line-height:1.5;}
+.sb-cta-btn{display:block;text-align:center;background:var(--green);color:#fff;border-radius:7px;padding:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;border:none;width:100%;margin-bottom:10px;}
+.sb-cta-btn:hover{background:var(--green-dark);}
+.sb-cta-box img{width:100%;border-radius:7px;object-fit:cover;display:block;}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{height:var(--topbar);background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;}
+.menu-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:4px;}
+.menu-btn span{display:block;width:20px;height:2px;background:#333;border-radius:2px;}
+.topbar-right{display:flex;align-items:center;gap:12px;position:relative;}
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:4px;}
+.notif-btn svg{width:20px;height:20px;stroke:#555;fill:none;stroke-width:1.8;}
+.notif-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:#e53935;border-radius:50%;font-size:9px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+.user-meta{text-align:right;}
+.user-meta .uname{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#111;}
+.user-meta .usince{font-size:10.5px;color:#999;}
+.avatar-wrap{position:relative;cursor:pointer;}
+.avatar-wrap img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2.5px solid var(--green);display:block;}
+/* Profile dropdown */
+.profile-dropdown{position:absolute;top:54px;right:0;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);width:220px;z-index:300;padding:16px;display:none;}
+.profile-dropdown.show{display:block;}
+.pd-header{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #f0f0f0;margin-bottom:8px;}
+.pd-header img{width:38px;height:38px;border-radius:50%;object-fit:cover;}
+.pd-header .pdname{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;}
+.pd-header .pdsince{font-size:10.5px;color:#999;}
+.pd-item{display:flex;align-items:center;gap:9px;padding:9px 6px;border-radius:7px;font-size:13px;color:#333;cursor:pointer;transition:background .2s;}
+.pd-item:hover{background:#f5f5f5;}
+.pd-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+.pd-item.red{color:#e53935;}
+.pd-item.red svg{stroke:#e53935;}
+
+/* ══ CONTENT AREA ══ */
+.content{padding:24px 28px;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{margin-bottom:22px;}
+.page-header h1{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#111;}
+.page-header p{font-size:13px;color:#999;margin-top:3px;}
+.page-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+
+/* Buttons */
+.btn-green{background:var(--green);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-green svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;}
+.btn-outline{background:#fff;color:#333;border:1.5px solid #ddd;padding:9px 18px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s;}
+.btn-outline:hover{border-color:var(--green);color:var(--green);}
+
+/* Cards */
+.card{background:#fff;border-radius:12px;border:1px solid #eee;padding:20px;}
+
+/* ══ DASHBOARD ══ */
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat-card{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;display:flex;align-items:center;gap:13px;}
+.stat-ic{width:42px;height:42px;border:1.5px solid #e0e0e0;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.stat-ic svg{width:20px;height:20px;stroke:#444;fill:none;stroke-width:1.8;}
+.stat-lbl{font-size:10.5px;color:#999;margin-bottom:2px;}
+.stat-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#111;}
+.stat-val.g{color:var(--green);}
+.stat-val.r{color:#e53935;}
+.stat-sub{font-size:10.5px;color:#bbb;margin-top:1px;}
+.mid-row{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-bottom:20px;}
+.sub-card .plan-name{color:var(--green);font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;margin-bottom:3px;}
+.sub-card .plan-freq{font-size:12px;color:#888;margin-bottom:14px;}
+.sub-body{display:flex;gap:24px;}
+.feat{display:flex;align-items:center;gap:7px;font-size:12.5px;color:#333;margin-bottom:8px;}
+.feat svg{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2.5;flex-shrink:0;}
+.price-big{font-family:'Montserrat',sans-serif;font-weight:900;font-size:20px;}
+.price-mo{font-size:11.5px;color:#888;}
+.renew-lbl{font-size:11px;color:#999;margin-top:10px;}
+.renew-dt{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;}
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 300px;gap:18px;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-head h3{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;}
+.voir-tout{font-size:12px;color:var(--green);font-weight:700;cursor:pointer;text-decoration:none;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:700;color:#999;text-align:left;padding:0 6px 9px;border-bottom:1px solid #f0f0f0;font-family:'Montserrat',sans-serif;}
+td{padding:9px 6px;font-size:12px;color:#333;border-bottom:1px solid #f8f8f8;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:700;font-family:'Montserrat',sans-serif;}
+.bg{background:var(--green-light);color:var(--green);}
+.br{background:#fdecea;color:#e53935;}
+.bo{background:#fff8e1;color:#f59e0b;}
+.bbk{background:#e3f2fd;color:#1976d2;}
+.agent-tiny{width:26px;height:26px;border-radius:50%;object-fit:cover;}
+.dl-btn{background:none;border:none;cursor:pointer;color:#bbb;}
+.dl-btn:hover{color:var(--green);}
+.dl-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;}
+.notif-item2{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;}
+.notif-item2:last-child{border-bottom:none;}
+.nic{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nic svg{width:14px;height:14px;fill:none;stroke-width:2;}
+.nic.gr{background:var(--green-light);} .nic.gr svg{stroke:var(--green);}
+.nic.or{background:#fff3e0;} .nic.or svg{stroke:#f59e0b;}
+.nic.bl{background:#e3f2fd;} .nic.bl svg{stroke:#1976d2;}
+.ntitle{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#111;margin-bottom:2px;}
+.ndesc{font-size:11px;color:#777;line-height:1.4;}
+.ndate{font-size:10px;color:#bbb;margin-top:2px;}
+/* Agent card in dashboard */
+.agent-card .ag-pic{width:80px;height:80px;border-radius:9px;object-fit:cover;flex-shrink:0;}
+.verified{display:inline-flex;align-items:center;gap:4px;background:var(--green-light);color:var(--green);font-size:10.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:3px 8px;border-radius:20px;}
+.verified svg{width:10px;height:10px;stroke:var(--green);fill:none;stroke-width:3;}
+
+/* ══ MON PROFIL ══ */
+.profil-grid{display:grid;grid-template-columns:220px 1fr 240px;gap:18px;}
+.profil-left{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;}
+.profil-pic-wrap{position:relative;margin-bottom:14px;}
+.profil-pic{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--green);}
+.cam-btn{position:absolute;bottom:4px;right:4px;width:28px;height:28px;background:var(--green);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.cam-btn svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;}
+.profil-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;margin-bottom:4px;}
+.profil-since{background:var(--green-light);color:var(--green);font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:16px;font-family:'Montserrat',sans-serif;}
+.profil-stat-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#555;margin-bottom:10px;width:100%;}
+.profil-stat-item svg{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:1.8;flex-shrink:0;}
+.info-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.info-item label{display:block;font-size:10.5px;color:#999;font-weight:600;margin-bottom:4px;font-family:'Montserrat',sans-serif;}
+.info-item .val{font-size:13px;color:#222;font-weight:500;}
+.section-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:13.5px;margin-bottom:14px;color:#111;}
+.pref-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f5f5f5;}
+.pref-item:last-child{border-bottom:none;}
+.pref-left{display:flex;align-items:center;gap:10px;}
+.pref-ico{width:34px;height:34px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;}
+.pref-ico svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:1.8;}
+.pref-lbl{font-size:13px;font-weight:600;color:#222;}
+.pref-sub{font-size:11px;color:#999;}
+.toggle{width:40px;height:22px;background:var(--green);border-radius:11px;position:relative;cursor:pointer;border:none;transition:background .2s;flex-shrink:0;}
+.toggle::after{content:'';position:absolute;top:3px;right:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:right .2s;}
+.toggle.off{background:#ddd;}
+.toggle.off::after{right:auto;left:3px;}
+.abonne-badge{background:#f0f0f0;border-radius:8px;padding:10px 14px;display:inline-block;margin-bottom:18px;}
+.abonne-badge span:first-child{font-size:10.5px;color:#999;display:block;margin-bottom:2px;}
+.abonne-badge span:last-child{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;color:var(--green);}
+
+/* ══ MON ABONNEMENT ══ */
+.abo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.plan-actuel-box{border:2px solid var(--green);border-radius:12px;padding:20px;}
+.plan-actuel-box .plan-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.actif-badge{background:var(--green-light);color:var(--green);font-size:11px;font-weight:700;font-family:'Montserrat',sans-serif;padding:3px 10px;border-radius:20px;}
+.plan-big{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:var(--green);margin-bottom:2px;}
+.plan-price{font-family:'Montserrat',sans-serif;font-weight:800;font-size:17px;margin-bottom:14px;}
+.plan-info-row{display:flex;gap:20px;margin-top:16px;}
+.plan-info-item label{font-size:10.5px;color:#999;display:block;margin-bottom:3px;}
+.plan-info-item span{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;}
+.besoin-box{border:1.5px dashed #ccc;border-radius:10px;padding:14px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;}
+.besoin-box p{font-size:12px;color:#666;}
+.besoin-box p strong{display:block;font-size:13px;color:#111;margin-bottom:2px;}
+.changer-link{font-size:12.5px;color:var(--green);font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap;margin-left:12px;}
+.histo-table th{font-size:11px;} .histo-table td{font-size:12px;}
+
+/* ══ PAIEMENT ══ */
+.pay-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.pay-stat{background:#fff;border-radius:10px;border:1px solid #eee;padding:14px 16px;}
+.pay-stat .ps-ico{width:36px;height:36px;background:#f5f5f5;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.pay-stat .ps-ico svg{width:18px;height:18px;stroke:#555;fill:none;stroke-width:1.8;}
+.pay-stat .ps-lbl{font-size:10.5px;color:#999;margin-bottom:2px;}
+.pay-stat .ps-val{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;}
+.pay-stat .ps-sub{font-size:10.5px;color:#bbb;}
+.pay-grid{display:grid;grid-template-columns:280px 1fr;gap:18px;}
+.moyen-item{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #f5f5f5;}
+.moyen-item:last-child{border-bottom:none;}
+.moyen-left{display:flex;align-items:center;gap:11px;}
+.moyen-ico{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.moyen-ico.red{background:#fdecea;} .moyen-ico.red svg{stroke:#e53935;}
+.moyen-ico.blue{background:#e3f2fd;} .moyen-ico.blue svg{stroke:#1976d2;}
+.moyen-ico svg{width:18px;height:18px;fill:none;stroke-width:1.8;}
+.moyen-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;}
+.moyen-num{font-size:11.5px;color:#888;}
+.defaut-badge{font-size:10px;color:#e53935;font-weight:700;font-family:'Montserrat',sans-serif;}
+.dots-btn{background:none;border:none;cursor:pointer;color:#bbb;font-size:18px;padding:4px;}
+.ajouter-btn{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--green);font-weight:700;border:1.5px dashed var(--green);border-radius:8px;padding:8px 12px;cursor:pointer;background:none;transition:background .2s;}
+.ajouter-btn:hover{background:var(--green-light);}
+.ajouter-btn svg{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2.5;}
+
+/* ══ MES COLLECTES ══ */
+.collectes-top{display:grid;grid-template-columns:1fr 220px;gap:18px;margin-bottom:20px;}
+.prochaine-box{background:var(--green);border-radius:12px;padding:18px;color:#fff;position:relative;overflow:hidden;}
+.prochaine-box::after{content:'';position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%;}
+.dans-badge{background:rgba(255,255,255,.2);color:#fff;font-size:10.5px;font-weight:700;font-family:'Montserrat',sans-serif;padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:8px;}
+.prochaine-date{font-family:'Montserrat',sans-serif;font-weight:900;font-size:19px;margin-bottom:4px;}
+.prochaine-time{font-size:12px;opacity:.85;margin-bottom:4px;}
+.prochaine-zone{font-size:12px;opacity:.8;}
+.resume-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.res-item{background:#fff;border-radius:10px;border:1px solid #eee;padding:12px;text-align:center;}
+.res-num{font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#111;}
+.res-lbl{font-size:11px;color:#999;}
+.res-item.green .res-num{color:var(--green);}
+.res-item.red .res-num{color:#e53935;}
+.res-item.orange .res-num{color:#f59e0b;}
+.collectes-detail-table th{font-size:11px;} .collectes-detail-table td{font-size:12px;}
+.voir-btn{font-size:11.5px;color:var(--green);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
+.voir-btn svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:2;}
+.signal-btn{background:#fdecea;color:#e53935;border:none;padding:8px 14px;border-radius:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.signal-btn svg{width:13px;height:13px;stroke:#e53935;fill:none;stroke-width:2;}
+
+/* ══ MES AGENTS ══ */
+.agents-list{display:flex;flex-direction:column;gap:14px;max-width:600px;}
+.agent-row{background:#fff;border-radius:12px;border:1px solid #eee;padding:16px;display:flex;align-items:center;gap:14px;}
+.agent-row img{width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+.agent-row-info{flex:1;}
+.agent-row-name{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;margin-bottom:2px;}
+.agent-row-role{font-size:12px;color:#888;margin-bottom:6px;}
+.agent-row-tel{font-size:12.5px;color:#444;display:flex;align-items:center;gap:5px;}
+.agent-row-tel svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:1.8;}
+
+/* ══ NOTIFICATIONS ══ */
+.notif-tabs{display:flex;gap:0;border-bottom:2px solid #eee;margin-bottom:18px;}
+.ntab{padding:9px 16px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.ntab.active{color:var(--green);border-bottom-color:var(--green);}
+.notif-full-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f0f0f0;}
+.notif-full-item:last-child{border-bottom:none;}
+.nfi-ico{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nfi-ico svg{width:18px;height:18px;fill:none;stroke-width:2;}
+.nfi-ico.gr{background:var(--green-light);} .nfi-ico.gr svg{stroke:var(--green);}
+.nfi-ico.or{background:#fff3e0;} .nfi-ico.or svg{stroke:#f59e0b;}
+.nfi-ico.bl{background:#e3f2fd;} .nfi-ico.bl svg{stroke:#1976d2;}
+.nfi-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;margin-bottom:3px;}
+.nfi-desc{font-size:12.5px;color:#666;line-height:1.5;}
+.nfi-date{font-size:11px;color:#bbb;margin-top:4px;}
+
+/* ══ SUPPORT ══ */
+.support-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;}
+.support-options{display:flex;flex-direction:column;gap:14px;}
+.support-opt{background:#fff;border:1px solid #eee;border-radius:12px;padding:18px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:border-color .2s;}
+.support-opt:hover{border-color:var(--green);}
+.support-opt-ico{width:42px;height:42px;border:1.5px solid #ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.support-opt-ico svg{width:18px;height:18px;stroke:#555;fill:none;stroke-width:1.8;}
+.support-opt-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;margin-bottom:3px;}
+.support-opt-sub{font-size:12px;color:#888;}
+.demande-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f0f0;}
+.demande-item:last-child{border-bottom:none;}
+.demande-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;margin-bottom:2px;}
+.demande-date{font-size:11px;color:#bbb;}
+
+/* ══ MOT DE PASSE ══ */
+.pwd-form{max-width:480px;}
+.pwd-form .form-group{margin-bottom:20px;}
+.pwd-form label{display:block;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#333;margin-bottom:8px;}
+.pwd-wrap{position:relative;}
+.pwd-wrap input{width:100%;padding:13px 42px 13px 14px;border:1.5px solid #ddd;border-radius:9px;font-size:14px;font-family:'Open Sans',sans-serif;outline:none;transition:border-color .2s;}
+.pwd-wrap input:focus{border-color:var(--green);}
+.eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#bbb;}
+.eye svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.pwd-rules{background:#f9f9f9;border-radius:8px;padding:12px 14px;margin-top:8px;}
+.pwd-rule{display:flex;align-items:center;gap:7px;font-size:12px;color:#777;margin-bottom:5px;}
+.pwd-rule:last-child{margin-bottom:0;}
+.pwd-rule svg{width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:2.5;flex-shrink:0;}
+
+/* ══ MODALS ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:#fff;border-radius:16px;padding:28px;max-width:580px;width:90%;position:relative;animation:modalIn .25s ease;max-height:90vh;overflow-y:auto;}
+@keyframes modalIn{from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);}}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;}
+.modal-close:hover{color:#333;}
+.modal h2{font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;margin-bottom:4px;}
+.modal .msub{font-size:13px;color:#888;margin-bottom:20px;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.mform-group{margin-bottom:16px;}
+.mform-group label{display:block;font-size:12px;color:#888;font-weight:600;margin-bottom:5px;font-family:'Montserrat',sans-serif;}
+.mform-group input,.mform-group select,.mform-group textarea{width:100%;padding:11px 13px;border:1.5px solid #ddd;border-radius:8px;font-size:13.5px;font-family:'Open Sans',sans-serif;outline:none;transition:border-color .2s;}
+.mform-group input:focus,.mform-group select:focus,.mform-group textarea:focus{border-color:var(--green);}
+.mform-group textarea{resize:vertical;min-height:90px;}
+.mform-group.full{grid-column:span 2;}
+.modal-contact-right{border-left:1px solid #eee;padding-left:20px;}
+.mci{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;}
+.mci-ico{width:34px;height:34px;border:1.5px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mci-ico svg{width:15px;height:15px;stroke:var(--green);fill:none;stroke-width:1.8;}
+.mci-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;margin-bottom:2px;}
+.mci-val{font-size:12px;color:#666;}
+/* Sub detail modal */
+.sub-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;}
+.sd-feat{display:flex;align-items:center;gap:7px;font-size:13px;color:#333;margin-bottom:8px;}
+.sd-feat svg{width:14px;height:14px;stroke:var(--green);fill:none;stroke-width:2.5;}
+.sd-info-item{margin-bottom:12px;}
+.sd-info-item label{display:block;font-size:11px;color:#999;margin-bottom:2px;}
+.sd-info-item span{font-size:13.5px;font-weight:600;color:#111;}
+
+/* ══ RESPONSIVE ══ */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;}
+.overlay.show{display:block;}
+@media(max-width:1100px){
+  .stat-cards{grid-template-columns:repeat(2,1fr);}
+  .mid-row{grid-template-columns:1fr;}
+  .bottom-row{grid-template-columns:1fr 1fr;}
+  .profil-grid{grid-template-columns:1fr;}
+  .abo-grid{grid-template-columns:1fr;}
+  .pay-grid{grid-template-columns:1fr;}
+  .collectes-top{grid-template-columns:1fr;}
+  .support-grid{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .bottom-row{grid-template-columns:1fr;}
+  .pay-stats{grid-template-columns:1fr 1fr;}
+  .content{padding:16px;}
+  .modal-grid{grid-template-columns:1fr;}
+  .mform-group.full{grid-column:span 1;}
+  .modal-contact-right{border-left:none;padding-left:0;border-top:1px solid #eee;padding-top:16px;margin-top:8px;}
+  .sub-detail-grid{grid-template-columns:1fr;}
+  .contact-grid{grid-template-columns:1fr!important;}
+  .contact-grid-inner{grid-template-columns:1fr!important;}
+}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.contact-grid-inner{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.toast-msg{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:12px 22px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:90vw;text-align:center;transition:opacity .3s;opacity:0;pointer-events:none;}
+.toast-msg.show{opacity:1;}
+</style>
+  <script src="assets/js/theme-init.js"></script>
+  <link rel="stylesheet" href="assets/css/site-refresh.css"/>
+</head>
+<body>
+<div id="dashboardLoader" style="position:fixed;inset:0;background:#fff;z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;transition:opacity .3s ease;">
+  <div style="width:42px;height:42px;border:4px solid #e0e0e0;border-top-color:#3ab54a;border-radius:50%;animation:dashSpin .8s linear infinite;"></div>
+  <p style="font-family:'Montserrat',sans-serif;font-weight:600;color:#3ab54a;font-size:14px;margin:0;">Chargement de votre espace...</p>
+</div>
+<style>@keyframes dashSpin{to{transform:rotate(360deg);}}</style>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="assets/brand/logo-enviro-cleans.webp" alt="logo"/>
+    <div class="sb-logo-t">
+      <span>ENVIRO CLEANS</span>
+      <span>Pour un environnement propre et sain</span>
+    </div>
+  </div>
+  <div class="sb-dash"><button class="sb-dash-btn" onclick="showPage('dashboard')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Tableau de bord</button></div>
+  <div class="sb-section">
+    <div class="sb-lbl">Mon compte</div>
+    <button class="sb-item" onclick="showPage('profil')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mon profil</button>
+    <button class="sb-item" onclick="showPage('abonnement')"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Mon abonnement</button>
+    <button class="sb-item" onclick="showPage('paiement')"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Paiement</button>
+    <button class="sb-item" onclick="showPage('collectes')"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Mes collectes</button>
+    <button class="sb-item" onclick="showPage('agents')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Mes agents</button>
+    <button class="sb-item" onclick="showPage('notifications')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications <span class="sb-notif-badge" style="display:none;background:#e53935;color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:6px;"></span></button>
+    <button class="sb-item" onclick="showPage('support')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Support</button>
+  </div>
+  <div class="sb-section">
+    <div class="sb-lbl">Autres</div>
+    <button class="sb-item" onclick="showPage('password')"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Modifier le mot de passe</button>
+    <button class="sb-item" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</button>
+  </div>
+  <div class="sb-cta">
+    <div class="sb-cta-box">
+      <h4>Besoin d'une intervention rapide ?</h4>
+      <p>Nous sommes disponibles 24h/24.</p>
+      <button class="sb-cta-btn" onclick="openModal('contactModal')">Nous contacter</button>
+      <img src="assets/media/710e4ca66b1f.webp" alt="camion" loading="lazy" decoding="async"/>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+    <div class="topbar-right">
+      <button class="notif-btn" onclick="showPage('notifications')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge">3</span>
+      </button>
+      <div class="user-meta"><div class="uname">Peace Bakala</div><div class="usince">Client depuis janvier 2026</div></div>
+      <div class="avatar-wrap" onclick="toggleDropdown()">
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" alt="Peace Bakala" loading="lazy" decoding="async"/>
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="pd-header">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" alt="Peace" loading="lazy" decoding="async"/>
+            <div><div class="pdname">Peace Bakala</div><div class="pdsince">Client depuis janvier 2026</div></div>
+          </div>
+          <div class="pd-item" onclick="showPage('profil');closeDropdown()"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mon profil</div>
+          <div class="pd-item" onclick="showPage('password');closeDropdown()"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Modifier le mot de passe</div>
+          <div class="pd-item red" onclick="logout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header"><h1>Bonjour, Peace Bakala 👋</h1><p>Bienvenue dans votre espace client !</p></div>
+    <div class="stat-cards">
+      <div class="stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="stat-lbl">Statut du compte</div><div class="stat-val g">Actif</div><div class="stat-sub">Votre compte est à jour</div></div></div>
+      <div class="stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="stat-lbl">Prochaine récolte</div><div class="stat-val" style="font-size:12px">Mercredi 20 Mai 2026</div><div class="stat-sub">Entre 08h00 et 12h00</div></div></div>
+      <div class="stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="stat-lbl">Zone</div><div class="stat-val" style="font-size:13px">Nsele</div><div class="stat-sub">Kinshasa, RD Congo</div></div></div>
+      <div class="stat-card"><div class="stat-ic"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="stat-lbl">Paiement</div><div class="stat-val g">À jour</div><div class="stat-sub">Prochain le 09/06/2026</div></div></div>
+    </div>
+    <div class="mid-row">
+      <div class="card sub-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:18px;">👑</span><h3 style="font-family:Montserrat;font-weight:800;font-size:15px;">Mon abonnement</h3></div>
+        <div class="plan-name">Plan Premium</div><div class="plan-freq">Collecte 3 fois par semaine</div>
+        <div class="sub-body">
+          <div style="flex:1"><div id="dashFeatList"><div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Sac poubelle offert</div><div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Produit écologique offert</div><div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Support client prioritaire</div><div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Intervention rapide</div></div><button class="btn-green" style="margin-top:14px;" onclick="openModal('subDetailModal')">Voir les détails</button></div>
+          <div><div class="price-big">33 750 FC</div><div class="price-mo">/ mois</div><div class="renew-lbl">Date de renouvellement</div><div class="renew-dt">09 Juin 2026</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:Montserrat;font-weight:800;font-size:15px;margin-bottom:14px;">Mon agent assigné</h3>
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;">
+          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="ag-pic" style="width:78px;height:78px;border-radius:9px;object-fit:cover;" alt="agent" loading="lazy" decoding="async"/>
+          <div><div style="font-family:Montserrat;font-weight:800;font-size:14px;">Jean Mukendi</div><div style="font-size:12px;color:#888;margin-bottom:6px;">Collecteur</div><span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span></div>
+        </div>
+        <div style="font-size:12.5px;color:#444;margin-bottom:5px;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:var(--green);fill:none;stroke-width:1.8;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>+243 893 456 789</div>
+        <button class="btn-outline" style="width:100%;margin-top:10px;">Voir le profil de l'agent</button>
+      </div>
+    </div>
+    <div class="bottom-row">
+      <div class="card"><div class="card-head"><h3>Mes collectes</h3><a class="voir-tout" onclick="showPage('collectes')">Voir tout</a></div><table><thead><tr><th>Date</th><th>Statut</th><th>Type</th><th>Agent</th></tr></thead><tbody><tr><td>Lun. 11 Mai</td><td><span class="badge bg">Effectuée</span></td><td>Ménagers</td><td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/></td></tr><tr><td>Mer. 13 Mai</td><td><span class="badge br">Manquée</span></td><td>Recyclables</td><td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/></td></tr><tr><td>Ven. 15 Mai</td><td><span class="badge bg">Effectuée</span></td><td>Mixtes</td><td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/></td></tr><tr><td>Lun. 18 Mai</td><td><span class="badge bg">Effectuée</span></td><td>Ménagers</td><td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/></td></tr><tr><td>Mer. 20 Mai</td><td><span class="badge bo">À venir</span></td><td>Ménagers</td><td><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/></td></tr></tbody></table></div>
+      <div class="card"><div class="card-head"><h3>Mes paiements</h3><a class="voir-tout" onclick="showPage('paiement')">Voir tout</a></div><table><thead><tr><th>Date</th><th>Statut</th><th>Montant</th><th></th></tr></thead><tbody><tr><td>09 Mai 2026</td><td><span class="badge bg">Payé</span></td><td style="font-weight:700">33 750 FC</td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr><tr><td>09 Avr. 2026</td><td><span class="badge bg">Payé</span></td><td style="font-weight:700">33 750 FC</td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr><tr><td>09 Mar. 2026</td><td><span class="badge bg">Payé</span></td><td style="font-weight:700">33 750 FC</td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr><tr><td>09 Fév. 2026</td><td><span class="badge bg">Payé</span></td><td style="font-weight:700">33 750 FC</td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr><tr><td>09 Jan. 2026</td><td><span class="badge bg">Payé</span></td><td style="font-weight:700">33 750 FC</td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr></tbody></table></div>
+      <div class="card"><div class="card-head"><h3>Notifications</h3><a class="voir-tout" onclick="showPage('notifications')">Voir tout</a></div><div><div class="notif-item2"><div class="nic gr"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="ntitle">Collecte effectuée</div><div class="ndesc">Votre collecte du 18 Mai a été effectuée.</div><div class="ndate">18 Mai 2026</div></div></div><div class="notif-item2"><div class="nic or"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="ntitle">Prochaine collecte</div><div class="ndesc">Lundi 18 Mai entre 8h00 et 12h00.</div><div class="ndate">16 Mai 2026</div></div></div><div class="notif-item2"><div class="nic bl"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="ntitle">Paiement reçu</div><div class="ndesc">Paiement du 9 Mai 2026 reçu.</div><div class="ndate">9 Mai 2026</div></div></div></div></div>
+    </div>
+  </div>
+
+  <!-- ══ MON PROFIL ══ -->
+  <div class="page" id="page-profil">
+    <div class="page-top"><div class="page-header" style="margin-bottom:0"><h1>Mon profil</h1><p>Gérez vos informations personnelles.</p></div><div style="display:flex;align-items:center;gap:10px;"><div class="abonne-badge"><span>numéro d'abonné</span><span>A00012</span></div><button class="btn-green"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Modifier le profil</button></div></div>
+    <div class="profil-grid" style="margin-top:20px;">
+      <div class="card profil-left">
+        <div class="profil-pic-wrap"><img id="profilPicImg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="profil-pic" alt="Peace" loading="lazy" decoding="async"/><button class="cam-btn" onclick="document.getElementById('profilPhotoInput').click()"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button><input type="file" id="profilPhotoInput" accept="image/*" style="display:none;" onchange="handleProfilPhotoChange(event)"/></div>
+        <div class="profil-name">Peace Bakala</div>
+        <div class="profil-since">Client depuis janvier 2026</div>
+        <div class="profil-stat-item"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="20 6 9 17 4 12"/></svg>Statut : <strong style="color:var(--green)">Actif</strong></div>
+        <div class="profil-stat-item"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Zone : Nsele</div>
+        <div class="profil-stat-item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Inscrit le : 11 Mai 2026</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Informations personnelles</div>
+        <div class="info-row">
+          <div class="info-item"><label>Nom complet</label><div class="val" id="profilNomVal">Peace Bakala</div></div>
+          <div class="info-item"><label>Email</label><div class="val">peacebakala@gmail.com</div></div>
+          <div class="info-item"><label>Téléphone</label><div class="val" id="profilTelVal">+243 895 456 789</div></div>
+          <div class="info-item"><label>Adresse</label><div class="val">Nsele, Kinshasa, RD Congo</div></div>
+          <div class="info-item"><label>Zone de collecte</label><div class="val">Nsele</div></div>
+          <div class="info-item"><label>Langue</label><div class="val">Français</div></div>
+          <div class="info-item" style="grid-column:span 2"><label>Fuseau horaire</label><div class="val">(UTC+01:00) Kinshasa</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Préférences</div>
+        <div class="pref-item"><div class="pref-left"><div class="pref-ico"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div><div class="pref-lbl">Notifications</div><div class="pref-sub">Activées</div></div></div><button class="toggle" onclick="this.classList.toggle('off')"></button></div>
+        <div class="pref-item"><div class="pref-left"><div class="pref-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="pref-lbl">Méthode de contact</div><div class="pref-sub">Email et SMS</div></div></div><button class="toggle" onclick="this.classList.toggle('off')"></button></div>
+        <div class="pref-item"><div class="pref-left"><div class="pref-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="pref-lbl">Rappels collectes</div><div class="pref-sub">Activés</div></div></div><button class="toggle" onclick="this.classList.toggle('off')"></button></div>
+        <div class="pref-item"><div class="pref-left"><div class="pref-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="pref-lbl">Reçus de paiement</div><div class="pref-sub">Activés</div></div></div><button class="toggle" onclick="this.classList.toggle('off')"></button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MON ABONNEMENT ══ -->
+  <div class="page" id="page-abonnement">
+    <div class="page-top"><div class="page-header" style="margin-bottom:0"><h1>Mon abonnement</h1><p>Détails de votre plan et historique.</p></div><button class="btn-green"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>Changer de plan</button></div>
+    <div class="abo-grid" style="margin-top:20px;">
+      <div>
+        <div class="plan-actuel-box">
+          <img id="aboPlanVisual" class="abo-plan-visual" src="assets/images/offre-premium-enviro.webp" alt="Illustration du plan actuel" loading="lazy" decoding="async"/>
+          <div class="plan-top"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:20px;">👑</span><div><div style="font-size:12px;color:#888;">Plan actuel</div><div class="plan-big">Plan Premium</div></div></div><span class="actif-badge">Actif</span></div>
+          <div class="plan-price">33 750 FC / mois</div>
+          <div id="aboFeatList">
+          <div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Collecte 3 fois par semaine</div>
+          <div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Sac poubelle offert</div>
+          <div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Produit écologique offert</div>
+          <div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Support client prioritaire</div>
+          <div class="feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Intervention rapide</div>
+          </div>
+          <div class="plan-info-row">
+            <div class="plan-info-item"><label>Prochain renouvellement</label><span>09 Juin 2026</span></div>
+            <div class="plan-info-item"><label>Cycle de facturation</label><span>Mensuel</span></div>
+          </div>
+          <button class="btn-green" style="margin-top:16px;" onclick="openModal('subDetailModal')">Voir les détails</button>
+        </div>
+        <div class="besoin-box" style="margin-top:14px;"><div><p><strong>Besoin d'un autre plan ?</strong>Passez à un plan supérieur ou inférieur selon vos besoins.</p></div><a class="changer-link">Changer de plan →</a></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Historique des abonnements</div>
+        <table class="histo-table"><thead><tr><th>Date</th><th>Plan</th><th>Montant</th><th>Statut</th></tr></thead><tbody>
+          <tr><td>09 Mai 2026</td><td>Plan Premium</td><td>33 750 FC</td><td><span class="badge bg">Actif</span></td></tr>
+          <tr><td>09 Avr. 2026</td><td>Plan Premium</td><td>33 750 FC</td><td><span class="badge" style="background:#f5f5f5;color:#888;">Expiré</span></td></tr>
+          <tr><td>09 Mar. 2026</td><td>Plan Premium</td><td>33 750 FC</td><td><span class="badge" style="background:#f5f5f5;color:#888;">Expiré</span></td></tr>
+          <tr><td>09 Fév. 2026</td><td>Plan Standard</td><td>25 000 FC</td><td><span class="badge" style="background:#f5f5f5;color:#888;">Expiré</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAIEMENT ══ -->
+  <div class="page" id="page-paiement">
+    <div class="page-top"><div class="page-header" style="margin-bottom:0"><h1>Paiement</h1><p>Consultez vos paiements et factures.</p></div><div style="text-align:right;"><button class="btn-green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Payer maintenant</button><p id="payerIndispoMsg" style="display:none;font-size:11.5px;color:#888;margin-top:6px;max-width:220px;"></p></div></div>
+    <div class="pay-stats" style="margin-top:20px;">
+      <div class="pay-stat"><div class="ps-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="ps-lbl">Solde à payer</div><div class="ps-val">0 FC</div><div class="ps-sub">Aucun paiement en attente</div></div>
+      <div class="pay-stat"><div class="ps-ico"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="ps-lbl">Total payé</div><div class="ps-val" style="color:var(--green)">202 500 FC</div><div class="ps-sub">6 paiements effectués</div></div>
+      <div class="pay-stat"><div class="ps-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="ps-lbl">Dernier paiement</div><div class="ps-val" style="font-size:13px">09 Mai 2026</div><div class="ps-sub">33 750 FC</div></div>
+      <div class="pay-stat"><div class="ps-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="ps-lbl">Prochaine échéance</div><div class="ps-val" style="font-size:13px">09 Juin 2026</div><div class="ps-sub">33 750 FC</div></div>
+    </div>
+    <div class="pay-grid">
+      <div class="card"><div class="card-head"><h3>Moyens de paiement enregistrés</h3><button class="ajouter-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Ajouter</button></div>
+        <div class="moyen-item"><div class="moyen-left"><div class="moyen-ico red"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div><div class="moyen-name">Mobile Money (M-Pesa)</div><div class="moyen-num">+243 854 269 234</div><div class="defaut-badge">Par défaut</div></div></div><button class="dots-btn">⋮</button></div>
+        <div class="moyen-item"><div class="moyen-left"><div class="moyen-ico blue"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><div class="moyen-name">Carte bancaire</div><div class="moyen-num">Visa **** **** **** 4567</div></div></div><button class="dots-btn">⋮</button></div>
+      </div>
+      <div class="card"><div class="card-head"><h3>Historique des paiements</h3><a class="voir-tout">Voir tout</a></div>
+        <table><thead><tr><th>Date</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Facture</th></tr></thead><tbody>
+          <tr><td>09 Mai 2026</td><td style="font-weight:700">33 750 FC</td><td>M-Pesa</td><td><span class="badge bg">Payé</span></td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr>
+          <tr><td>09 Avr. 2026</td><td style="font-weight:700">33 750 FC</td><td>Carte bancaire</td><td><span class="badge bg">Payé</span></td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr>
+          <tr><td>09 Mar. 2026</td><td style="font-weight:700">33 750 FC</td><td>M-Pesa</td><td><span class="badge bg">Payé</span></td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr>
+          <tr><td>09 Fév. 2026</td><td style="font-weight:700">33 750 FC</td><td>M-Pesa</td><td><span class="badge bg">Payé</span></td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr>
+          <tr><td>09 Jan. 2026</td><td style="font-weight:700">33 750 FC</td><td>Carte bancaire</td><td><span class="badge bg">Payé</span></td><td><button class="dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MES COLLECTES ══ -->
+  <div class="page" id="page-collectes">
+    <div class="page-top"><div class="page-header" style="margin-bottom:0"><h1>Mes collectes</h1><p>Suivez l'historique de toutes vos collectes.</p></div><button class="signal-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Signaler un problème</button></div>
+    <div class="collectes-top" style="margin-top:20px;">
+      <div class="card prochaine-box">
+        <span class="dans-badge">Dans 2 jours</span>
+        <div class="prochaine-date">Mercredi 20 Mai 2026</div>
+        <div class="prochaine-time">Entre 08h00 et 12h00</div>
+        <div class="prochaine-zone">Zone : Nsele, Kinshasa</div>
+      </div>
+      <div>
+        <div class="section-title" style="margin-bottom:12px;">Résumé</div>
+        <div class="resume-grid">
+          <div class="res-item"><div class="res-num">12</div><div class="res-lbl">Total collectes</div></div>
+          <div class="res-item green"><div class="res-num">10</div><div class="res-lbl">Effectuées</div></div>
+          <div class="res-item red"><div class="res-num">1</div><div class="res-lbl">Manquées</div></div>
+          <div class="res-item orange"><div class="res-num">1</div><div class="res-lbl">À venir</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px;"><div class="card-head"><h3>Historique des collectes</h3><a class="voir-tout">Voir tout</a></div>
+      <table class="collectes-detail-table"><thead><tr><th>Date</th><th>Statut</th><th>Type de déchet</th><th>Agent</th><th>Heure</th><th>Détails</th></tr></thead><tbody>
+        <tr><td>Lun. 11 Mai 2026</td><td><span class="badge bg">Effectuée</span></td><td>Déchets ménagers</td><td style="display:flex;align-items:center;gap:6px;padding:9px 6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/>Jean Mukendi</td><td>08h15</td><td><a class="voir-btn"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</a></td></tr>
+        <tr><td>Mer. 13 Mai 2026</td><td><span class="badge br">Manquée</span></td><td>Déchets recyclables</td><td style="display:flex;align-items:center;gap:6px;padding:9px 6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/>Patrick Lumbu</td><td>—</td><td><a class="voir-btn"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</a></td></tr>
+        <tr><td>Ven. 15 Mai 2026</td><td><span class="badge bg">Effectuée</span></td><td>Déchets mixtes</td><td style="display:flex;align-items:center;gap:6px;padding:9px 6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/>Grace Ngbala</td><td>09h05</td><td><a class="voir-btn"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</a></td></tr>
+        <tr><td>Lun. 18 Mai 2026</td><td><span class="badge bg">Effectuée</span></td><td>Déchets ménagers</td><td style="display:flex;align-items:center;gap:6px;padding:9px 6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/>Jean Mukendi</td><td>08h20</td><td><a class="voir-btn"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</a></td></tr>
+        <tr><td>Mer. 20 Mai 2026</td><td><span class="badge bo">À venir</span></td><td>Déchets ménagers</td><td style="display:flex;align-items:center;gap:6px;padding:9px 6px;"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" class="agent-tiny" alt="" loading="lazy" decoding="async"/>Jean Mukendi</td><td>08h00–12h00</td><td><a class="voir-btn"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Voir</a></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+
+  <!-- ══ MES AGENTS ══ -->
+  <div class="page" id="page-agents">
+    <div class="page-header"><h1>Mes agents</h1><p>Découvrez les agents qui s'occupent de vos collectes.</p></div>
+    <div class="agents-list">
+      <div class="agent-row"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" alt="Jean" loading="lazy" decoding="async"/><div class="agent-row-info"><div class="agent-row-name">Jean Mukendi</div><div class="agent-row-role">Collecteur</div><span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span><div class="agent-row-tel" style="margin-top:6px;"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>+243 893 456 789</div></div><button class="btn-outline">Voir le profil</button></div>
+      <div class="agent-row"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" alt="Patrick" loading="lazy" decoding="async"/><div class="agent-row-info"><div class="agent-row-name">Patrick Lumbu</div><div class="agent-row-role">Collecteur</div><span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span><div class="agent-row-tel" style="margin-top:6px;"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>+243 815 321 456</div></div><button class="btn-outline">Voir le profil</button></div>
+      <div class="agent-row"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+" alt="Grace" loading="lazy" decoding="async"/><div class="agent-row-info"><div class="agent-row-name">Grace Ngbala</div><div class="agent-row-role">Superviseure</div><span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span><div class="agent-row-tel" style="margin-top:6px;"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>+243 900 777 888</div></div><button class="btn-outline">Voir le profil</button></div>
+    </div>
+    <button class="btn-outline" style="margin-top:18px;">Voir tous les agents</button>
+  </div>
+
+  <!-- ══ NOTIFICATIONS ══ -->
+  <div class="page" id="page-notifications">
+    <div class="page-header"><h1>Notifications</h1><p>Restez informé de toutes nos actualités et mises à jour.</p></div>
+    <div class="notif-tabs"><button class="ntab active" onclick="switchTab(this,'all')">Toutes</button><button class="ntab" onclick="switchTab(this,'collectes')">Collectes</button><button class="ntab" onclick="switchTab(this,'paiements')">Paiements</button><button class="ntab" onclick="switchTab(this,'systeme')">Système</button></div>
+    <div class="card" style="max-width:680px;">
+      <div class="notif-full-item"><div class="nfi-ico gr"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="nfi-title">Collecte effectuée</div><div class="nfi-desc">Votre collecte du 16 Mai a été effectuée.</div><div class="nfi-date">18 Mai 2026 – 10:30</div></div></div>
+      <div class="notif-full-item"><div class="nfi-ico or"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8l4 2v5h-4V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><div><div class="nfi-title">Prochaine collecte</div><div class="nfi-desc">Votre prochaine collecte est prévue le Lundi 18 Mai entre 08h00 et 12h00.</div><div class="nfi-date">16 Mai 2026 – 09:00</div></div></div>
+      <div class="notif-full-item"><div class="nfi-ico bl"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="nfi-title">Paiement reçu</div><div class="nfi-desc">Nous avons bien reçu votre paiement du 9 Mai 2026.</div><div class="nfi-date">09 Mai 2026 – 11:15</div></div></div>
+      <div class="notif-full-item"><div class="nfi-ico or"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div><div class="nfi-title">Promotion</div><div class="nfi-desc">Profitez de 10% de réduction sur votre prochain paiement.</div><div class="nfi-date">01 Mai 2026 – 08:00</div></div></div>
+    </div>
+    <button class="btn-outline" style="margin-top:16px;">Voir toutes les notifications</button>
+  </div>
+
+  <!-- ══ SUPPORT ══ -->
+  <div class="page" id="page-support">
+    <div class="page-header support-hero"><h1>Support</h1><p>Une équipe disponible pour répondre à vos questions et résoudre vos demandes.</p></div>
+    <div class="support-grid">
+      <div class="support-options">
+        <div class="support-opt"><div class="support-opt-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="support-opt-title">Questions fréquentes</div><div class="support-opt-sub">Consultez notre FAQ</div></div></div>
+        <div class="support-opt" onclick="openModal('contactModal')"><div class="support-opt-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="support-opt-title">Envoyer un message</div><div class="support-opt-sub">Nous vous répondrons rapidement</div></div></div>
+        <div class="support-opt"><div class="support-opt-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="support-opt-title">Appeler le support</div><div class="support-opt-sub">+243 905 416 789 · Lun-Ven, 8h00-17h00</div></div></div>
+      </div>
+      <div class="card"><div class="card-head"><h3>Mes demandes</h3></div>
+        <div class="demande-item"><div><div class="demande-title">Problème de collecte</div><div class="demande-date">18 Mar. 2026</div></div><span class="badge br">Ouverte</span></div>
+        <div class="demande-item"><div><div class="demande-title">Facture non reçue</div><div class="demande-date">10 Mar. 2026</div></div><span class="badge bg">Résolue</span></div>
+        <div class="demande-item"><div><div class="demande-title">Changement de plan</div><div class="demande-date">02 Mar. 2026</div></div><span class="badge bo">En cours</span></div>
+        <button class="btn-outline" style="margin-top:16px;width:100%;">Voir toutes mes demandes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MOT DE PASSE ══ -->
+  <div class="page" id="page-password">
+    <div class="page-header"><h1>Modifier le mot de passe</h1><p>Assurez la sécurité de votre compte.</p></div>
+    <img class="pwd-page-visual" src="assets/images/securite-compte-enviro.webp" alt="Protection du compte" loading="lazy" decoding="async"/>
+    <div class="card pwd-form">
+      <div class="form-group"><label>Mot de passe actuel</label><div class="pwd-wrap"><input type="password" value="••••••••" id="pwd1"/><button class="eye" onclick="togglePwd('pwd1')"><svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
+      <div class="form-group"><label>Nouveau mot de passe</label><div class="pwd-wrap"><input type="password" value="••••••••" id="pwd2"/><button class="eye" onclick="togglePwd('pwd2')"><svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div>
+        <div class="pwd-rules">
+          <div class="pwd-rule"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Au moins 8 caractères</div>
+          <div class="pwd-rule"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Inclure une lettre majuscule</div>
+          <div class="pwd-rule"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Inclure un chiffre</div>
+          <div class="pwd-rule"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Inclure un caractère spécial</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Confirmer le nouveau mot de passe</label><div class="pwd-wrap"><input type="password" value="••••••••" id="pwd3"/><button class="eye" onclick="togglePwd('pwd3')"><svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></div></div>
+      <button class="btn-green" style="width:100%;justify-content:center;padding:13px;">Mettre à jour le mot de passe</button>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- ══ MODAL: MODIFIER LE PROFIL ══ -->
+<div class="modal-overlay" id="editProfilModal">
+  <div class="modal" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('editProfilModal')">×</button>
+    <h2>Modifier le profil</h2>
+    <p style="font-size:12.5px;color:#888;margin-bottom:16px;">Vous pouvez modifier votre photo, votre nom et votre numéro de téléphone.</p>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+      <div style="position:relative;cursor:pointer;" onclick="document.getElementById('epPhotoInput').click()">
+        <img id="epPhotoPreview" src="" alt="Photo de profil" style="display:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--green);" loading="lazy" decoding="async"/>
+        <div id="epPhotoInitials" style="width:64px;height:64px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:Montserrat;font-weight:800;font-size:22px;color:#fff;">—</div>
+        <div style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;background:var(--green);border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:#fff;fill:none;stroke-width:2;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+      </div>
+      <input type="file" id="epPhotoInput" accept="image/*" style="display:none;" onchange="handleProfilPhotoChange(event)"/>
+      <span style="font-size:12px;color:#888;">Cliquez sur la photo pour la changer</span>
+    </div>
+    <div class="form-group"><label>Nom</label><input type="text" id="epNom"/></div>
+    <div class="form-group"><label>Post-nom</label><input type="text" id="epPostNom"/></div>
+    <div class="form-group"><label>Prénom</label><input type="text" id="epPrenom"/></div>
+    <div class="form-group"><label>Téléphone</label><input type="text" id="epTelephone"/></div>
+    <div id="epError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <button class="btn-green" id="epSaveBtn" style="width:100%;justify-content:center;" onclick="saveProfilEdit()">Enregistrer</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: DÉTAILS ABONNEMENT ══ -->
+<div class="modal-overlay" id="subDetailModal">
+  <div class="modal" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('subDetailModal')">×</button>
+    <h2>Détails de l'abonnement</h2>
+    <div class="sub-detail-grid">
+      <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:22px;">👑</span><div><div class="plan-big" id="sdPlanName" style="font-size:18px;">—</div><div style="font-size:13px;color:#555;" id="sdPrice">33 750 FC / mois</div></div></div>
+        <div id="sdFeatList">
+        <div class="sd-feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Collecte 5 fois par semaine</div>
+        <div class="sd-feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Sac poubelle offert</div>
+        <div class="sd-feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Produit écologique offert</div>
+        <div class="sd-feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Support client prioritaire</div>
+        <div class="sd-feat"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Intervention rapide</div>
+        </div>
+        <div style="margin-top:14px;"><div style="font-size:11px;color:#999;">Prochain renouvellement</div><div style="font-family:Montserrat;font-weight:700;font-size:14px;" id="sdRenewDate">09 Juin 2026</div></div>
+      </div>
+      <div><div class="sd-info-item"><label>Date d'activation</label><span id="sdDateActivation">09 Mai 2026</span></div><div class="sd-info-item"><label>Cycle de facturation</label><span id="sdCycle">Mensuel</span></div><div class="sd-info-item"><label>Méthode de paiement</label><span id="sdMethode">Carte bancaire **** 4567</span></div><div class="sd-info-item"><label>Statut</label><span id="sdStatutBadge" class="badge bg">Actif</span></div></div>
+    </div>
+    <button class="btn-green" style="width:100%;justify-content:center;margin-top:20px;" onclick="closeModal('subDetailModal')">Fermer</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: NOUS CONTACTER ══ -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal" style="max-width:620px;">
+    <button class="modal-close" onclick="closeModal('contactModal')">×</button>
+    <h2>Nous contacter</h2>
+    <p class="msub">Une question, un besoin ? Écrivez-nous, nous vous répondrons rapidement.</p>
+    <div class="contact-grid">
+      <div>
+        <div class="contact-grid-inner">
+          <div class="mform-group"><label>Nom complet</label><input type="text" id="contactName"/></div>
+          <div class="mform-group"><label>Email</label><input type="email" id="contactEmail"/></div>
+        </div>
+        <div class="mform-group" style="margin-bottom:12px;"><label>Sujet</label><select id="contactSubject"><option>Sélectionner un sujet</option><option>Problème de collecte</option><option>Paiement</option><option>Abonnement</option><option>Autre</option></select></div>
+        <div class="mform-group"><label>Votre message</label><textarea id="contactMessage" placeholder="Décrivez votre demande..."></textarea></div>
+        <button class="btn-green" id="contactSendBtn" style="width:100%;justify-content:center;">Envoyer le message</button>
+      </div>
+      <div class="modal-contact-right">
+        <div style="font-family:Montserrat;font-weight:700;font-size:13px;margin-bottom:14px;color:#555;">Autres moyens de contact</div>
+        <div class="mci"><div class="mci-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.17-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="mci-title">Appeler le support</div><div class="mci-val">+243 905 416 789<br>Lun-Ven: 8h00-17h00</div></div></div>
+        <div class="mci"><div class="mci-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="mci-title">Email</div><div class="mci-val">support@envirocleans.cd</div></div></div>
+        <div class="mci"><div class="mci-ico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="mci-title">Adresse</div><div class="mci-val">Nsele, Kinshasa, RD Congo</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: PROFIL DE L'AGENT ══ -->
+<div class="modal-overlay" id="agentProfileModal">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('agentProfileModal')">×</button>
+    <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;">
+      <img id="apImg" src="https://placehold.co/100x100?text=Agent" style="width:100px;height:100px;border-radius:10px;object-fit:cover;flex-shrink:0;" alt="agent" loading="lazy" decoding="async"/>
+      <div>
+        <span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span>
+        <div style="font-family:Montserrat;font-weight:800;font-size:18px;margin-top:6px;" id="apName">—</div>
+        <span class="badge bg" id="apFonction" style="margin-top:6px;display:inline-block;">—</span>
+      </div>
+    </div>
+    <div class="sd-info-item"><label>Matricule</label><span id="apMatricule">—</span></div>
+    <div class="sd-info-item"><label>Zone</label><span id="apZone">—</span></div>
+    <div class="sd-info-item"><label>Téléphone</label><span id="apTelephone">—</span></div>
+    <div class="sd-info-item"><label>Date d'intégration</label><span id="apDateEmbauche">—</span></div>
+    <div class="sd-info-item"><label>Statut</label><span id="apStatut">—</span></div>
+    <button class="btn-green" style="width:100%;justify-content:center;margin-top:10px;" onclick="closeModal('agentProfileModal')">Fermer</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: QUESTIONS FRÉQUENTES ══ -->
+<div class="modal-overlay" id="faqModal">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeModal('faqModal')">×</button>
+    <h2>Questions fréquentes</h2>
+    <div style="margin-top:10px;">
+      <div class="sd-info-item"><label>Comment savoir quand passe mon agent ?</label><span style="font-weight:400;">La date et l'heure de votre prochaine collecte apparaissent sur votre tableau de bord et dans l'onglet "Mes collectes".</span></div>
+      <div class="sd-info-item"><label>Que faire si l'agent n'est pas passé ?</label><span style="font-weight:400;">Utilisez le bouton "Signaler un problème" dans l'onglet Collectes, ou contactez le support directement.</span></div>
+      <div class="sd-info-item"><label>Comment changer d'offre ?</label><span style="font-weight:400;">Rendez-vous dans "Mon abonnement" puis "Changer de plan".</span></div>
+      <div class="sd-info-item"><label>Mes paiements sont-ils sécurisés ?</label><span style="font-weight:400;">Oui, tous les paiements transitent par des prestataires Mobile Money reconnus en RDC.</span></div>
+    </div>
+    <button class="btn-green" style="width:100%;justify-content:center;margin-top:16px;" onclick="closeModal('faqModal')">Fermer</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: CHANGER / CHOISIR UNE OFFRE ══ -->
+<div class="modal-overlay" id="modalChangerOffre">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('modalChangerOffre')">×</button>
+    <h2 id="coTitre">Changer d'offre</h2>
+    <div id="coOffreActuelleBox" style="display:none;background:var(--green-pale);border-radius:10px;padding:14px;margin-bottom:16px;">
+      <p style="font-size:11.5px;color:#888;margin-bottom:4px;">Votre offre actuelle</p>
+      <p id="coOffreActuelleNom" style="font-weight:700;font-size:15px;">—</p>
+    </div>
+    <p style="font-size:12.5px;color:#888;margin-bottom:12px;">Choisissez une offre :</p>
+    <div id="coOffresListe" style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;"></div>
+    <div id="coError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <button class="btn-green" id="coContinuerBtn" style="width:100%;justify-content:center;" onclick="coContinuerVersPaiement()" disabled>Continuer vers le paiement</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: SIMULATEUR DE PAIEMENT (en attendant SerdiPay) ══ -->
+<div class="modal-overlay" id="paymentSimModal">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeModal('paymentSimModal'); if(PAY_POLL_INTERVAL) clearInterval(PAY_POLL_INTERVAL); resetPaySimModal();">×</button>
+    <h2>Paiement de l'abonnement</h2>
+    <p style="font-size:13px;color:#777;margin:8px 0 14px;" id="paySimSummary"></p>
+
+    <div id="paySimMethodsExisting"></div>
+
+    <div id="paySimNewMethodForm" style="display:none;margin-top:10px;">
+      <div class="mform-group"><label>Opérateur</label>
+        <select id="paySimOperateur">
+          <option value="mpesa">M-Pesa</option>
+          <option value="orange_money">Orange Money</option>
+          <option value="airtel_money">Airtel Money</option>
+          <option value="carte_credit">Carte de crédit</option>
+        </select>
+      </div>
+      <div class="mform-group"><label>Numéro de compte / carte</label><input type="text" id="paySimNumero" placeholder="Ex: 0991234567"/></div>
+    </div>
+    <button class="btn-outline" id="paySimToggleNewBtn" style="width:100%;justify-content:center;margin:8px 0 14px;" onclick="togglePaySimNewMethod()">+ Utiliser un autre moyen de paiement</button>
+
+    <div id="paySimError" style="font-size:12.5px;color:#e53935;margin-bottom:10px;display:none;"></div>
+    <button class="btn-green" id="payNowBtn" style="width:100%;justify-content:center;margin-bottom:10px;" onclick="startRealPayment()">📱 Payer maintenant</button>
+
+    <div id="payPendingView" style="display:none;text-align:center;padding:10px 0;">
+      <div style="width:42px;height:42px;border:3px solid var(--green-light);border-top-color:var(--green);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite;"></div>
+      <p style="font-size:13.5px;font-weight:700;margin-bottom:6px;">En attente de confirmation</p>
+      <p style="font-size:12px;color:#888;">Une demande a été envoyée sur votre téléphone. Validez-la pour finaliser le paiement.</p>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+  </div>
+</div>
+
+<div class="toast-msg" id="appToast"></div>
+
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const map={'profil':0,'abonnement':1,'paiement':2,'collectes':3,'agents':4,'notifications':5,'support':6,'password':7};
+  if(map[id]!==undefined) document.querySelectorAll('.sb-item')[map[id]].classList.add('active');
+  window.scrollTo(0,0);
+  closeSidebar();
+  if(id === 'notifications') markNotificationsAsRead();
+}
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+function toggleDropdown(){
+  document.getElementById('profileDropdown').classList.toggle('show');
+}
+function closeDropdown(){
+  document.getElementById('profileDropdown').classList.remove('show');
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.avatar-wrap')) closeDropdown();
+});
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',function(e){if(e.target===this) this.classList.remove('show');});
+});
+function togglePwd(id){
+  const i=document.getElementById(id);
+  i.type=i.type==='password'?'text':'password';
+}
+function logout(){
+  localStorage.removeItem('ec.accessToken');
+  localStorage.removeItem('ec.refreshToken');
+  localStorage.removeItem('ec.user');
+  window.location.href='espace-client.html';
+}
+function switchTab(btn,tab){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════
+// CONNEXION À L'API – DONNÉES RÉELLES DU CLIENT
+// ════════════════════════════════════════
+const API_BASE_URL = 'https://enviro-cleans-api.onrender.com';
+let CLIENT_DASHBOARD_DATA = null;
+
+const STATUT_LABELS = {
+  actif: { label: 'Actif', cls: 'bg' },
+  expire: { label: 'Expiré', cls: '' },
+  suspendu: { label: 'Suspendu', cls: 'bo' },
+  en_attente: { label: 'En attente', cls: 'bo' },
+  annule: { label: 'Annulé', cls: 'br' },
+  reussi: { label: 'Payé', cls: 'bg' },
+  echoue: { label: 'Échoué', cls: 'br' },
+  rembourse: { label: 'Remboursé', cls: 'bo' },
+  effectuee: { label: 'Effectuée', cls: 'bg' },
+  a_venir: { label: 'À venir', cls: 'bo' },
+  absent: { label: 'Absent', cls: 'br' },
+  probleme: { label: 'Problème', cls: 'br' },
+  manquee: { label: 'Manquée', cls: 'br' },
+};
+
+function badgeHtml(statut){
+  const info = STATUT_LABELS[statut] || { label: statut || '—', cls: '' };
+  return `<span class="badge ${info.cls}">${info.label}</span>`;
+}
+function formatDateLong(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr);
+  if(isNaN(d)) return dateStr;
+  return d.toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+}
+function formatDateWithDay(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr);
+  if(isNaN(d)) return dateStr;
+  const s = d.toLocaleDateString('fr-FR', { weekday:'short', day:'2-digit', month:'long', year:'numeric' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function formatMontant(montant){
+  if(montant===null || montant===undefined) return '—';
+  const n = Number(montant);
+  return n.toLocaleString('fr-FR', { maximumFractionDigits: 2 }) + ' $';
+}
+function fullName(obj, withPostNom){
+  if(!obj) return '—';
+  const parts = [obj.prenom, withPostNom ? obj.post_nom : null, obj.nom].filter(Boolean);
+  return parts.join(' ') || obj.nom || '—';
+}
+function buildFeatList(privileges, featClass){
+  const list = Array.isArray(privileges) ? privileges : [];
+  if(list.length === 0) return `<p style="color:#999;font-size:13px;">Aucun détail disponible pour cette offre.</p>`;
+  return list.map(p => `<div class="${featClass}"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${p}</div>`).join('');
+}
+
+async function loadClientDashboard(){
+  const token = localStorage.getItem('ec.accessToken');
+  if(!token){ window.location.href = 'espace-client.html'; return; }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/client/dashboard`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if(response.status === 401){
+      localStorage.removeItem('ec.accessToken');
+      localStorage.removeItem('ec.refreshToken');
+      localStorage.removeItem('ec.user');
+      window.location.href = 'espace-client.html';
+      return;
+    }
+    if(!response.ok){
+      console.error('Erreur API dashboard:', await response.text());
+      showToast("Impossible de charger vos données. Réessayez.");
+      return;
+    }
+    const data = await response.json();
+    CLIENT_DASHBOARD_DATA = data;
+    renderClientDashboard(data);
+    wireExtraFeatures(data);
+  } catch(err){
+    console.error('Impossible de charger le tableau de bord:', err);
+    showToast("Impossible de contacter le serveur.");
+  } finally {
+    hideDashboardLoader();
+  }
+}
+
+function hideDashboardLoader(){
+  const loader = document.getElementById('dashboardLoader');
+  if(!loader) return;
+  loader.style.opacity = '0';
+  setTimeout(() => { loader.style.display = 'none'; }, 300);
+}
+
+let CLIENT_DATA_CACHE = null;
+function renderClientDashboard(data){
+  CLIENT_DATA_CACHE = data;
+  const client = data.client || {};
+  const adresse = data.adresse || null;
+  const abonnement = data.abonnement || null;
+  const paiements = data.paiements || [];
+  const collectes = data.collectes || [];
+  const notifications = data.notifications || [];
+
+  const displayName = fullName(client, true);
+  const adresseLabel = adresse ? [adresse.avenue, adresse.quartier, adresse.commune, adresse.ville].filter(Boolean).join(', ') : '—';
+  const prochaineCollecte = data.prochaineCollecte || null;
+  const dernierPaiement = paiements[0];
+
+  // ── Nom / topbar / dropdown / profil ──
+  document.querySelectorAll('.uname, .profil-name, .pdname').forEach(el => el.textContent = displayName);
+  const sinceLabel = client.date_enregistrement ? 'Client depuis ' + new Date(client.date_enregistrement).toLocaleDateString('fr-FR', { month:'long', year:'numeric' }) : '';
+  document.querySelectorAll('.usince, .profil-since, .pdsince').forEach(el => el.textContent = sinceLabel);
+
+  const profilNomVal = document.getElementById('profilNomVal');
+  if(profilNomVal) profilNomVal.textContent = displayName;
+  const profilTelVal = document.getElementById('profilTelVal');
+  if(profilTelVal) profilTelVal.textContent = client.telephone || '—';
+  const PHOTO_PLACEHOLDER = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2U4ZjVlOSIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzgiIHI9IjE4IiBmaWxsPSIjYThkNWIwIi8+PHBhdGggZD0iTTUwIDYwYy0yMCAwLTMyIDEyLTMyIDI4djEyaDY0Vjg4YzAtMTYtMTItMjgtMzItMjh6IiBmaWxsPSIjYThkNWIwIi8+PC9zdmc+";
+  if(client.photo_url){
+    document.querySelectorAll('#profilPicImg, .profil-pic, .avatar-wrap img').forEach(img => img.src = client.photo_url);
+  } else {
+    document.querySelectorAll('#profilPicImg, .profil-pic, .avatar-wrap img').forEach(img => img.src = PHOTO_PLACEHOLDER);
+  }
+
+  const abonneBadge = document.querySelector('.abonne-badge');
+  if(abonneBadge){
+    const spans = abonneBadge.querySelectorAll('span');
+    if(spans[1]) spans[1].textContent = client.numero_abonne || '—';
+  }
+
+  const greeting = document.querySelector('#page-dashboard .page-header h1');
+  if(greeting) greeting.textContent = `Bonjour, ${client.prenom || displayName} 👋`;
+
+  // ── Stat cards (dashboard) ──
+  const statCards = document.querySelectorAll('#page-dashboard .stat-card');
+  if(statCards[0]){
+    const val = statCards[0].querySelector('.stat-val'), sub = statCards[0].querySelector('.stat-sub');
+    if(val){ val.textContent = client.statut === 'actif' ? 'Actif' : (client.statut || '—'); val.className = 'stat-val ' + (client.statut==='actif' ? 'g' : ''); }
+    if(sub) sub.textContent = client.statut === 'actif' ? 'Votre compte est à jour' : 'Vérifiez votre compte';
+  }
+  if(statCards[1]){
+    const val = statCards[1].querySelector('.stat-val'), sub = statCards[1].querySelector('.stat-sub');
+    if(prochaineCollecte && prochaineCollecte.date){
+      if(val) val.textContent = formatDateLong(prochaineCollecte.date);
+      if(sub) sub.textContent = prochaineCollecte.type === 'rattrapage' ? '⚠ Rattrapage programmé'
+        : prochaineCollecte.type === 'estimee' ? 'Date estimée — à confirmer' : '';
+    } else if(prochaineCollecte && prochaineCollecte.type === 'manquee_en_attente'){
+      if(val){ val.textContent = 'Collecte manquée'; val.className = 'stat-val r'; }
+      if(sub) sub.textContent = '⚠ Nouvelle date à venir';
+    } else {
+      if(val) val.textContent = 'Aucune collecte prévue';
+      if(sub) sub.textContent = '';
+    }
+  }
+  if(statCards[2]){
+    const val = statCards[2].querySelector('.stat-val'), sub = statCards[2].querySelector('.stat-sub');
+    if(val) val.textContent = adresse ? (adresse.zone || '—') : '—';
+    if(sub) sub.textContent = adresse ? [adresse.commune, adresse.ville].filter(Boolean).join(', ') : '';
+  }
+  if(statCards[3]){
+    const val = statCards[3].querySelector('.stat-val'), sub = statCards[3].querySelector('.stat-sub');
+    const isAJour = dernierPaiement && dernierPaiement.statut === 'reussi';
+    if(val){ val.textContent = isAJour ? 'À jour' : (dernierPaiement ? 'En attente' : 'Aucun paiement'); val.className = 'stat-val ' + (isAJour ? 'g' : ''); }
+    if(sub) sub.textContent = abonnement && abonnement.date_fin ? `Prochain le ${formatDateLong(abonnement.date_fin)}` : '';
+  }
+
+  // ── Carte "Mon abonnement" (dashboard) ──
+  const subCardBtn = document.querySelector('#page-dashboard .sub-card .btn-green');
+  const dashFeatList = document.getElementById('dashFeatList');
+  if(abonnement){
+    const planName = document.querySelector('#page-dashboard .plan-name');
+    const planFreq = document.querySelector('#page-dashboard .plan-freq');
+    const priceBig = document.querySelector('#page-dashboard .price-big');
+    const renewDt = document.querySelector('#page-dashboard .renew-dt');
+    if(planName) planName.textContent = 'Plan ' + abonnement.offre;
+    if(planFreq) planFreq.textContent = abonnement.description || '';
+    if(priceBig) priceBig.textContent = formatMontant(abonnement.prix);
+    if(renewDt) renewDt.textContent = formatDateLong(abonnement.date_fin);
+    if(subCardBtn) subCardBtn.style.display = '';
+    if(dashFeatList) dashFeatList.innerHTML = buildFeatList(abonnement.privileges, 'feat');
+  } else {
+    const planName = document.querySelector('#page-dashboard .plan-name');
+    const planFreq = document.querySelector('#page-dashboard .plan-freq');
+    const priceBig = document.querySelector('#page-dashboard .price-big');
+    const renewDt = document.querySelector('#page-dashboard .renew-dt');
+    const renewLbl = document.querySelector('#page-dashboard .renew-lbl');
+    if(planName) planName.textContent = 'Aucun abonnement actif';
+    if(planFreq) planFreq.textContent = 'Rendez-vous dans le menu Paiement pour souscrire à une offre.';
+    if(priceBig) priceBig.textContent = '—';
+    if(renewLbl) renewLbl.style.display = 'none';
+    if(renewDt) renewDt.textContent = '';
+    if(subCardBtn) subCardBtn.style.display = 'none';
+    if(dashFeatList) dashFeatList.innerHTML = '';
+  }
+
+
+  // ── Carte "Mon agent assigné" (dernière collecte) ──
+  const latestWithAgent = collectes.find(c => c.agent);
+  const agentCard = document.querySelectorAll('#page-dashboard .mid-row .card')[1];
+  if(agentCard){
+    if(latestWithAgent){
+      const latestAgent = latestWithAgent.agent;
+      const img = agentCard.querySelector('img.ag-pic');
+      if(img){ img.style.display=''; if(latestAgent.photo) img.src = latestAgent.photo; }
+      const nameDiv = agentCard.querySelector('div[style*="font-weight:800"]');
+      if(nameDiv) nameDiv.textContent = fullName(latestAgent, false);
+      const fonctionDiv = agentCard.querySelector('div[style*="margin-bottom:6px"]');
+      if(fonctionDiv) fonctionDiv.textContent = latestAgent.fonction || '—';
+      const verifiedSpan = agentCard.querySelector('.verified');
+      if(verifiedSpan) verifiedSpan.style.display = '';
+      const phoneDiv = agentCard.querySelector('div[style*="margin-bottom:5px"]');
+      if(phoneDiv){
+        const svg = phoneDiv.querySelector('svg');
+        phoneDiv.textContent = '';
+        if(svg) phoneDiv.appendChild(svg);
+        phoneDiv.appendChild(document.createTextNode(latestAgent.telephone || '—'));
+        phoneDiv.style.display = '';
+      }
+      const agentProfileBtn = agentCard.querySelector('button.btn-outline');
+      if(agentProfileBtn) agentProfileBtn.style.display = '';
+    } else {
+      const img = agentCard.querySelector('img.ag-pic');
+      if(img) img.style.display = 'none';
+      const nameDiv = agentCard.querySelector('div[style*="font-weight:800"]');
+      if(nameDiv) nameDiv.textContent = 'Aucun agent assigné';
+      const fonctionDiv = agentCard.querySelector('div[style*="margin-bottom:6px"]');
+      if(fonctionDiv) fonctionDiv.textContent = 'Une collecte n\'a pas encore eu lieu.';
+      const verifiedSpan = agentCard.querySelector('.verified');
+      if(verifiedSpan) verifiedSpan.style.display = 'none';
+      const phoneDiv = agentCard.querySelector('div[style*="margin-bottom:5px"]');
+      if(phoneDiv) phoneDiv.style.display = 'none';
+      const agentProfileBtn = agentCard.querySelector('button.btn-outline');
+      if(agentProfileBtn) agentProfileBtn.style.display = 'none';
+    }
+  }
+
+  // ── Mini-tableaux (dashboard) ──
+  const dashTables = document.querySelectorAll('#page-dashboard .bottom-row table');
+  if(dashTables[0]){
+    dashTables[0].querySelector('tbody').innerHTML = collectes.slice(0,5).map(c => `
+      <tr><td>${formatDateWithDay(c.date)}</td><td>${badgeHtml(c.statut)}</td><td>${c.type_dechet||'—'}</td><td>${c.agent?fullName(c.agent,false):'—'}</td></tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;color:#999;padding:14px;">Aucune collecte enregistrée</td></tr>';
+  }
+  if(dashTables[1]){
+    dashTables[1].querySelector('tbody').innerHTML = paiements.slice(0,5).map(p => `
+      <tr><td>${formatDateLong(p.date)}</td><td>${badgeHtml(p.statut)}</td><td style="font-weight:700">${formatMontant(p.montant)}</td><td>${p.invoice_id ? `<button class="dl-btn" data-invoice-id="${p.invoice_id}"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>` : ''}</td></tr>
+    `).join('') || '<tr><td colspan="4" style="text-align:center;color:#999;padding:14px;">Aucun paiement enregistré</td></tr>';
+  }
+  const notifCard = document.querySelectorAll('#page-dashboard .bottom-row .card')[2];
+  if(notifCard && notifCard.children[1]){
+    notifCard.children[1].innerHTML = notifications.slice(0,3).map(n => `
+      <div class="notif-item2"><div class="nic gr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div>
+      <div><div class="ntitle">${n.titre}</div><div class="ndesc">${n.message}</div><div class="ndate">${formatDateLong(n.date)}</div></div></div>
+    `).join('') || '<p style="color:#999;font-size:13px;">Aucune notification.</p>';
+  }
+
+  // ── Page Profil ──
+  const profilStatItems = document.querySelectorAll('#page-profil .profil-stat-item');
+  if(profilStatItems[0]) profilStatItems[0].innerHTML = profilStatItems[0].querySelector('svg').outerHTML + `Statut : <strong style="color:var(--green)">${client.statut==='actif'?'Actif':client.statut}</strong>`;
+  if(profilStatItems[1]) profilStatItems[1].innerHTML = profilStatItems[1].querySelector('svg').outerHTML + `Zone : ${adresse?(adresse.zone||'—'):'—'}`;
+  if(profilStatItems[2]) profilStatItems[2].innerHTML = profilStatItems[2].querySelector('svg').outerHTML + `Inscrit le : ${formatDateLong(client.date_enregistrement)}`;
+
+  const infoItems = document.querySelectorAll('#page-profil .info-item .val');
+  if(infoItems[0]) infoItems[0].textContent = displayName;
+  if(infoItems[1]) infoItems[1].textContent = client.email || '—';
+  if(infoItems[2]) infoItems[2].textContent = client.telephone || '—';
+  if(infoItems[3]) infoItems[3].textContent = adresseLabel;
+  if(infoItems[4]) infoItems[4].textContent = adresse ? (adresse.zone||'—') : '—';
+
+  // ── Page Abonnement ──
+  const planBig = document.querySelector('#page-abonnement .plan-big');
+  const planPrice = document.querySelector('#page-abonnement .plan-price');
+  const actifBadge = document.querySelector('#page-abonnement .actif-badge');
+  const planInfoSpans = document.querySelectorAll('#page-abonnement .plan-info-item span');
+  const aboHistoTbody = document.querySelector('#page-abonnement .histo-table tbody');
+  const aboFeatList = document.getElementById('aboFeatList');
+  const aboPlanVisual = document.getElementById('aboPlanVisual');
+  const aboChangerBtn = Array.from(document.querySelectorAll('#page-abonnement button')).find(b=>b.textContent.includes('Changer de plan'));
+  const aboDetailBtn = document.querySelector('#page-abonnement .plan-actuel-box > button.btn-green');
+
+  if(abonnement){
+    if(planBig) planBig.textContent = 'Plan ' + abonnement.offre;
+    if(aboPlanVisual){ aboPlanVisual.src = getPlanVisual(abonnement.offre); aboPlanVisual.style.display = ''; }
+    if(planPrice) planPrice.textContent = formatMontant(abonnement.prix) + ' / ' + (abonnement.cycle_facturation||'mois');
+    if(actifBadge){ actifBadge.textContent = (STATUT_LABELS[abonnement.statut]||{label:abonnement.statut}).label; actifBadge.style.display=''; }
+    if(planInfoSpans[0]) planInfoSpans[0].textContent = formatDateLong(abonnement.date_fin);
+    if(planInfoSpans[1]) planInfoSpans[1].textContent = (abonnement.cycle_facturation||'—').replace(/^./, c=>c.toUpperCase());
+    if(aboFeatList) aboFeatList.innerHTML = buildFeatList(abonnement.privileges, 'feat');
+    if(aboDetailBtn) aboDetailBtn.style.display = '';
+    if(aboChangerBtn) aboChangerBtn.textContent = 'Changer de plan';
+
+    if(aboHistoTbody){
+      aboHistoTbody.innerHTML = `<tr><td>${formatDateLong(abonnement.date_debut)}</td><td>Plan ${abonnement.offre}</td><td>${formatMontant(abonnement.prix)}</td><td>${badgeHtml(abonnement.statut)}</td></tr>`;
+    }
+  } else {
+    if(planBig) planBig.textContent = 'Aucun abonnement actif';
+    if(aboPlanVisual) aboPlanVisual.style.display = 'none';
+    if(planPrice) planPrice.textContent = '—';
+    if(actifBadge) actifBadge.style.display = 'none';
+    if(planInfoSpans[0]) planInfoSpans[0].textContent = '—';
+    if(planInfoSpans[1]) planInfoSpans[1].textContent = '—';
+    if(aboFeatList) aboFeatList.innerHTML = '';
+    if(aboDetailBtn) aboDetailBtn.style.display = 'none';
+    if(aboChangerBtn) aboChangerBtn.textContent = 'Souscrire à une offre';
+    if(aboHistoTbody){
+      aboHistoTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:14px;">Aucun abonnement pour le moment</td></tr>';
+    }
+  }
+
+  // ── Page Paiement ──
+  const payStats = document.querySelectorAll('#page-paiement .pay-stat');
+  const totalPaye = paiements.filter(p=>p.statut==='reussi').reduce((s,p)=>s+Number(p.montant||0),0);
+  const soldeAttente = paiements.filter(p=>p.statut==='en_attente').reduce((s,p)=>s+Number(p.montant||0),0);
+  if(payStats[0]){ payStats[0].querySelector('.ps-val').textContent = formatMontant(soldeAttente); payStats[0].querySelector('.ps-sub').textContent = soldeAttente>0?'Paiement en attente':'Aucun paiement en attente'; }
+  if(payStats[1]){ payStats[1].querySelector('.ps-val').textContent = formatMontant(totalPaye); payStats[1].querySelector('.ps-sub').textContent = `${paiements.filter(p=>p.statut==='reussi').length} paiement(s) effectué(s)`; }
+  if(payStats[2]){ payStats[2].querySelector('.ps-val').textContent = dernierPaiement?formatDateLong(dernierPaiement.date):'—'; payStats[2].querySelector('.ps-sub').textContent = dernierPaiement?formatMontant(dernierPaiement.montant):'Aucun paiement'; }
+  if(payStats[3]){ payStats[3].querySelector('.ps-val').textContent = abonnement?formatDateLong(abonnement.date_fin):'—'; payStats[3].querySelector('.ps-sub').textContent = abonnement?formatMontant(abonnement.prix):''; }
+
+  const payHistoTbody = document.querySelectorAll('#page-paiement table')[0]?.querySelector('tbody');
+  if(payHistoTbody){
+    payHistoTbody.innerHTML = paiements.map(p => `
+      <tr><td>${formatDateLong(p.date)}</td><td style="font-weight:700">${formatMontant(p.montant)}</td><td>${p.methode_label||(p.methode||'—').replace('_',' ')}${p.numero_compte_masque?' '+p.numero_compte_masque:''}</td><td>${badgeHtml(p.statut)}</td><td>${p.invoice_id ? `<button class="dl-btn" data-invoice-id="${p.invoice_id}"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>` : ''}</td></tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center;color:#999;padding:14px;">Aucun paiement enregistré</td></tr>';
+  }
+
+  // ── Page Collectes ──
+  const prochaineBox = document.querySelector('#page-collectes .prochaine-box');
+  if(prochaineBox){
+    const badge = prochaineBox.querySelector('.dans-badge');
+    const dateEl = prochaineBox.querySelector('.prochaine-date');
+    const timeEl = prochaineBox.querySelector('.prochaine-time');
+    const zoneEl = prochaineBox.querySelector('.prochaine-zone');
+    const zoneTxt = adresse ? `Zone : ${adresse.zone}${adresse.ville ? ', '+adresse.ville : ''}` : '';
+
+    if(prochaineCollecte && prochaineCollecte.type === 'manquee_en_attente'){
+      prochaineBox.style.background = '#e53935';
+      badge.textContent = '⚠ Manquée';
+      dateEl.textContent = 'En attente de rattrapage';
+      timeEl.textContent = prochaineCollecte.message;
+      zoneEl.textContent = zoneTxt;
+    } else if(prochaineCollecte && prochaineCollecte.date){
+      prochaineBox.style.background = prochaineCollecte.type === 'rattrapage' ? '#f59e0b' : 'var(--green)';
+      badge.textContent = prochaineCollecte.type === 'rattrapage' ? 'Rattrapage' : prochaineCollecte.type === 'estimee' ? 'Estimée' : 'À venir';
+      dateEl.textContent = formatDateWithDay(prochaineCollecte.date);
+      timeEl.textContent = prochaineCollecte.message || 'Heure à confirmer';
+      zoneEl.textContent = zoneTxt;
+    } else {
+      prochaineBox.style.background = 'var(--green)';
+      badge.textContent = '—';
+      dateEl.textContent = 'Aucune collecte prévue';
+      timeEl.textContent = '';
+      zoneEl.textContent = zoneTxt;
+    }
+  }
+
+  const resNums = document.querySelectorAll('#page-collectes .res-item .res-num');
+  if(resNums.length){
+    resNums[0].textContent = collectes.length;
+    resNums[1].textContent = collectes.filter(c=>c.statut==='effectuee').length;
+    resNums[2].textContent = collectes.filter(c=>['manquee','absent','probleme'].includes(c.statut)).length;
+    resNums[3].textContent = collectes.filter(c=>c.statut==='a_venir').length;
+  }
+
+  const collectesHistoTbody = document.querySelector('#page-collectes .collectes-detail-table tbody');
+  if(collectesHistoTbody){
+    collectesHistoTbody.innerHTML = collectes.map(c => `
+      <tr><td>${formatDateWithDay(c.date)}</td><td>${badgeHtml(c.statut)}</td><td>${c.type_dechet||'—'}</td>
+      <td style="display:flex;align-items:center;gap:6px;padding:9px 6px;">${c.agent?fullName(c.agent,false):'—'}</td>
+      <td>${c.heure||'—'}</td><td></td></tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:14px;">Aucune collecte enregistrée</td></tr>';
+  }
+
+  // ── Page Agents (dédupliqués depuis les collectes) ──
+  const agentsList = document.querySelector('#page-agents .agents-list');
+  if(agentsList){
+    const seen = new Set(); const uniqueAgents = [];
+    collectes.forEach(c => { if(c.agent && c.agent.telephone && !seen.has(c.agent.telephone)){ seen.add(c.agent.telephone); uniqueAgents.push(c.agent); } });
+    agentsList.innerHTML = uniqueAgents.map(a => `
+      <div class="agent-row"><img src="${a.photo||'https://placehold.co/80x80?text=Agent'}" alt="${fullName(a,false)}" loading="lazy" decoding="async"/>
+      <div class="agent-row-info"><div class="agent-row-name">${fullName(a,false)}</div><div class="agent-row-role">${a.fonction||'—'}</div>
+      <span class="verified"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Agent vérifié</span>
+      <div class="agent-row-tel" style="margin-top:6px;">${a.telephone||'—'}</div></div><button class="btn-outline">Voir le profil</button></div>
+    `).join('') || '<p style="color:#999;">Aucun agent assigné pour le moment.</p>';
+  }
+
+  // ── Page Notifications (complète) ──
+  const notifFullContainer = document.querySelector('#page-notifications .card');
+  if(notifFullContainer){
+    notifFullContainer.innerHTML = notifications.map(n => `
+      <div class="notif-full-item"><div class="nfi-ico gr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div>
+      <div><div class="nfi-title">${n.titre}</div><div class="nfi-desc">${n.message}</div><div class="nfi-date">${formatDateLong(n.date)}</div></div></div>
+    `).join('') || '<p style="color:#999;padding:10px;">Aucune notification pour le moment.</p>';
+  }
+}
+
+// ════════════════════════════════════════
+// TOAST GÉNÉRIQUE
+// ════════════════════════════════════════
+function showToast(msg){
+  const t = document.getElementById('appToast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>{ t.classList.remove('show'); }, 3000);
+}
+function comingSoon(){ showToast('Cette fonctionnalité arrive bientôt 🚧'); }
+
+function openEditProfilModal(){
+  const client = (CLIENT_DATA_CACHE && CLIENT_DATA_CACHE.client) || {};
+  document.getElementById('epNom').value = client.nom || '';
+  document.getElementById('epPostNom').value = client.post_nom || '';
+  document.getElementById('epPrenom').value = client.prenom || '';
+  document.getElementById('epTelephone').value = client.telephone || '';
+  document.getElementById('epError').style.display = 'none';
+  const preview = document.getElementById('epPhotoPreview');
+  const initials = document.getElementById('epPhotoInitials');
+  if(client.photo_url){
+    preview.src = client.photo_url;
+    preview.style.display = 'block';
+    initials.style.display = 'none';
+  } else {
+    preview.style.display = 'none';
+    initials.style.display = 'flex';
+    initials.textContent = fullName(client, false).split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase() || '—';
+  }
+  openModal('editProfilModal');
+}
+
+async function saveProfilEdit(){
+  const errorBox = document.getElementById('epError');
+  errorBox.style.display = 'none';
+  const body = {
+    nom: document.getElementById('epNom').value.trim(),
+    post_nom: document.getElementById('epPostNom').value.trim(),
+    prenom: document.getElementById('epPrenom').value.trim(),
+    telephone: document.getElementById('epTelephone').value.trim(),
+  };
+  if(!body.nom || !body.telephone){
+    errorBox.textContent = 'Le nom et le téléphone sont obligatoires.';
+    errorBox.style.display = 'block';
+    return;
+  }
+
+  const token = localStorage.getItem('ec.accessToken');
+  const btn = document.getElementById('epSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement...';
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/client/profil`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de la mise à jour.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    closeModal('editProfilModal');
+    showToast('Profil mis à jour avec succès !');
+    loadClientDashboard();
+  } catch(err){
+    console.error('Erreur mise à jour profil:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer';
+  }
+}
+
+function handleProfilPhotoChange(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const base64 = ev.target.result.split(',')[1];
+    const token = localStorage.getItem('ec.accessToken');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/client/profil/photo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ photo_base64: base64, content_type: file.type })
+      });
+      const data = await response.json();
+      if(!response.ok){ showToast(data.message || "Erreur lors de l'envoi de la photo."); return; }
+      document.querySelectorAll('#profilPicImg, .profil-pic, .avatar-wrap img, #epPhotoPreview').forEach(img => { img.src = data.photo_url; img.style.display = 'block'; });
+      document.getElementById('epPhotoInitials')?.style.setProperty('display', 'none');
+      if(CLIENT_DATA_CACHE && CLIENT_DATA_CACHE.client) CLIENT_DATA_CACHE.client.photo_url = data.photo_url;
+      showToast('Photo mise à jour !');
+    } catch(err){
+      console.error('Erreur envoi photo:', err);
+      showToast('Impossible de contacter le serveur.');
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+// ════════════════════════════════════════
+// BADGES DE NOTIFICATION (cloche + menu, toujours synchronisés)
+// ════════════════════════════════════════
+function setNotificationBadges(count){
+  const bellBadge = document.querySelector('.notif-badge');
+  const menuBadge = document.querySelector('.sb-notif-badge');
+  [bellBadge, menuBadge].forEach(el => {
+    if(!el) return;
+    if(count > 0){ el.textContent = count; el.style.display = ''; }
+    else { el.style.display = 'none'; }
+  });
+}
+
+let notificationPollingStarted = false;
+function startNotificationPolling(){
+  if(notificationPollingStarted) return;
+  notificationPollingStarted = true;
+  setInterval(async () => {
+    // On ne dérange pas si l'utilisateur est déjà en train de regarder ses notifications
+    const onNotifPage = document.getElementById('page-notifications')?.classList.contains('active');
+    if(onNotifPage) return;
+
+    const token = localStorage.getItem('ec.accessToken');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/client/notifications/unread-count`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if(!response.ok) return;
+      const data = await response.json();
+      setNotificationBadges(data.count || 0);
+    } catch (err) {
+      console.error('Erreur verification notifications en arriere-plan:', err);
+    }
+  }, 30000);
+}
+
+// ════════════════════════════════════════
+// MARQUER LES NOTIFICATIONS COMME LUES
+// ════════════════════════════════════════
+let notificationsAlreadyMarked = false;
+async function markNotificationsAsRead(){
+  setNotificationBadges(0);
+  ALL_NOTIFICATIONS.forEach(n => n.lu = true);
+
+  if(notificationsAlreadyMarked) return;
+  notificationsAlreadyMarked = true;
+
+  const token = localStorage.getItem('ec.accessToken');
+  try {
+    await fetch(`${API_BASE_URL}/api/client/notifications/mark-read`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+  } catch(err){
+    console.error('Erreur marquage notifications lues:', err);
+  }
+}
+
+// ════════════════════════════════════════
+// TÉLÉCHARGEMENT RÉEL DES FACTURES PDF
+// ════════════════════════════════════════
+async function downloadInvoice(invoiceId){
+  const token = localStorage.getItem('ec.accessToken');
+  showToast('Téléchargement en cours...');
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/client/invoices/${invoiceId}/download`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if(!response.ok){
+      showToast('Impossible de télécharger cette facture.');
+      return;
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `facture-${invoiceId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch(err){
+    console.error('Erreur téléchargement facture:', err);
+    showToast('Erreur lors du téléchargement.');
+  }
+}
+
+// ════════════════════════════════════════
+// SIMULATEUR DE PAIEMENT (en attendant SerdiPay)
+// ════════════════════════════════════════
+let PAYSIM_METHODS = [];
+let PAYSIM_PLAN_ID = null;
+let CO_PLANS = [];
+let CO_SELECTED_PLAN_ID = null;
+
+function getPlanVisual(planName){
+  const name = String(planName || '').toLowerCase();
+  if(name.includes('premium')) return 'assets/images/offre-premium-enviro.webp';
+  if(name.includes('standard')) return 'assets/images/offre-standard-enviro.webp';
+  return 'assets/images/offre-basic-enviro.webp';
+}
+
+async function openChangerOffreModal(){
+  const token = localStorage.getItem('ec.accessToken');
+  const titre = document.getElementById('coTitre');
+  const actuelleBox = document.getElementById('coOffreActuelleBox');
+  const actuelleNom = document.getElementById('coOffreActuelleNom');
+  const liste = document.getElementById('coOffresListe');
+  const errorBox = document.getElementById('coError');
+  errorBox.style.display = 'none';
+  CO_SELECTED_PLAN_ID = null;
+  document.getElementById('coContinuerBtn').disabled = true;
+
+  if(CLIENT_DASHBOARD_DATA && CLIENT_DASHBOARD_DATA.abonnement){
+    titre.textContent = "Changer d'offre";
+    actuelleBox.style.display = 'block';
+    actuelleNom.textContent = `${CLIENT_DASHBOARD_DATA.abonnement.offre} — ${formatMontant(CLIENT_DASHBOARD_DATA.abonnement.prix)}`;
+  } else {
+    titre.textContent = "Souscrire à une offre";
+    actuelleBox.style.display = 'none';
+  }
+
+  liste.innerHTML = `<p style="font-size:12.5px;color:#999;text-align:center;padding:10px 0;">Chargement des offres...</p>`;
+  openModal('modalChangerOffre');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/client/plans`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const data = await response.json();
+    CO_PLANS = data.plans || [];
+
+    const currentPlanId = CLIENT_DASHBOARD_DATA && CLIENT_DASHBOARD_DATA.abonnement ? CLIENT_DASHBOARD_DATA.abonnement.plan_id : null;
+
+    liste.innerHTML = CO_PLANS.map(p => {
+      const estActuelle = p.id === currentPlanId;
+      return `
+        <div class="co-offre-card" data-plan-id="${p.id}" onclick="coSelectionnerOffre(${p.id})"
+          style="border:1.5px solid ${estActuelle ? '#ddd' : '#e3e3e3'};border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;${estActuelle ? 'opacity:.55;' : ''}">
+          <div class="co-plan-meta">
+            <img class="co-plan-img" src="${getPlanVisual(p.nom)}" alt="" loading="lazy" decoding="async"/>
+            <div>
+              <p style="font-weight:700;font-size:14px;">${p.nom}${estActuelle ? ' (actuelle)' : ''}</p>
+              <p style="font-size:12px;color:#888;">${formatMontant(p.prix)} / ${p.duree_jours || 30} jours</p>
+            </div>
+          </div>
+          <div class="co-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;"></div>
+        </div>`;
+    }).join('');
+  } catch(err){
+    console.error('Erreur chargement des offres:', err);
+    liste.innerHTML = `<p style="font-size:12.5px;color:#e53935;text-align:center;padding:10px 0;">Impossible de charger les offres. Réessayez.</p>`;
+  }
+}
+
+function coSelectionnerOffre(planId){
+  CO_SELECTED_PLAN_ID = planId;
+  document.querySelectorAll('.co-offre-card').forEach(card => {
+    const isSelected = parseInt(card.dataset.planId, 10) === planId;
+    card.style.borderColor = isSelected ? 'var(--green)' : '#e3e3e3';
+    const radio = card.querySelector('.co-radio');
+    radio.style.borderColor = isSelected ? 'var(--green)' : '#ccc';
+    radio.style.background = isSelected ? 'var(--green)' : 'transparent';
+  });
+  document.getElementById('coContinuerBtn').disabled = false;
+}
+
+function coContinuerVersPaiement(){
+  if(!CO_SELECTED_PLAN_ID) return;
+  closeModal('modalChangerOffre');
+  PAYSIM_PLAN_ID = CO_SELECTED_PLAN_ID;
+  document.getElementById('payNowBtn').style.display = '';
+  document.getElementById('payPendingView').style.display = 'none';
+  openModal('paymentSimModal');
+}
+
+function togglePaySimNewMethod(){
+  const form = document.getElementById('paySimNewMethodForm');
+  const existing = document.getElementById('paySimMethodsExisting');
+  const showingNew = form.style.display !== 'none';
+  form.style.display = showingNew ? 'none' : 'block';
+  document.getElementById('paySimToggleNewBtn').textContent = showingNew ? '+ Utiliser un autre moyen de paiement' : '← Utiliser un moyen déjà enregistré';
+  if(existing) existing.style.display = showingNew ? '' : 'none';
+}
+
+function openPaySimModalForNewMethod(){
+  openModal('paymentSimModal');
+  document.getElementById('paySimNewMethodForm').style.display = 'block';
+  const existing = document.getElementById('paySimMethodsExisting');
+  if(existing) existing.style.display = 'none';
+  const toggleBtn = document.getElementById('paySimToggleNewBtn');
+  if(toggleBtn && PAYSIM_METHODS.length > 0){
+    toggleBtn.style.display = '';
+    toggleBtn.textContent = '← Utiliser un moyen déjà enregistré';
+  }
+}
+
+function renderPaySimModalContent(abonnement, methods){
+  PAYSIM_METHODS = methods || [];
+  PAYSIM_PLAN_ID = abonnement ? abonnement.plan_id : null;
+  const summary = document.getElementById('paySimSummary');
+  if(summary){
+    summary.textContent = abonnement
+      ? `Renouveler "${abonnement.offre}" — ${formatMontant(abonnement.prix)} / mois`
+      : "Choisissez d'abord une offre dans l'onglet Abonnement.";
+  }
+
+  const container = document.getElementById('paySimMethodsExisting');
+  const newForm = document.getElementById('paySimNewMethodForm');
+  if(container){
+    if(PAYSIM_METHODS.length === 0){
+      container.innerHTML = '<p style="font-size:12.5px;color:#999;">Aucun moyen enregistré encore — ajoutez-en un ci-dessous.</p>';
+      newForm.style.display = 'block';
+      document.getElementById('paySimToggleNewBtn').style.display = 'none';
+    } else {
+      container.innerHTML = PAYSIM_METHODS.map((m, i) => `
+        <label style="display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="paySimMethodChoice" value="${m.id}" ${i===0?'checked':''}/>
+          ${m.label}${m.numero_compte_masque ? ' — ' + m.numero_compte_masque : ''}${m.is_default ? ' <span style="color:var(--green);font-size:11px;">(par défaut)</span>' : ''}
+        </label>
+      `).join('');
+      newForm.style.display = 'none';
+      document.getElementById('paySimToggleNewBtn').style.display = '';
+      document.getElementById('paySimToggleNewBtn').textContent = '+ Utiliser un autre moyen de paiement';
+    }
+  }
+}
+
+let PAY_POLL_INTERVAL = null;
+
+async function startRealPayment(){
+  const token = localStorage.getItem('ec.accessToken');
+  const errorBox = document.getElementById('paySimError');
+  errorBox.style.display = 'none';
+
+  const newForm = document.getElementById('paySimNewMethodForm');
+  const usingNew = newForm && newForm.style.display !== 'none';
+
+  const body = { plan_id: PAYSIM_PLAN_ID };
+  if(usingNew){
+    const numero = document.getElementById('paySimNumero').value.trim();
+    if(!numero){
+      errorBox.textContent = 'Veuillez indiquer votre numéro de téléphone Mobile Money.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    body.operateur = document.getElementById('paySimOperateur').value;
+    body.phone_number = numero;
+  } else {
+    const selected = document.querySelector('input[name="paySimMethodChoice"]:checked');
+    if(!selected){
+      errorBox.textContent = 'Veuillez choisir un moyen de paiement.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    body.payment_method_id = parseInt(selected.value, 10);
+  }
+
+  const btn = document.getElementById('payNowBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/payments/initiate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if(!response.ok){
+      errorBox.textContent = data.message || 'Erreur lors de l\'initiation du paiement.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '📱 Payer maintenant';
+      return;
+    }
+
+    btn.style.display = 'none';
+    document.getElementById('payPendingView').style.display = 'block';
+    pollPaymentStatus(data.paymentId);
+  } catch(err){
+    console.error('Erreur initiation paiement:', err);
+    errorBox.textContent = 'Impossible de contacter le serveur.';
+    errorBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '📱 Payer maintenant';
+  }
+}
+
+function pollPaymentStatus(paymentId){
+  const token = localStorage.getItem('ec.accessToken');
+  let tentatives = 0;
+  if(PAY_POLL_INTERVAL) clearInterval(PAY_POLL_INTERVAL);
+
+  PAY_POLL_INTERVAL = setInterval(async () => {
+    tentatives += 1;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/payments/status/${paymentId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+
+      if(data.statut === 'reussi'){
+        clearInterval(PAY_POLL_INTERVAL);
+        resetPaySimModal();
+        closeModal('paymentSimModal');
+        showToast('✅ Paiement confirmé ! Votre abonnement est actif.');
+        loadClientDashboard();
+      } else if(data.statut === 'echoue'){
+        clearInterval(PAY_POLL_INTERVAL);
+        resetPaySimModal();
+        showToast('❌ Le paiement a échoué ou a été annulé.');
+      } else if(tentatives >= 40){ // ~2 minutes à 3s d'intervalle
+        clearInterval(PAY_POLL_INTERVAL);
+        resetPaySimModal();
+        showToast('Toujours en attente. Vérifiez votre téléphone, ou réessayez dans quelques instants.');
+      }
+    } catch(err){
+      console.error('Erreur vérification statut paiement:', err);
+    }
+  }, 3000);
+}
+
+function resetPaySimModal(){
+  const btn = document.getElementById('payNowBtn');
+  btn.style.display = '';
+  btn.disabled = false;
+  btn.textContent = '📱 Payer maintenant';
+  document.getElementById('payPendingView').style.display = 'none';
+}
+
+function bindByText(selector, text, handler){
+  document.querySelectorAll(selector).forEach(el => {
+    if(el.textContent.trim().includes(text)){
+      el.addEventListener('click', (e) => { e.preventDefault(); handler(e, el); });
+    }
+  });
+}
+
+// ════════════════════════════════════════
+// PROFIL DE L'AGENT (modale)
+// ════════════════════════════════════════
+let AGENTS_INDEX = [];
+
+function openAgentModal(agent){
+  if(!agent) return;
+  document.getElementById('apImg').src = agent.photo || 'https://placehold.co/100x100?text=Agent';
+  document.getElementById('apName').textContent = fullName(agent, false);
+  document.getElementById('apFonction').textContent = agent.fonction || '—';
+  document.getElementById('apMatricule').textContent = agent.matricule || '—';
+  document.getElementById('apZone').textContent = agent.zone || '—';
+  document.getElementById('apTelephone').textContent = agent.telephone || '—';
+  document.getElementById('apDateEmbauche').textContent = agent.date_embauche ? formatDateLong(agent.date_embauche) : '—';
+  document.getElementById('apStatut').textContent = agent.statut === 'actif' ? 'Actif' : (agent.statut || '—');
+  openModal('agentProfileModal');
+}
+function openAgentModalByIndex(i){ openAgentModal(AGENTS_INDEX[i]); }
+
+// ════════════════════════════════════════
+// FILTRAGE DES NOTIFICATIONS
+// ════════════════════════════════════════
+let ALL_NOTIFICATIONS = [];
+const NOTIF_TYPE_MAP = { collectes: 'collecte', paiements: 'paiement', systeme: 'systeme' };
+
+function renderNotifFullList(list){
+  const container = document.querySelector('#page-notifications .card');
+  if(!container) return;
+  container.innerHTML = list.map(n => `
+    <div class="notif-full-item"><div class="nfi-ico gr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div>
+    <div><div class="nfi-title">${n.titre}</div><div class="nfi-desc">${n.message}</div><div class="nfi-date">${formatDateLong(n.date)}</div></div></div>
+  `).join('') || '<p style="color:#999;padding:10px;">Aucune notification pour le moment.</p>';
+}
+
+function switchTab(btn, tab){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab === 'all'){
+    renderNotifFullList(ALL_NOTIFICATIONS);
+  } else {
+    const type = NOTIF_TYPE_MAP[tab];
+    renderNotifFullList(ALL_NOTIFICATIONS.filter(n => n.type === type));
+  }
+}
+
+// ════════════════════════════════════════
+// FENÊTRE "NOUS CONTACTER" — préremplissage + envoi
+// ════════════════════════════════════════
+function openContactModal(sujetPreset){
+  openModal('contactModal');
+  const subjectSelect = document.getElementById('contactSubject');
+  if(subjectSelect && sujetPreset){
+    Array.from(subjectSelect.options).forEach(opt => { if(opt.textContent === sujetPreset) subjectSelect.value = sujetPreset; });
+  }
+}
+
+async function handleContactSend(){
+  const message = document.getElementById('contactMessage').value.trim();
+  if(!message){
+    showToast('Écris ton message avant d\'envoyer.');
+    return;
+  }
+  // L'envoi réel des messages de support arrive bientôt (nécessite une route backend dédiée).
+  showToast('Cette fonctionnalité d\'envoi arrive bientôt 🚧 — en attendant, appelle directement le support.');
+}
+
+// ════════════════════════════════════════
+// CHANGEMENT DE MOT DE PASSE
+// ════════════════════════════════════════
+async function handleChangePassword(){
+  const current = document.getElementById('pwd1').value;
+  const next = document.getElementById('pwd2').value;
+  const confirm = document.getElementById('pwd3').value;
+  const btn = document.getElementById('changePwdBtn');
+
+  if(!current || !next || !confirm){ showToast('Remplis tous les champs.'); return; }
+  if(next !== confirm){ showToast('Les deux mots de passe ne correspondent pas.'); return; }
+  if(next.length < 8 || !/[A-Z]/.test(next) || !/[0-9]/.test(next) || !/[^A-Za-z0-9]/.test(next)){
+    showToast('Le mot de passe ne respecte pas toutes les règles ci-dessus.');
+    return;
+  }
+
+  const token = localStorage.getItem('ec.accessToken');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Mise à jour...';
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ mot_de_passe_actuel: current, nouveau_mot_de_passe: next })
+    });
+    const result = await response.json();
+    if(!response.ok){
+      showToast(result.message || 'Erreur lors du changement de mot de passe.');
+      return;
+    }
+    showToast('Mot de passe mis à jour avec succès ✅');
+    document.getElementById('pwd1').value = '';
+    document.getElementById('pwd2').value = '';
+    document.getElementById('pwd3').value = '';
+  } catch(err){
+    console.error(err);
+    showToast('Impossible de contacter le serveur.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+// ════════════════════════════════════════
+// CÂBLAGE DE TOUTES LES FONCTIONNALITÉS RESTANTES
+// ════════════════════════════════════════
+function wireExtraFeatures(data){
+  const abonnement = data.abonnement || null;
+  const paiements = data.paiements || [];
+  const collectes = data.collectes || [];
+  const notifications = data.notifications || [];
+  ALL_NOTIFICATIONS = notifications;
+
+  // ── Badge de notification réel ──
+  const unreadCount = notifications.filter(n => !n.lu).length;
+  setNotificationBadges(unreadCount);
+  startNotificationPolling();
+
+  // ── Détails de l'abonnement (modale) ──
+  const sdFeatList = document.getElementById('sdFeatList');
+  if(abonnement){
+    const reussi = paiements.find(p => p.statut === 'reussi');
+    const sdPlanName = document.getElementById('sdPlanName');
+    if(sdPlanName) sdPlanName.textContent = 'Plan ' + abonnement.offre;
+    document.getElementById('sdPrice').textContent = formatMontant(abonnement.prix) + ' / ' + (abonnement.cycle_facturation || 'mois');
+    document.getElementById('sdRenewDate').textContent = formatDateLong(abonnement.date_fin);
+    document.getElementById('sdDateActivation').textContent = formatDateLong(abonnement.date_debut);
+    document.getElementById('sdCycle').textContent = (abonnement.cycle_facturation||'—').replace(/^./, c=>c.toUpperCase());
+    document.getElementById('sdMethode').textContent = reussi ? (reussi.methode_label || reussi.methode || '—') + (reussi.numero_compte_masque ? ' — ' + reussi.numero_compte_masque : '') : 'Aucun paiement encore';
+    const sdBadge = document.getElementById('sdStatutBadge');
+    const info = STATUT_LABELS[abonnement.statut] || { label: abonnement.statut, cls: '' };
+    sdBadge.textContent = info.label;
+    sdBadge.className = 'badge ' + info.cls;
+    if(sdFeatList) sdFeatList.innerHTML = buildFeatList(abonnement.privileges, 'sd-feat');
+  } else {
+    const sdPlanName = document.getElementById('sdPlanName');
+    if(sdPlanName) sdPlanName.textContent = 'Aucun abonnement';
+    document.getElementById('sdPrice').textContent = '—';
+    document.getElementById('sdRenewDate').textContent = '—';
+    document.getElementById('sdDateActivation').textContent = '—';
+    document.getElementById('sdCycle').textContent = '—';
+    document.getElementById('sdMethode').textContent = '—';
+    const sdBadge = document.getElementById('sdStatutBadge');
+    sdBadge.textContent = 'Aucun abonnement';
+    sdBadge.className = 'badge';
+    if(sdFeatList) sdFeatList.innerHTML = '';
+  }
+
+  // ── "Payer maintenant" : masqué si l'abonnement est actif et loin de son échéance,
+  // réapparaît dans les 5 derniers jours avant expiration (ou s'il n'y a aucun abonnement actif) ──
+  const payerBtn = Array.from(document.querySelectorAll('#page-paiement button')).find(b => b.textContent.includes('Payer maintenant'));
+  const payerIndispoMsg = document.getElementById('payerIndispoMsg');
+  if(payerBtn){
+    let dansLaFenetreDeRenouvellement = true;
+    if(abonnement && abonnement.statut === 'actif' && abonnement.date_fin){
+      const joursRestants = (new Date(abonnement.date_fin) - new Date()) / (24*60*60*1000);
+      dansLaFenetreDeRenouvellement = joursRestants <= 5;
+    }
+    payerBtn.style.display = dansLaFenetreDeRenouvellement ? '' : 'none';
+    if(payerIndispoMsg) payerIndispoMsg.style.display = dansLaFenetreDeRenouvellement ? 'none' : 'block';
+    if(payerIndispoMsg && !dansLaFenetreDeRenouvellement){
+      payerIndispoMsg.textContent = `Renouvelable à partir du ${formatDateLong(new Date(new Date(abonnement.date_fin).getTime() - 5*24*60*60*1000))}.`;
+    }
+    if(dansLaFenetreDeRenouvellement) payerBtn.addEventListener('click', (e)=>{ e.preventDefault(); openModal('paymentSimModal'); });
+  }
+  renderPaySimModalContent(abonnement, data.moyensPaiement || []);
+
+  // ── Vrais moyens de paiement enregistrés (table payment_methods) ──
+  const moyensContainer = document.querySelector('#page-paiement .pay-grid .card');
+  if(moyensContainer){
+    const moyens = data.moyensPaiement || [];
+    const existingItems = moyensContainer.querySelectorAll('.moyen-item');
+    existingItems.forEach(it => it.remove());
+    const addBtn = moyensContainer.querySelector('.ajouter-btn');
+    if(moyens.length === 0){
+      const p = document.createElement('p');
+      p.className = 'moyen-item';
+      p.style.cssText = 'color:#999;font-size:13px;padding:8px 0;';
+      p.textContent = 'Aucun moyen de paiement enregistré encore.';
+      moyensContainer.appendChild(p);
+    } else {
+      moyens.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'moyen-item';
+        div.innerHTML = `<div class="moyen-left"><div class="moyen-ico red"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div><div class="moyen-name">${m.label}${m.numero_compte_masque ? ' — ' + m.numero_compte_masque : ''}</div><div class="defaut-badge">${m.is_default ? 'Par défaut' : 'Enregistré'}</div></div></div>`;
+        moyensContainer.appendChild(div);
+      });
+    }
+    if(addBtn) addBtn.addEventListener('click', (e)=>{ e.preventDefault(); openPaySimModalForNewMethod(); });
+  }
+
+  // ── Téléchargement réel des factures PDF ──
+  document.querySelectorAll('#page-paiement .dl-btn[data-invoice-id], #page-dashboard .dl-btn[data-invoice-id]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await downloadInvoice(btn.dataset.invoiceId);
+    });
+  });
+
+  // ── "Voir tout / voir tous" : cachés quand tout est déjà affiché sur la page ──
+  document.querySelectorAll('#page-paiement .voir-tout, #page-collectes .voir-tout').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('#page-agents button').forEach(b => { if(b.textContent.includes('Voir tous les agents')) b.style.display = 'none'; });
+  document.querySelectorAll('#page-notifications button').forEach(b => { if(b.textContent.includes('Voir toutes les notifications')) b.style.display = 'none'; });
+  document.querySelectorAll('#page-support button').forEach(b => { if(b.textContent.includes('Voir toutes mes demandes')) b.style.display = 'none'; });
+
+  const dashVoirTouts = document.querySelectorAll('#page-dashboard .voir-tout');
+  if(dashVoirTouts[0]) dashVoirTouts[0].style.display = collectes.length > 5 ? '' : 'none';
+  if(dashVoirTouts[1]) dashVoirTouts[1].style.display = paiements.length > 5 ? '' : 'none';
+  if(dashVoirTouts[2]) dashVoirTouts[2].style.display = notifications.length > 3 ? '' : 'none';
+
+  // ── Agent assigné (dashboard) : "Voir le profil de l'agent" ──
+  const latestWithAgent = collectes.find(c => c.agent);
+  const agentCard = document.querySelectorAll('#page-dashboard .mid-row .card')[1];
+  if(agentCard && latestWithAgent){
+    const profileBtn = agentCard.querySelector('button.btn-outline');
+    if(profileBtn) profileBtn.addEventListener('click', (e)=>{ e.preventDefault(); openAgentModal(latestWithAgent.agent); });
+  }
+
+  // ── Liste "Mes agents" : reconstruire avec data-index + bouton fonctionnel ──
+  const seen = new Set(); AGENTS_INDEX = [];
+  collectes.forEach(c => { if(c.agent && c.agent.telephone && !seen.has(c.agent.telephone)){ seen.add(c.agent.telephone); AGENTS_INDEX.push(c.agent); } });
+  document.querySelectorAll('#page-agents .agent-row .btn-outline').forEach((btn, i) => {
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); openAgentModalByIndex(i); });
+  });
+
+  // ── Signaler un problème ──
+  const signalBtn = document.querySelector('#page-collectes .signal-btn');
+  if(signalBtn) signalBtn.addEventListener('click', (e)=>{ e.preventDefault(); openContactModal('Problème de collecte'); });
+
+  // ── Support : FAQ, message, appeler ──
+  const supportOpts = document.querySelectorAll('#page-support .support-opt');
+  if(supportOpts[0]) supportOpts[0].addEventListener('click', ()=> openModal('faqModal'));
+  if(supportOpts[1]) supportOpts[1].addEventListener('click', ()=> openContactModal());
+  if(supportOpts[2]) supportOpts[2].addEventListener('click', ()=> { window.location.href = 'tel:+243905416789'; });
+
+  const sendBtn = document.getElementById('contactSendBtn');
+  if(sendBtn) sendBtn.addEventListener('click', (e)=>{ e.preventDefault(); handleContactSend(); });
+
+  // Préremplissage des champs du formulaire de contact avec les vraies infos client
+  const client = data.client || {};
+  const contactNameInput = document.getElementById('contactName');
+  const contactEmailInput = document.getElementById('contactEmail');
+  if(contactNameInput) contactNameInput.value = fullName(client, true);
+  if(contactEmailInput) contactEmailInput.value = client.email || '';
+
+  // ── Boutons encore en attente de backend : message clair plutôt qu'un clic mort ──
+  bindByText('#page-profil button', 'Modifier le profil', openEditProfilModal);
+  // Le bouton photo de profil déclenche déjà le sélecteur de fichier via son onclick HTML —
+  // l'envoi fonctionne réellement, pas besoin (et pas correct) d'afficher "arrive bientôt" en plus.
+  bindByText('#page-abonnement button', 'Changer de plan', openChangerOffreModal);
+  bindByText('#page-abonnement button', 'Souscrire à une offre', openChangerOffreModal);
+  document.querySelectorAll('.changer-link').forEach(a => a.addEventListener('click', (e)=>{ e.preventDefault(); openChangerOffreModal(); }));
+
+  // ── Mot de passe : champs vides au départ + vraie action ──
+  ['pwd1','pwd2','pwd3'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  const pwdBtn = document.querySelector('#page-password button.btn-green');
+  if(pwdBtn){ pwdBtn.id = 'changePwdBtn'; pwdBtn.addEventListener('click', (e)=>{ e.preventDefault(); handleChangePassword(); }); }
+}
+
+loadClientDashboard();
+</script>
+  <script src="assets/js/theme.js" defer></script>
+</body>
+</html>
