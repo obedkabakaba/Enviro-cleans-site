@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction financière - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Direction financière</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="tableau">Tableau de bord</a>
+      <a href="#" data-vue="encaissements">Encaissements</a>
+      <a href="#" data-vue="offres">Offres et tarifs</a>
+      <a href="#" data-vue="abonnements">Abonnements</a>
+      <a href="#" data-vue="recouvrement">Recouvrement</a>
+      <a href="#" data-vue="facturation">Facturation</a>
+      <a href="#" data-vue="registre">Registre des KPI</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Tableau de bord</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION FINANCIÈRE
+ * ════════════════════════════════════════
+ *
+ * Aucune valeur n'est écrite en dur. Tout vient de /api/direction-financiere/*.
+ *
+ * ── Les deux avertissements que cet écran répète ──
+ *
+ * 1. AUCUNE DEVISE n'est stockée sur `payments`. Les montants sont affichés sans symbole,
+ *    délibérément : écrire « USD » ou « CDF » serait une invention, et une invention
+ *    qu'on ne remarquerait pas avant d'avoir additionné les deux.
+ *
+ * 2. AUCUNE TABLE DE DÉPENSES n'existe. Marge, rentabilité, coût par collecte et
+ *    trésorerie sont affichés « non mesuré » avec leur motif — jamais estimés. Un
+ *    tableau de bord financier sans dépenses est incomplet ; un tableau de bord financier
+ *    qui invente ses dépenses est dangereux.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    tableau: 'Tableau de bord',
+    encaissements: 'Encaissements',
+    offres: 'Offres et tarifs',
+    abonnements: 'Abonnements',
+    recouvrement: 'Recouvrement',
+    facturation: 'Facturation',
+    registre: 'Registre des KPI',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  // ── Tableau de bord ────────────────────────────────────────────────────────
+
+  function vueTableau() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-financiere/tableau-de-bord' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Du ' + d.periode.debut + ' au ' + d.periode.fin
+        + ' · ' + E.nombre(d.encaissements.transactions) + ' transaction(s)';
+
+      var enc = d.encaissements;
+
+      var cartes = [
+        { nom: 'Montant encaissé', valeur: enc.encaisse, format: 'montant',
+          base: E.nombre(enc.reussies) + ' transaction(s) réussie(s)',
+          definition: 'Somme des paiements au statut « reussi » sur la période.',
+          note: 'Aucune devise n’est stockée : montant dans l’unité de saisie.' },
+        { nom: 'Taux d’échec de paiement', valeur: enc.taux_echec_pct, format: 'pourcent',
+          base: 'sur ' + E.nombre(enc.base_taux_echec) + ' transaction(s) tranchée(s)',
+          definition: 'Échouées / (réussies + échouées). Les paiements en attente sont exclus.',
+          note: 'Les inclure au dénominateur ferait baisser ce taux à chaque pic '
+            + 'd’activité — un indicateur qui s’améliore quand la situation empire.' },
+        { nom: 'Ticket moyen', valeur: enc.ticket_moyen, format: 'montant',
+          definition: 'Montant moyen d’une transaction réussie.' },
+        { nom: 'Payeurs distincts', valeur: enc.payeurs_distincts,
+          definition: 'Abonnés ayant réglé au moins une fois sur la période.' },
+        { nom: 'En suspens', valeur: enc.en_suspens, format: 'montant',
+          base: E.nombre(enc.en_attente) + ' paiement(s) en attente' },
+        { nom: 'À renouveler sous 30 j', valeur: d.abonnements.valeur_a_renouveler_30j,
+          format: 'montant',
+          base: 'abonnements actifs arrivant à échéance',
+          definition: 'C’est l’encaissement des semaines à venir, s’il est relancé.' },
+      ];
+
+      // Les indicateurs non mesurés apparaissent DANS la même grille, au même rang que
+      // les autres. Les reléguer en bas de page laisserait croire que le tableau est complet.
+      d.non_mesures.forEach(function (k) {
+        cartes.push({ nom: k.nom, disponible: false, motif: k.motif });
+      });
+
+      var alerteGratuit = '';
+      var sc = d.recouvrement.service_rendu_sans_abonnement;
+      if (sc.clients > 0) {
+        alerteGratuit = '<div class="erreur"><strong>'
+          + E.nombre(sc.clients) + ' client(s) servi(s) sans abonnement couvrant</strong>'
+          + ' — ' + E.nombre(sc.collectes) + ' collecte(s) sur ' + E.echapper(sc.fenetre) + '.<br>'
+          + '<small>' + E.echapper(sc.note) + '</small></div>';
+      }
+
+      elContenu.innerHTML = alerteGratuit
+        + E.avertissements(d.avertissements)
+        + E.grilleKpi(cartes)
+        + E.panneau('Évolution mensuelle', serieHtml(d.serie_mensuelle),
+          { sousTitre: 'La saisonnalité ne se voit pas sur un total.' })
+        + E.panneau('Par méthode de paiement', methodesHtml(d.par_methode),
+          { sousTitre: 'C’est ici que se voit un canal Mobile Money défaillant.' })
+        + E.panneau('Cohérence de la facturation', facturationHtml(d.facturation));
+    }).catch(echec);
+  }
+
+  function serieHtml(serie) {
+    if (!serie || serie.length === 0) {
+      return '<div class="etat-vide">Aucune transaction sur cette période.</div>';
+    }
+
+    var max = Math.max.apply(null, serie.map(function (m) { return m.encaisse; })) || 1;
+
+    // Graphique en barres accompagné de son tableau : lisible au lecteur d'écran, et
+    // vérifiable par qui veut le chiffre exact.
+    var barres = serie.map(function (m) {
+      var h = Math.round((m.encaisse / max) * 130);
+      return '<div style="flex:1;min-width:28px;display:flex;flex-direction:column;'
+        + 'justify-content:flex-end;align-items:center;gap:5px">'
+        + '<div title="' + E.echapper(m.mois + ' : ' + m.encaisse) + '" '
+        + 'style="width:100%;height:' + h + 'px;background:var(--vert);border-radius:3px 3px 0 0"></div>'
+        + '<small style="font-size:10.5px;color:var(--texte-faible)">'
+        + E.echapper(m.mois.slice(5)) + '</small></div>';
+    }).join('');
+
+    var lignes = serie.map(function (m) {
+      return '<tr><td>' + E.echapper(m.mois) + '</td>'
+        + '<td>' + E.nombre(m.transactions) + '</td>'
+        + '<td>' + E.nombre(m.echecs) + '</td>'
+        + '<td><strong>' + E.montant(m.encaisse) + '</strong></td></tr>';
+    }).join('');
+
+    return '<div style="display:flex;align-items:flex-end;gap:6px;height:155px;padding-top:8px">'
+      + barres + '</div>'
+      + '<details class="brut"><summary>Voir les chiffres</summary>'
+      + E.tableau(['Mois', 'Réussies', 'Échecs', 'Encaissé'], lignes) + '</details>';
+  }
+
+  function methodesHtml(methodes) {
+    if (!methodes || methodes.length === 0) {
+      return '<div class="etat-vide">Aucune transaction sur cette période.</div>';
+    }
+
+    var lignes = methodes.map(function (m) {
+      var puce = m.taux_echec_pct === null ? 'neutre'
+        : m.taux_echec_pct >= 25 ? 'alerte'
+          : m.taux_echec_pct >= 10 ? 'attention' : 'ok';
+
+      return '<tr>'
+        + '<td><strong>' + E.echapper(m.methode) + '</strong></td>'
+        + '<td>' + E.nombre(m.transactions) + '</td>'
+        + '<td>' + E.nombre(m.reussies) + '</td>'
+        + '<td><span class="puce ' + puce + '">' + E.pourcent(m.taux_echec_pct) + '</span>'
+        + (m.echantillon_faible
+          ? '<br><small style="color:var(--texte-faible)">échantillon &lt; 10, non exploitable</small>'
+          : '') + '</td>'
+        + '<td><strong>' + E.montant(m.encaisse) + '</strong></td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(['Méthode', 'Transactions', 'Réussies', 'Taux d’échec', 'Encaissé'], lignes);
+  }
+
+  function facturationHtml(f) {
+    var anomalie = f.paiements_sans_facture.nombre > 0
+      ? '<div class="erreur"><strong>' + E.nombre(f.paiements_sans_facture.nombre)
+        + ' paiement(s) réussi(s) sans facture</strong> — ' + E.montant(f.paiements_sans_facture.montant)
+        + '.<br><small>Le client a payé et ne dispose d’aucune pièce. C’est le genre de trou '
+        + 'qu’on ne découvre qu’au contrôle, des mois plus tard.</small></div>'
+      : '<div class="note">Chaque paiement réussi de la période porte sa facture.</div>';
+
+    var doublons = f.numeros_dupliques.length > 0
+      ? '<div class="avertissement">' + E.nombre(f.numeros_dupliques.length)
+        + ' numéro(s) de facture en doublon.<br><small>' + E.echapper(f.note_doublons)
+        + '</small></div>'
+      : '';
+
+    return anomalie + doublons
+      + '<p class="meta" style="color:var(--texte-faible);margin-top:10px">'
+      + E.nombre(f.factures) + ' facture(s) émise(s) sur la période, '
+      + E.montant(f.montant_facture) + ' au total'
+      + (f.sans_fichier > 0
+        ? ' · ' + E.nombre(f.sans_fichier) + ' sans document PDF associé' : '')
+      + '</p>';
+  }
+
+  // ── Encaissements ──────────────────────────────────────────────────────────
+
+  function vueEncaissements() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/encaissements' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.global.transactions) + ' transaction(s)';
+
+      if (d.etat_vide) {
+        elContenu.innerHTML = E.avertissements(d.avertissements)
+          + E.panneau('Encaissements', '<div class="etat-vide">' + E.echapper(d.etat_vide) + '</div>');
+        return;
+      }
+
+      var g = d.global;
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Encaissé', valeur: g.encaisse, format: 'montant' },
+          { nom: 'Réussies', valeur: g.reussies },
+          { nom: 'Échouées', valeur: g.echouees },
+          { nom: 'En attente', valeur: g.en_attente, base: E.montant(g.en_suspens) },
+          { nom: 'Remboursées', valeur: g.remboursees, base: E.montant(g.rembourse) },
+          { nom: 'Taux d’échec', valeur: g.taux_echec_pct, format: 'pourcent' },
+        ])
+        + E.panneau('Par méthode', methodesHtml(d.par_methode))
+        + E.panneau('Évolution mensuelle', serieHtml(d.serie_mensuelle));
+    }).catch(echec);
+  }
+
+  // ── Offres ─────────────────────────────────────────────────────────────────
+
+  function vueOffres() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/offres' + periode()).then(function (d) {
+      elSousTitre.textContent = d.offres.length + ' offre(s)';
+
+      var lignes = d.offres.map(function (o) {
+        // Écart prix affiché / encaissé moyen : un signal, pas un verdict.
+        var ecart = (o.encaisse_moyen !== null && o.prix > 0)
+          ? Math.round(((o.encaisse_moyen - o.prix) / o.prix) * 1000) / 10
+          : null;
+
+        return '<tr>'
+          + '<td><strong>' + E.echapper(o.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(o.type_dechet)
+          + ' · ' + E.echapper(o.frequence_collecte) + ' · ' + E.nombre(o.duree_jours)
+          + ' j</small></td>'
+          + '<td><span class="puce ' + (o.statut_offre === 'active' ? 'ok' : 'neutre') + '">'
+          + E.echapper(o.statut_offre) + '</span></td>'
+          + '<td>' + E.montant(o.prix) + '</td>'
+          + '<td>' + E.nombre(o.paiements) + '</td>'
+          + '<td>' + E.nombre(o.abonnes_payeurs) + '</td>'
+          + '<td><strong>' + E.montant(o.encaisse) + '</strong></td>'
+          + '<td>' + E.montant(o.encaisse_moyen)
+          + (ecart !== null && Math.abs(ecart) >= 5
+            ? '<br><span class="puce ' + (ecart < 0 ? 'attention' : 'info') + '">'
+              + (ecart > 0 ? '+' : '') + ecart + ' %</span>'
+            : '') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Revenu par offre',
+          E.tableau(['Offre', 'Statut', 'Prix affiché', 'Paiements', 'Abonnés',
+            'Encaissé', 'Encaissé moyen'], lignes, { vide: d.etat_vide }),
+          { sousTitre: 'L’écart entre prix affiché et encaissement moyen est un signal à '
+            + 'instruire, pas une conclusion.' });
+    }).catch(echec);
+  }
+
+  // ── Abonnements ────────────────────────────────────────────────────────────
+
+  function vueAbonnements() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/abonnements' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.etat.actifs_couvrant_aujourdhui)
+        + ' abonnement(s) couvrant aujourd’hui';
+
+      var incoherence = d.etat.ecart_statut_vs_periode > 0
+        ? '<div class="avertissement"><strong>' + E.nombre(d.etat.ecart_statut_vs_periode)
+          + ' abonnement(s) marqués « actif » ne couvrent pas la date du jour.</strong><br>'
+          + 'Tout écran qui filtre sur <code>statut = actif</code> les compte comme des '
+          + 'clients payants. Le nombre d’abonnés actifs est donc surestimé partout où '
+          + 'cette colonne sert de critère. Vérifiez que le job d’expiration tourne.</div>'
+        : '';
+
+      var echeances = d.echeances_30j.map(function (e) {
+        return '<tr><td>' + E.dateCourte(e.date_fin) + '</td>'
+          + '<td>' + E.nombre(e.nombre) + '</td>'
+          + '<td><strong>' + E.montant(e.valeur) + '</strong></td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = incoherence
+        + E.grilleKpi([
+          { nom: 'Couvrant aujourd’hui', valeur: d.etat.actifs_couvrant_aujourdhui,
+            definition: 'Statut actif ET date du jour comprise dans la période payée.' },
+          { nom: 'Marqués actifs', valeur: d.etat.marques_actifs,
+            base: 'statut seul, période non vérifiée' },
+          { nom: 'Démarrés sur la période', valeur: d.mouvement.demarres,
+            base: E.montant(d.mouvement.valeur_demarree) },
+          { nom: 'Arrivés à échéance', valeur: d.mouvement.echus },
+          { nom: 'Renouvellements', valeur: d.mouvement.renouvellements },
+          { nom: 'Taux de renouvellement', valeur: d.taux_renouvellement_pct, format: 'pourcent',
+            note: 'Un client qui renouvelle avec quelques jours de retard sort du '
+              + 'numérateur : ce taux MINORE le renouvellement réel. La colonne `origine` '
+              + 'date de la migration 005 ; les abonnements antérieurs sont marqués '
+              + '« inconnue ».' },
+        ])
+        + E.panneau('Échéances des 30 prochains jours',
+          E.tableau(['Date de fin', 'Abonnements', 'Valeur'], echeances,
+            { vide: 'Aucune échéance dans les 30 jours.' }),
+          { sousTitre: 'Total à relancer : ' + E.montant(d.valeur_a_renouveler_30j) });
+    }).catch(echec);
+  }
+
+  // ── Recouvrement ───────────────────────────────────────────────────────────
+
+  function vueRecouvrement() {
+    elContenu.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-financiere/recouvrement').then(function (d) {
+      elSousTitre.textContent = 'Trois populations distinctes, à ne pas confondre';
+
+      var echus = d.abonnements_echus_non_renouveles;
+      var attente = d.paiements_en_attente_prolongee;
+      var gratuit = d.service_rendu_sans_abonnement;
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('1. Abonnements échus non renouvelés',
+          '<div class="bloc"><p><strong style="font-size:20px">' + E.nombre(echus.nombre)
+          + '</strong> abonnement(s), ' + E.montant(echus.valeur) + '</p>'
+          + '<p class="meta">Sur les ' + E.echapper(echus.fenetre)
+          + '. Aucun abonnement postérieur n’existe pour ces clients : ils sont sortis, '
+          + 'ou attendent une relance.</p></div>')
+
+        + E.panneau('2. Paiements en attente prolongée',
+          '<div class="bloc"><p><strong style="font-size:20px">' + E.nombre(attente.nombre)
+          + '</strong> paiement(s), ' + E.montant(attente.valeur) + '</p>'
+          + '<p class="meta">Initiés depuis plus de ' + E.echapper(attente.seuil)
+          + ' sans confirmation. Probablement abandonnés — un rapprochement avec le '
+          + 'prestataire tranchera.</p></div>')
+
+        + E.panneau('3. Service rendu sans abonnement couvrant',
+          '<div class="' + (gratuit.clients > 0 ? 'erreur' : 'note') + '">'
+          + '<p><strong style="font-size:20px">' + E.nombre(gratuit.clients)
+          + '</strong> client(s), ' + E.nombre(gratuit.collectes) + ' collecte(s) sur '
+          + E.echapper(gratuit.fenetre) + '</p>'
+          + '<p style="margin-top:8px">' + E.echapper(gratuit.note) + '</p></div>',
+          { sousTitre: 'La plus coûteuse et la moins visible : aucune transaction n’existe, '
+            + 'donc elle ne figure dans aucun journal comptable.' });
+    }).catch(echec);
+  }
+
+  // ── Facturation ────────────────────────────────────────────────────────────
+
+  function vueFacturation() {
+    elContenu.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-financiere/facturation' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.factures) + ' facture(s) émise(s)';
+
+      var doublons = d.numeros_dupliques.map(function (n) {
+        return '<tr><td><code>' + E.echapper(n.numero_facture) + '</code></td>'
+          + '<td>' + E.nombre(n.occurrences) + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Factures émises', valeur: d.factures },
+        { nom: 'Montant facturé', valeur: d.montant_facture, format: 'montant' },
+        { nom: 'Sans document PDF', valeur: d.sans_fichier },
+        { nom: 'Paiements sans facture', valeur: d.paiements_sans_facture.nombre,
+          base: E.montant(d.paiements_sans_facture.montant) },
+      ])
+        + E.panneau('Cohérence', facturationHtml(d))
+        + (d.numeros_dupliques.length > 0
+          ? E.panneau('Numéros dupliqués',
+            E.tableau(['Numéro', 'Occurrences'], doublons),
+            { sousTitre: 'Historique antérieur à la séquence atomique (migration 003).' })
+          : '');
+    }).catch(function (err) {
+      // `finance.payment.read` peut manquer alors que le tableau de bord est accessible.
+      elContenu.innerHTML = '<div class="note">' + E.echapper(err.message
+        || 'La facturation détaillée exige la permission finance.payment.read.') + '</div>';
+      elSousTitre.textContent = 'Accès restreint';
+    });
+  }
+
+  // ── Registre des KPI ───────────────────────────────────────────────────────
+
+  function vueRegistre() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-financiere/registre-kpi').then(function (d) {
+      elSousTitre.textContent = d.kpi.length + ' indicateur(s) dans votre périmètre';
+
+      var lignes = d.kpi.map(function (k) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(k.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(k.code) + '</small></td>'
+          + '<td style="max-width:300px">' + E.echapper(k.definition || '')
+          + (k.note ? '<br><em style="color:var(--texte-faible);font-size:11.5px">⚠ '
+            + E.echapper(k.note) + '</em>' : '') + '</td>'
+          + '<td><code style="font-size:11.5px">'
+          + E.echapper(k.formule || k.motif_indisponible || '—') + '</code></td>'
+          + '<td>' + E.echapper((k.sources || []).join(', ') || '—') + '</td>'
+          + '<td>' + (k.disponible
+            ? '<span class="puce ok">Calculé</span>'
+            : '<span class="puce neutre">Non mesuré</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Registre des indicateurs',
+        E.tableau(['Indicateur', 'Définition', 'Formule ou motif', 'Sources', 'État'], lignes),
+        { sousTitre: 'Un chiffre sans définition n’est pas exploitable. Chaque indicateur '
+          + 'porte sa formule et ses tables sources — ou le motif de son indisponibilité.' });
+    }).catch(echec);
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    tableau: vueTableau,
+    encaissements: vueEncaissements,
+    offres: vueOffres,
+    abonnements: vueAbonnements,
+    recouvrement: vueRecouvrement,
+    facturation: vueFacturation,
+    registre: vueRegistre,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  // La garde revalide auprès du backend. Le contrôle réel reste côté serveur : chaque
+  // appel API vérifie la permission indépendamment de ce qu'affiche cette page.
+  EnviroAuth.proteger({ permissions: ['finance.dashboard.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('tableau');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

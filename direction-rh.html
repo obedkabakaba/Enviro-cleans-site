@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction des ressources humaines - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Ressources humaines</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="tableau">Tableau de bord</a>
+      <a href="#" data-vue="effectifs">Effectifs</a>
+      <a href="#" data-vue="contrats">Contrats</a>
+      <a href="#" data-vue="conges">Congés</a>
+      <a href="#" data-vue="presence">Présence</a>
+      <a href="#" data-vue="disponibilite">Disponibilité</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Tableau de bord</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION DES RESSOURCES HUMAINES
+ * ════════════════════════════════════════
+ *
+ * ── Ce que cet écran n'affiche jamais ──
+ *
+ * Aucun salaire, aucun dossier disciplinaire, aucun motif d'arrêt maladie. Ce n'est pas
+ * un masquage à l'affichage : le backend ne SÉLECTIONNE pas ces colonnes. Ce qui n'est
+ * pas récupéré ne peut pas fuir par une erreur de rendu.
+ *
+ * ── Le piège que cet écran doit rendre visible ──
+ *
+ * La migration 006 a créé les tables RH SANS fabriquer de données. Une table vide ne
+ * signifie donc pas « l'entreprise n'a rien », mais « la saisie n'a pas encore eu lieu ».
+ *
+ * Un taux de présence de 0 % parce qu'aucune présence n'a été saisie n'est PAS un taux de
+ * présence de 0 %. Ces cas s'affichent « non mesuré » avec leur motif — jamais un zéro,
+ * qui serait parfaitement crédible et parfaitement faux.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    tableau: 'Tableau de bord',
+    effectifs: 'Effectifs',
+    contrats: 'Contrats',
+    conges: 'Congés',
+    presence: 'Présence',
+    disponibilite: 'Disponibilité opérationnelle',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  /** Une mesure renvoyée par `mesureOuNonSaisi` devient une carte à trois états. */
+  function carteMesure(nom, mesure, note) {
+    if (!mesure.disponible) {
+      return { nom: nom, disponible: false, motif: mesure.motif };
+    }
+    return {
+      nom: nom, valeur: mesure.valeur, format: 'pourcent',
+      base: 'sur ' + E.nombre(mesure.base) + ' enregistrement(s)',
+      note: note,
+    };
+  }
+
+  // ── Tableau de bord ────────────────────────────────────────────────────────
+
+  function vueTableau() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-rh/tableau-de-bord' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.effectifs.total_actifs) + ' personne(s) active(s)'
+        + ' · du ' + d.periode.debut + ' au ' + d.periode.fin;
+
+      var cartes = [
+        { nom: 'Personnel actif', valeur: d.effectifs.total_actifs,
+          base: 'sur ' + E.nombre(d.effectifs.total_personnel) + ' compte(s) au total',
+          definition: 'Comptes utilisateurs hors clients, au statut actif.' },
+        { nom: 'Contrats actifs', valeur: d.contrats.synthese.actifs,
+          base: E.nombre(d.contrats.synthese.sans_echeance) + ' sans échéance' },
+        { nom: 'Expirant sous 60 j', valeur: d.contrats.synthese.expirant_sous_60j,
+          definition: 'Perte de capacité de collecte si le renouvellement n’est pas anticipé.' },
+        { nom: 'Absents aujourd’hui', valeur: d.conges.absents_aujourdhui.length,
+          base: 'congés approuvés en cours' },
+        carteMesure('Taux de présence', d.presence.taux_presence,
+          'Porte uniquement sur les jours RÉELLEMENT saisis. Une absence de saisie n’est '
+          + 'pas une absence de l’employé.'),
+        { nom: 'Collecteurs actifs', valeur: d.disponibilite.collecteurs_actifs,
+          base: 'capacité théorique max : '
+            + E.nombre(d.disponibilite.capacite_theorique_max) + ' clients/jour' },
+      ];
+
+      // Sans profil RH : un compte qui travaille mais n'existe pas côté RH.
+      if (d.effectifs.personnel_sans_profil_rh > 0) {
+        cartes.push({
+          nom: 'Sans fiche RH', valeur: d.effectifs.personnel_sans_profil_rh,
+          base: 'ni contrat, ni présence, ni disponibilité',
+        });
+      }
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi(cartes)
+        + E.panneau('Effectifs par rôle', rolesHtml(d.effectifs.par_role))
+        + E.panneau('Contrats arrivant à terme', echeancesHtml(d.contrats.echeances_90j),
+          { sousTitre: '90 prochains jours' })
+        + E.panneau('Disponibilité déclarée par jour', semaineHtml(d.disponibilite));
+    }).catch(echec);
+  }
+
+  function rolesHtml(roles) {
+    var lignes = (roles || []).map(function (r) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(r.role_libelle || r.role) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(r.role) + '</small></td>'
+        + '<td>' + E.nombre(r.total) + '</td>'
+        + '<td>' + E.nombre(r.actifs) + '</td>'
+        + '<td>' + (r.inactifs > 0
+          ? '<span class="puce neutre">' + E.nombre(r.inactifs) + '</span>' : '—') + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(['Rôle', 'Total', 'Actifs', 'Inactifs'], lignes,
+      { vide: 'Aucun compte de personnel enregistré.' });
+  }
+
+  function echeancesHtml(echeances) {
+    var lignes = (echeances || []).map(function (c) {
+      var jours = Math.ceil(
+        (new Date(c.date_fin + 'T12:00:00Z') - new Date()) / 86400000
+      );
+      var puce = jours < 0 ? 'alerte' : jours <= 30 ? 'attention' : 'neutre';
+
+      return '<tr>'
+        + '<td><strong>' + E.echapper(c.employe) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(c.matricule) + '</small></td>'
+        + '<td>' + E.echapper(c.poste || '—') + '<br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(c.departement || '—')
+        + '</small></td>'
+        + '<td>' + E.echapper(c.type_contrat) + '</td>'
+        + '<td>' + E.dateCourte(c.date_fin) + '</td>'
+        + '<td><span class="puce ' + puce + '">'
+        + (jours < 0 ? 'échu depuis ' + Math.abs(jours) + ' j' : 'dans ' + jours + ' j')
+        + '</span></td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(['Employé', 'Poste', 'Type', 'Fin', 'Échéance'], lignes,
+      { vide: 'Aucun contrat à échéance dans les 90 jours — ou aucun contrat enregistré.' });
+  }
+
+  function semaineHtml(dispo) {
+    if (!dispo.semaine) return '<div class="etat-vide">Aucune donnée.</div>';
+
+    var max = Math.max.apply(null,
+      dispo.semaine.map(function (j) { return j.capacite_declaree; }).concat([1]));
+
+    var lignes = dispo.semaine.map(function (j) {
+      var largeur = Math.round((j.capacite_declaree / max) * 100);
+      return '<tr>'
+        + '<td style="text-transform:capitalize"><strong>' + E.echapper(j.jour) + '</strong></td>'
+        + '<td>' + (j.declare
+          ? E.nombre(j.employes_disponibles)
+          : '<span style="color:var(--texte-faible)">non déclaré</span>') + '</td>'
+        + '<td>' + (j.declare ? E.nombre(j.capacite_declaree) : '—') + '</td>'
+        + '<td><div class="barre"><span style="width:' + largeur + '%"></span></div></td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(['Jour', 'Employés disponibles', 'Capacité déclarée', ''], lignes);
+  }
+
+  // ── Effectifs ──────────────────────────────────────────────────────────────
+
+  function vueEffectifs() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/effectifs').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total_actifs) + ' personne(s) active(s)';
+
+      var departements = d.par_departement.map(function (dep) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(dep.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(dep.code) + '</small></td>'
+          + '<td>' + E.echapper(dep.responsable || '—') + '</td>'
+          + '<td>' + E.nombre(dep.effectif_sous_contrat) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Personnel total', valeur: d.total_personnel },
+          { nom: 'Actifs', valeur: d.total_actifs },
+          { nom: 'Fiches RH', valeur: d.profils_rh.total,
+            base: E.nombre(d.profils_rh.rattaches_a_une_zone) + ' rattaché(s) à une zone' },
+          { nom: 'Sans fiche RH', valeur: d.personnel_sans_profil_rh },
+        ])
+        + E.panneau('Par rôle', rolesHtml(d.par_role))
+        + E.panneau('Par département',
+          E.tableau(['Département', 'Responsable', 'Sous contrat'], departements,
+            { vide: 'Aucun département actif enregistré. La structure n’a pas été saisie.' }));
+    }).catch(echec);
+  }
+
+  // ── Contrats ───────────────────────────────────────────────────────────────
+
+  function vueContrats() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/contrats').then(function (d) {
+      var s = d.synthese;
+      elSousTitre.textContent = E.nombre(s.actifs) + ' contrat(s) actif(s)';
+
+      var types = d.par_type.map(function (t) {
+        return '<tr><td><strong>' + E.echapper(t.type_contrat) + '</strong></td>'
+          + '<td>' + E.nombre(t.nombre) + '</td>'
+          + '<td>' + E.nombre(t.actifs) + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Contrats actifs', valeur: s.actifs },
+          { nom: 'Sans échéance', valeur: s.sans_echeance, base: 'durée indéterminée' },
+          { nom: 'Expirant sous 60 j', valeur: s.expirant_sous_60j },
+          { nom: 'Échus encore actifs', valeur: s.echus_encore_actifs,
+            base: s.echus_encore_actifs > 0 ? 'à régulariser' : null },
+          { nom: 'Suspendus', valeur: s.suspendus },
+          { nom: 'Terminés', valeur: s.termines },
+        ])
+        + E.panneau('Par type de contrat',
+          E.tableau(['Type', 'Total', 'Actifs'], types,
+            { vide: d.etat_vide || 'Aucun contrat enregistré.' }))
+        + E.panneau('Échéances des 90 prochains jours', echeancesHtml(d.echeances_90j));
+    }).catch(function (err) {
+      elContenu.innerHTML = '<div class="note">' + E.echapper(err.message
+        || 'Les contrats exigent la permission hr.contract.manage.') + '</div>';
+      elSousTitre.textContent = 'Accès restreint';
+    });
+  }
+
+  // ── Congés ─────────────────────────────────────────────────────────────────
+
+  function vueConges() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/conges' + periode()).then(function (d) {
+      var s = d.synthese;
+      elSousTitre.textContent = E.nombre(s.demandes) + ' demande(s) sur la période';
+
+      var types = d.par_type.map(function (t) {
+        return '<tr><td><strong>' + E.echapper(t.type_conge) + '</strong></td>'
+          + '<td>' + E.nombre(t.nombre) + '</td>'
+          + '<td>' + E.nombre(t.approuvees) + '</td></tr>';
+      }).join('');
+
+      var absents = d.absents_aujourdhui.map(function (a) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(a.employe) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(a.matricule)
+          + ' · ' + E.echapper(a.role || '—') + '</small></td>'
+          + '<td>' + E.echapper(a.type_conge) + '</td>'
+          + '<td>' + E.dateCourte(a.date_debut) + ' → ' + E.dateCourte(a.date_fin) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Demandes', valeur: s.demandes },
+          { nom: 'Approuvées', valeur: s.approuvees },
+          { nom: 'En attente', valeur: s.en_attente,
+            base: s.en_attente > 0 ? 'l’employé reste compté disponible' : null },
+          { nom: 'Refusées', valeur: s.refusees },
+          { nom: 'Employés concernés', valeur: s.employes_concernes },
+        ])
+        + E.panneau('Absents aujourd’hui',
+          E.tableau(['Employé', 'Type', 'Période'], absents,
+            { vide: 'Personne n’est en congé approuvé aujourd’hui.' }),
+          { sousTitre: 'Ces absences réduisent la capacité de collecte du jour.' })
+        + E.panneau('Par type',
+          E.tableau(['Type', 'Demandes', 'Approuvées'], types,
+            { vide: d.etat_vide || 'Aucune demande sur cette période.' }));
+    }).catch(echec);
+  }
+
+  // ── Présence ───────────────────────────────────────────────────────────────
+
+  function vuePresence() {
+    elContenu.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-rh/presence' + periode()).then(function (d) {
+      var b = d.brut;
+      elSousTitre.textContent = E.nombre(b.enregistrements) + ' saisie(s) sur '
+        + E.nombre(b.jours_saisis) + ' jour(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          carteMesure('Taux de présence', d.taux_presence),
+          carteMesure('Taux de retard', d.taux_retard),
+          { nom: 'Enregistrements', valeur: b.enregistrements },
+          { nom: 'Employés saisis', valeur: b.employes_saisis },
+          { nom: 'Jours couverts', valeur: b.jours_saisis },
+        ])
+        + E.panneau('Répartition des statuts',
+          E.tableau(['Statut', 'Occurrences'],
+            [['Présent', b.presents], ['Absent', b.absents], ['Retard', b.retards],
+              ['Congé', b.conges], ['Maladie', b.maladies]]
+              .map(function (l) {
+                return '<tr><td><strong>' + l[0] + '</strong></td><td>'
+                  + E.nombre(l[1]) + '</td></tr>';
+              }).join(''),
+            { vide: d.etat_vide }),
+          { sousTitre: 'Ces chiffres portent sur les jours saisis, pas sur les jours '
+            + 'travaillés.' });
+    }).catch(echec);
+  }
+
+  // ── Disponibilité ──────────────────────────────────────────────────────────
+
+  function vueDisponibilite() {
+    elContenu.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-rh/disponibilite').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.collecteurs_actifs) + ' collecteur(s) actif(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Collecteurs actifs', valeur: d.collecteurs_actifs },
+          { nom: 'Plafond par collecteur', valeur: d.plafond_absolu_par_collecteur,
+            unite: ' clients/j',
+            definition: 'Plafond de sécurité appliqué par le moteur de planification.' },
+          { nom: 'Capacité théorique max', valeur: d.capacite_theorique_max,
+            unite: ' clients/j',
+            note: 'THÉORIQUE : ignore la disponibilité des véhicules, dont la table '
+              + 'n’existe pas. Une équipe complète sans camion collecte zéro client.' },
+          { nom: 'Disponibilité véhicules', disponible: false,
+            motif: 'Les tables `vehicles` et `vehicle_availability` n’existent pas. C’est '
+              + 'le seul critère de capacité que le moteur de planification ne peut pas '
+              + 'vérifier.' },
+        ])
+        + E.panneau('Disponibilité déclarée par jour de la semaine', semaineHtml(d),
+          { sousTitre: 'Un jour « non déclaré » signifie qu’aucune disponibilité n’a été '
+            + 'saisie — le moteur retombe alors sur le plafond par défaut.' });
+    }).catch(echec);
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    tableau: vueTableau,
+    effectifs: vueEffectifs,
+    contrats: vueContrats,
+    conges: vueConges,
+    presence: vuePresence,
+    disponibilite: vueDisponibilite,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  EnviroAuth.proteger({ permissions: ['hr.employee.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('tableau');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>
