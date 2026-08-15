@@ -94,6 +94,9 @@
       <li>les espaces existants auxquels votre rôle donne accès.</li>
     </ul>
 
+    <p id="titreAcces" style="display:none">Espaces déjà livrés auxquels vos permissions vous donnent accès&nbsp;:</p>
+    <ul id="listeAcces" style="display:none"></ul>
+
     <p id="pagePrevue" style="display:none;font-size:12.5px;opacity:.55"></p>
 
     <div class="actions">
@@ -134,8 +137,44 @@
           note.textContent = 'Page prévue : ' + data.espace.page_prevue;
           note.style.display = 'block';
         }
+
+        // Une page d'attente qui ne mène nulle part est une impasse. Un directeur dont
+        // l'espace n'existe pas encore a néanmoins des permissions réelles, qui ouvrent
+        // des espaces DÉJÀ livrés — le Centre d'analyse notamment. On les lui montre.
+        //
+        // La liste est filtrée par les permissions RENVOYÉES PAR LE SERVEUR, jamais par
+        // le rôle deviné côté navigateur. Masquer un lien n'est pas une protection : le
+        // contrôle réel reste sur chaque appel de l'API.
+        afficherAccesDisponibles(data.permissions || []);
       })
       .catch(function () { /* session invalide : la page reste lisible telle quelle */ });
+
+    // Ne référencer ici qu'une page RÉELLEMENT présente dans ce dépôt.
+    var ESPACES_LIVRES = [
+      { page: 'centre-analyse.html', libelle: 'Centre d’analyse Claude',
+        permissions: ['ai.analysis.run', 'ai.analysis.read.executive', 'ai.analysis.read.department'] },
+      { page: 'direction-operations-commerciales.html', libelle: 'Direction opérationnelle et commerciale',
+        permissions: ['operations.dashboard.read'] },
+      { page: 'centre-technique.html', libelle: 'Centre technique et maintenance',
+        permissions: ['technical.health.read'] },
+    ];
+
+    function afficherAccesDisponibles(permissions) {
+      var accessibles = ESPACES_LIVRES.filter(function (e) {
+        return e.permissions.some(function (p) { return permissions.indexOf(p) !== -1; });
+      });
+
+      if (accessibles.length === 0) return;
+
+      var liste = document.getElementById('listeAcces');
+      liste.innerHTML = accessibles.map(function (e) {
+        return '<li><a href="' + e.page + '" style="color:#3ab54a;font-weight:600">'
+          + e.libelle + '</a></li>';
+      }).join('');
+
+      liste.style.display = 'block';
+      document.getElementById('titreAcces').style.display = 'block';
+    }
   }());
 </script>
 <script src="assets/js/theme.js" defer></script>
