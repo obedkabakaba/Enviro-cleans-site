@@ -179,6 +179,7 @@
       <a href="#" class="actif" data-vue="lancer">Lancer une analyse</a>
       <a href="#" data-vue="historique">Analyses produites</a>
       <a href="#" data-vue="memoire">Mémoire décisionnelle</a>
+      <a href="#" data-vue="veille">Veille externe</a>
       <a href="#" data-vue="consommation">Consommation et coûts</a>
     </div>
   </nav>
@@ -245,6 +246,7 @@
     lancer: 'Lancer une analyse',
     historique: 'Analyses produites',
     memoire: 'Mémoire décisionnelle',
+    veille: 'Veille externe',
     consommation: 'Consommation et coûts',
   };
 
@@ -863,6 +865,110 @@
     });
   }
 
+  // ── Vue : veille externe ───────────────────────────────────────────────────
+
+  function vueVeille() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/analyse/veilles?limite=30').then(function (d) {
+      elSousTitre.textContent = d.veilles.length + ' veille(s) exécutée(s)';
+
+      var peutLancer = etat.capacites && etat.capacites.peut_lancer_veille;
+
+      // Sans recherche web, une veille produirait la connaissance antérieure du modèle
+      // présentée comme actuelle — exactement ce que la politique des sources interdit.
+      var bandeauWeb = d.recherche_web
+        ? ''
+        : '<div class="avertissement"><strong>Recherche web désactivée.</strong><br>'
+          + 'Aucune veille ne peut aboutir : elle produirait la connaissance antérieure du '
+          + 'modèle présentée comme actuelle. Activez CLAUDE_WEB_SEARCH_ENABLED.</div>';
+
+      var themes = d.themes_disponibles.map(function (t) {
+        return '<tr>'
+          + '<td><strong>' + echapper(t.libelle) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(t.code) + '</small></td>'
+          + '<td>' + nombre(t.validite_jours) + ' j</td>'
+          + '<td>' + (peutLancer && d.recherche_web
+            ? '<button class="action secondaire" data-veille="' + echapper(t.code) + '">Lancer</button>'
+            : '<span class="puce neutre">indisponible</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var historique = d.veilles.map(function (v) {
+        var puce = v.statut === 'terminee' ? 'ok' : v.statut === 'echec' ? 'alerte' : 'neutre';
+        return '<tr>'
+          + '<td>' + dateCourte(v.executed_at) + '</td>'
+          + '<td>' + echapper((v.themes || []).join(', ')) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(v.statut) + '</span></td>'
+          + '<td>' + nombre(v.sources_trouvees) + '</td>'
+          + '<td>' + nombre(v.signaux_crees) + '</td>'
+          + '<td style="max-width:320px">' + echapper(v.message || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = bandeauWeb
+        + '<div class="note">La veille <strong>collecte</strong> du contexte daté et '
+        + 'citable ; elle ne conclut jamais. Une veille qui recommanderait serait une '
+        + 'analyse déguisée, lancée sans demandeur et sans question posée. Les conclusions '
+        + 'se tirent depuis « Lancer une analyse ».</div>'
+        + '<div class="panneau"><header><h2>Thèmes suivis</h2>'
+        + '<small style="color:var(--texte-faible)">La durée de validité détermine quand '
+        + 'une source cesse d’être présentée comme actuelle.</small></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Thème</th><th>Validité</th><th></th></tr></thead><tbody>'
+        + themes + '</tbody></table></div>'
+        + (peutLancer ? '' : '<p class="meta" style="color:var(--texte-faible);margin-top:12px">'
+          + 'Déclencher une veille exige la permission <code>ai.watch.run</code> : chaque '
+          + 'exécution consomme des recherches web facturées.</p>')
+        + '<div id="resultatVeille"></div></div></div>'
+        + '<div class="panneau"><header><h2>Historique</h2></header><div class="corps">'
+        + (d.etat_vide
+          ? '<div class="etat-vide">' + echapper(d.etat_vide) + '</div>'
+          : '<div class="table-wrap"><table><thead><tr>'
+            + '<th>Date</th><th>Thèmes</th><th>Statut</th><th>Sources</th>'
+            + '<th>Signaux</th><th>Message</th></tr></thead><tbody>'
+            + historique + '</tbody></table></div>')
+        + '</div></div>';
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+        b.addEventListener('click', function () { lancerVeille(b.getAttribute('data-veille'), b); });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function lancerVeille(theme, bouton) {
+    var zone = document.getElementById('resultatVeille');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+      b.disabled = true;
+    });
+
+    zone.innerHTML = '<div class="bloc" style="margin-top:12px">'
+      + '<p><strong>Veille en cours…</strong></p>'
+      + '<p class="meta">Claude interroge le web sur ce thème et enregistre les sources '
+      + 'datées. Une minute environ.</p></div>';
+
+    EnviroAPI.post('/api/analyse/veilles', { theme: theme }).then(function (r) {
+      zone.innerHTML = '<div class="bloc" style="margin-top:12px">'
+        + '<h3>Veille terminée — ' + echapper(theme) + '</h3>'
+        + '<p>' + nombre(r.sources) + ' source(s) enregistrée(s), '
+        + nombre(r.observations) + ' observation(s), ' + nombre(r.signaux) + ' signal(aux).</p>'
+        + (r.sources_rejetees > 0
+          ? '<p class="meta"><strong>' + nombre(r.sources_rejetees) + ' source(s) écartée(s)</strong>'
+            + ' : URL ou organisme manquant. Une information dont la provenance n’est pas '
+            + 'vérifiable ne devient jamais une source.</p>'
+          : '')
+        + '<p class="meta">' + nombre(r.recherches_web) + ' recherche(s) web · coût estimé '
+        + usd(r.cout_estime_usd) + '</p></div>';
+      setTimeout(vueVeille, 2500);
+    }).catch(function (err) {
+      zone.innerHTML = '<div class="erreur" style="margin-top:12px">'
+        + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+        b.disabled = false;
+      });
+    });
+  }
+
   // ── Vue : consommation ─────────────────────────────────────────────────────
 
   function vueConsommation() {
@@ -906,7 +1012,7 @@
 
   var VUES = {
     lancer: vueLancer, historique: vueHistorique,
-    memoire: vueMemoire, consommation: vueConsommation,
+    memoire: vueMemoire, veille: vueVeille, consommation: vueConsommation,
   };
 
   function allerA(vue) {
