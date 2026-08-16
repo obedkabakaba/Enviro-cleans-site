@@ -158,6 +158,26 @@
     font-size:11.5px; margin-top:9px;
   }
 
+  /* ── Conversation ── */
+  .fil{ max-height:58vh; overflow-y:auto; padding-right:6px; }
+  .tour{ margin-bottom:14px; display:flex; }
+  .tour.moi{ justify-content:flex-end; }
+  .bulle{
+    max-width:78%; padding:11px 14px; border-radius:12px; font-size:13.5px;
+    white-space:pre-wrap; word-wrap:break-word;
+  }
+  .tour.moi .bulle{ background:var(--vert); color:#fff; border-bottom-right-radius:3px; }
+  .tour.analyste .bulle{
+    background:var(--surface-2); border:1px solid var(--bordure);
+    border-bottom-left-radius:3px;
+  }
+  .bulle .outils{
+    font-size:11px; opacity:.7; margin-top:8px; padding-top:7px;
+    border-top:1px solid rgba(128,128,128,.25);
+  }
+  .composer{ display:flex; gap:8px; margin-top:14px; align-items:flex-end; }
+  .composer textarea{ flex:1; min-height:52px; }
+
   @media (max-width:900px){
     .shell{ grid-template-columns:1fr; }
     .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
@@ -179,6 +199,7 @@
       <a href="#" class="actif" data-vue="lancer">Lancer une analyse</a>
       <a href="#" data-vue="historique">Analyses produites</a>
       <a href="#" data-vue="memoire">Mémoire décisionnelle</a>
+      <a href="#" data-vue="conversation">Conversation</a>
       <a href="#" data-vue="veille">Veille externe</a>
       <a href="#" data-vue="consommation">Consommation et coûts</a>
     </div>
@@ -246,6 +267,7 @@
     lancer: 'Lancer une analyse',
     historique: 'Analyses produites',
     memoire: 'Mémoire décisionnelle',
+    conversation: 'Conversation avec l’analyste',
     veille: 'Veille externe',
     consommation: 'Consommation et coûts',
   };
@@ -865,6 +887,159 @@
     });
   }
 
+  // ── Vue : conversation ─────────────────────────────────────────────────────
+
+  function vueConversation() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/analyse/conversations').then(function (d) {
+      elSousTitre.textContent = d.conversations.length + ' conversation(s)';
+
+      var liste = d.conversations.map(function (cv) {
+        return '<tr>'
+          + '<td><strong>' + echapper(cv.titre) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper(String(cv.dernier_message || '').slice(0, 90)) + '</small></td>'
+          + '<td>' + nombre(cv.messages) + '</td>'
+          + '<td>' + dateCourte(cv.updated_at) + '</td>'
+          + '<td><button class="action secondaire" data-conv="' + cv.id + '">Ouvrir</button></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML =
+        '<div class="note">L’analyste répond en <strong>texte libre</strong> sur les mêmes '
+        + 'données et avec les mêmes permissions qu’une analyse. Il n’a aucune mémoire des '
+        + 'chiffres entre deux messages : il rappelle un outil à chaque question chiffrée, '
+        + 'et cite sa source. Il ne modifie jamais rien.</div>'
+        + '<div class="panneau"><header><h2>Mes conversations</h2>'
+        + '<button class="action" id="nouvelleConv">Nouvelle conversation</button></header>'
+        + '<div class="corps">'
+        + (d.etat_vide
+          ? '<div class="etat-vide">' + echapper(d.etat_vide) + '</div>'
+          : '<div class="table-wrap"><table><thead><tr>'
+            + '<th>Conversation</th><th>Messages</th><th>Dernière activité</th><th></th>'
+            + '</tr></thead><tbody>' + liste + '</tbody></table></div>')
+        + '</div></div>'
+        + '<div id="filConversation"></div>';
+
+      document.getElementById('nouvelleConv').addEventListener('click', function () {
+        EnviroAPI.post('/api/analyse/conversations', {})
+          .then(function (cv) { ouvrirConversation(cv.id); })
+          .catch(afficherErreur);
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-conv]'), function (b) {
+        b.addEventListener('click', function () { ouvrirConversation(b.getAttribute('data-conv')); });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function ouvrirConversation(id) {
+    var zone = document.getElementById('filConversation');
+    zone.innerHTML = '<div class="panneau"><div class="corps">' + squelette(3) + '</div></div>';
+
+    EnviroAPI.get('/api/analyse/conversations/' + encodeURIComponent(id)).then(function (d) {
+      zone.innerHTML = '<div class="panneau">'
+        + '<header><h2>' + echapper(d.conversation.titre) + '</h2>'
+        + '<button class="action secondaire" id="archiverConv">Archiver</button></header>'
+        + '<div class="corps">'
+        + '<div class="fil" id="fil">' + tousLesTours(d.messages) + '</div>'
+        + '<div id="avertConv"></div>'
+        + '<div class="composer">'
+        + '<textarea id="saisieConv" maxlength="2000" '
+        + 'placeholder="Ex. : pourquoi la zone Nsele a-t-elle plus d’échecs ce mois-ci ?"></textarea>'
+        + '<button class="action" id="envoyerConv">Envoyer</button>'
+        + '</div></div></div>';
+
+      var fil = document.getElementById('fil');
+      fil.scrollTop = fil.scrollHeight;
+
+      document.getElementById('archiverConv').addEventListener('click', function () {
+        EnviroAPI.post('/api/analyse/conversations/' + id + '/archiver', {})
+          .then(vueConversation).catch(afficherErreur);
+      });
+
+      var saisie = document.getElementById('saisieConv');
+      var bouton = document.getElementById('envoyerConv');
+
+      function envoyer() {
+        var texte = saisie.value.trim();
+        if (!texte) return;
+
+        bouton.disabled = true;
+        saisie.disabled = true;
+
+        fil.insertAdjacentHTML('beforeend', unTour({ role: 'user', contenu: texte }));
+        fil.insertAdjacentHTML('beforeend',
+          '<div class="tour analyste" id="attente"><div class="bulle">'
+          + '<em style="opacity:.7">L’analyste consulte les données…</em></div></div>');
+        fil.scrollTop = fil.scrollHeight;
+        saisie.value = '';
+
+        EnviroAPI.post('/api/analyse/conversations/' + id + '/messages', { message: texte })
+          .then(function (r) {
+            document.getElementById('attente').remove();
+            fil.insertAdjacentHTML('beforeend', unTour({
+              role: 'assistant',
+              contenu: r.reponse.contenu,
+              outils_appeles: r.transparence.outils_appeles,
+            }));
+            fil.scrollTop = fil.scrollHeight;
+
+            // La troncature est annoncée, jamais silencieuse : un utilisateur qui
+            // référence « ce dont on parlait tout à l’heure » doit savoir que le modèle
+            // ne l’a peut-être plus.
+            document.getElementById('avertConv').innerHTML = r.transparence.note_troncature
+              ? '<div class="avertissement" style="margin-top:10px">'
+                + echapper(r.transparence.note_troncature) + '</div>'
+              : '';
+          })
+          .catch(function (err) {
+            var att = document.getElementById('attente');
+            if (att) att.remove();
+            document.getElementById('avertConv').innerHTML = '<div class="erreur" '
+              + 'style="margin-top:10px">'
+              + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+          })
+          .then(function () {
+            bouton.disabled = false;
+            saisie.disabled = false;
+            saisie.focus();
+          });
+      }
+
+      bouton.addEventListener('click', envoyer);
+      saisie.addEventListener('keydown', function (e) {
+        // Entrée envoie, Maj+Entrée saute une ligne — la convention attendue d’un fil.
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyer(); }
+      });
+
+      zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(afficherErreur);
+  }
+
+  function tousLesTours(messages) {
+    if (!messages || messages.length === 0) {
+      return '<div class="etat-vide">Posez votre première question.</div>';
+    }
+    return messages.map(unTour).join('');
+  }
+
+  function unTour(m) {
+    var outilsHtml = '';
+    var appeles = m.outils_appeles || [];
+
+    if (appeles.length > 0) {
+      outilsHtml = '<div class="outils">Outils : '
+        + echapper(appeles.map(function (o) {
+          return o.outil + (o.refuse ? ' (refusé)' : '');
+        }).join(', ')) + '</div>';
+    }
+
+    return '<div class="tour ' + (m.role === 'user' ? 'moi' : 'analyste') + '">'
+      + '<div class="bulle">' + echapper(m.contenu) + outilsHtml + '</div></div>';
+  }
+
   // ── Vue : veille externe ───────────────────────────────────────────────────
 
   function vueVeille() {
@@ -1012,7 +1187,8 @@
 
   var VUES = {
     lancer: vueLancer, historique: vueHistorique,
-    memoire: vueMemoire, veille: vueVeille, consommation: vueConsommation,
+    memoire: vueMemoire, conversation: vueConversation,
+    veille: vueVeille, consommation: vueConsommation,
   };
 
   function allerA(vue) {
