@@ -42,10 +42,19 @@
   ];
 
   /**
-   * Reprend une session ouverte sous une ancienne clé et la bascule vers la nouvelle.
-   * Sans cela, le déploiement déconnecterait tout le monde d'un coup.
+   * Reprend une session ouverte sous une ancienne clé et la recopie vers la nouvelle.
+   *
+   * ── Pourquoi COPIER et non DÉPLACER ──
+   * Les six espaces existants (gestionnaire.html, superviseur.html, collecteur.html,
+   * admin*.html, dashboard.html) lisent encore leur propre clé et n'utilisent pas ce
+   * module. Supprimer les anciennes clés ici déconnecterait un gestionnaire déjà
+   * connecté dès qu'il ouvrirait une page chargeant ce script.
+   *
+   * Les deux jeux de clés coexistent donc pendant la transition. La purge n'aura lieu
+   * qu'une fois les six pages passées à EnviroAPI — c'est la phase de contraction,
+   * documentée dans HANDOVER_ESPACES_DIRECTION.md.
    */
-  function migrerAnciennesCles() {
+  function reprendreAncienneSession() {
     if (localStorage.getItem(CLES.access)) return;
 
     for (var i = 0; i < ANCIENNES.length; i += 1) {
@@ -60,18 +69,28 @@
       if (localStorage.getItem(jeu.user)) {
         localStorage.setItem(CLES.user, localStorage.getItem(jeu.user));
       }
-      break;
+      return;
     }
-
-    // Purge : laisser traîner les anciennes clés recréerait la divergence.
-    ANCIENNES.forEach(function (jeu) {
-      localStorage.removeItem(jeu.access);
-      localStorage.removeItem(jeu.refresh);
-      localStorage.removeItem(jeu.user);
-    });
   }
 
-  migrerAnciennesCles();
+  reprendreAncienneSession();
+
+  /**
+   * Propage un token renouvelé vers les anciennes clés DÉJÀ présentes.
+   *
+   * Sans cela, une page historique continuerait d'envoyer un access token expiré
+   * après que ce module l'a renouvelé — et l'utilisateur serait déconnecté malgré
+   * une session valide. On ne CRÉE jamais une ancienne clé : on met seulement à jour
+   * celles qui existent déjà.
+   */
+  function propagerVersAnciennesCles(accessToken, refreshToken) {
+    ANCIENNES.forEach(function (jeu) {
+      if (localStorage.getItem(jeu.access)) {
+        localStorage.setItem(jeu.access, accessToken);
+        if (refreshToken) localStorage.setItem(jeu.refresh, refreshToken);
+      }
+    });
+  }
 
   // ── Session ────────────────────────────────────────────────────────────────
   var Session = {
@@ -94,6 +113,10 @@
       if (data.refreshToken) localStorage.setItem(CLES.refresh, data.refreshToken);
       if (data.user) localStorage.setItem(CLES.user, JSON.stringify(data.user));
       if (data.permissions) localStorage.setItem(CLES.permissions, JSON.stringify(data.permissions));
+
+      // Tant que les six espaces historiques lisent leur propre clé, ils doivent
+      // recevoir le token à jour, sinon ils se déconnecteraient tout seuls.
+      if (data.accessToken) propagerVersAnciennesCles(data.accessToken, data.refreshToken);
     },
 
     effacer: function () {

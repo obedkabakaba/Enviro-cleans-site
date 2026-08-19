@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction générale - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span id="libelleEspace">Direction générale</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="cockpit">Cockpit</a>
+      <a href="#" data-vue="signaux">Signaux transversaux</a>
+      <a href="#" data-vue="strategie">Suivi stratégique</a>
+      <a href="#" data-vue="mesure">État de la mesure</a>
+    </div>
+    <div style="padding:16px 20px;margin-top:10px;border-top:1px solid var(--bordure)">
+      <div style="font-size:11px;color:var(--texte-faible);text-transform:uppercase;
+                  letter-spacing:.04em;margin-bottom:8px">Espaces liés</div>
+      <div id="liensEspaces" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Cockpit</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION GÉNÉRALE — DGA et PDG
+ * ════════════════════════════════════════
+ *
+ * ── Une seule page pour deux rôles ──
+ *
+ * Le DGA et le PDG partagent `executive.dashboard.read` et voient le même cockpit. Leurs
+ * différences (approbation finale, gestion des délégations) portent sur des ACTIONS, pas
+ * sur ce tableau de bord. Écrire deux fichiers identiques garantirait qu'ils divergent
+ * dans six mois ; la page s'adapte au titre et aux liens selon le rôle réel.
+ *
+ * ── Le cockpit ne recalcule rien ──
+ *
+ * Il compose les services de domaine. « Abonnés actifs » affiche ici exactement le même
+ * nombre que chez le directeur opérationnel, parce que c'est la même fonction — et non
+ * deux requêtes écrites à six mois d'intervalle qui ne compteront jamais tout à fait
+ * pareil. C'est ce qui évite qu'une réunion se passe à départager deux tableaux au lieu
+ * de décider.
+ *
+ * ── L'état de la mesure ──
+ *
+ * Une section entière dit sur quelle proportion du réel la direction décide. C'est
+ * l'inverse d'un tableau de bord qui masque ses trous : un comité doit savoir ce qu'il
+ * ignore.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null, permissions: [] };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    cockpit: 'Cockpit',
+    signaux: 'Signaux transversaux',
+    strategie: 'Suivi stratégique',
+    mesure: 'État de la mesure',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  /**
+   * Un domaine indisponible ne produit pas de zéros.
+   *
+   * `Promise.allSettled` côté serveur permet au cockpit de s'afficher même si un domaine
+   * échoue. Encore faut-il que l'écran le DISE, au lieu de rendre une section vide qui
+   * ressemblerait à « rien à signaler ».
+   */
+  function sectionIndisponible(domaine, motif) {
+    return E.panneau(domaine,
+      '<div class="erreur" style="margin:0"><strong>Données indisponibles.</strong><br>'
+      + E.echapper(motif) + '</div>');
+  }
+
+  // ── Cockpit ────────────────────────────────────────────────────────────────
+
+  function vueCockpit() {
+    elContenu.innerHTML = E.squelette(6);
+
+    EnviroAPI.get('/api/direction-generale/cockpit' + periode()).then(function (d) {
+      var indisponibles = d.domaines_indisponibles || [];
+      elSousTitre.textContent = 'Du ' + d.periode.debut + ' au ' + d.periode.fin
+        + (indisponibles.length ? ' · ' + indisponibles.length + ' domaine(s) indisponible(s)' : '');
+
+      var html = '';
+
+      // Les signaux transversaux d'abord : ce sont les problèmes qu'aucun directeur de
+      // domaine ne peut voir seul, donc la seule chose que ce niveau apporte vraiment.
+      html += signauxHtml(d.signaux_transversaux);
+
+      // ── Opérations ──
+      if (d.operations.indisponible) {
+        html += sectionIndisponible('Opérations', d.operations.motif);
+      } else {
+        html += E.panneau('Opérations', operationsHtml(d.operations));
+      }
+
+      // ── Finance ──
+      if (d.finance.indisponible) {
+        html += sectionIndisponible('Finance', d.finance.motif);
+      } else {
+        html += E.panneau('Finance', financeHtml(d.finance));
+      }
+
+      // ── Ressources et capacité ──
+      if (d.effectifs.indisponible || d.disponibilite.indisponible) {
+        html += sectionIndisponible('Ressources',
+          (d.effectifs.motif || d.disponibilite.motif));
+      } else {
+        html += E.panneau('Ressources et capacité',
+          ressourcesHtml(d.effectifs, d.disponibilite));
+      }
+
+      // ── État de la mesure, en pied de cockpit ──
+      html += E.panneau('Sur quelle proportion du réel décidons-nous ?',
+        mesureHtml(d.etat_de_la_mesure));
+
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  function signauxHtml(s) {
+    if (s.indisponible) {
+      return '<div class="erreur">Les signaux transversaux n’ont pas pu être calculés.</div>';
+    }
+
+    if (s.aucun_signal) {
+      return '<div class="note"><strong>Aucun signal transversal détecté.</strong><br>'
+        + E.echapper(s.note_couverture) + '</div>';
+    }
+
+    var blocs = s.signaux.map(function (sig) {
+      var classe = sig.gravite === 'elevee' ? 'erreur' : 'avertissement';
+      return '<div class="' + classe + '">'
+        + '<strong>' + E.echapper(sig.constat) + '</strong>'
+        + ' <span class="puce neutre">' + E.echapper(sig.domaine) + '</span><br>'
+        + '<span style="font-size:15px;font-weight:700">' + E.echapper(sig.chiffre) + '</span>'
+        + '<p style="margin:8px 0 0;font-size:12.5px">'
+        + '<em>Pourquoi personne ne le voit :</em> ' + E.echapper(sig.pourquoi_invisible) + '</p>'
+        + '<div style="font-size:11.5px;opacity:.75;margin-top:6px">Source : '
+        + E.echapper(sig.source) + '</div>'
+        + '</div>';
+    }).join('');
+
+    return '<div style="margin-bottom:20px">'
+      + '<h2 style="font-family:Montserrat,sans-serif;font-size:15px;margin:0 0 12px">'
+      + s.signaux.length + ' signal(aux) transversal(aux)</h2>'
+      + blocs + '</div>';
+  }
+
+  function operationsHtml(ops) {
+    // `centreDeControle` renvoie ses KPI sous forme de TABLEAU, chaque entrée portant son
+    // `code` ainsi que sa définition et sa formule. On l'indexe pour sélectionner les six
+    // qui ont leur place dans un cockpit exécutif, et on réutilise les libellés du
+    // registre plutôt que d'en réécrire ici — deux libellés divergents pour le même
+    // chiffre, c'est déjà deux chiffres différents aux yeux d'un comité.
+    var parCode = {};
+    (ops.kpi || []).forEach(function (k) { parCode[k.code] = k; });
+
+    var cartes = [];
+    ['tournees_planifiees', 'taux_realisation_tournees', 'collectes_effectuees',
+      'taux_echec_collecte', 'abonnes_actifs', 'rattrapages_en_attente']
+      .forEach(function (code) {
+        var k = parCode[code];
+        if (!k) return;
+        cartes.push({
+          nom: k.nom,
+          valeur: k.valeur,
+          unite: k.unite === '%' ? ' %' : null,
+          base: k.etat_vide || k.base || null,
+          definition: k.definition, formule: k.formule, sources: k.sources, note: k.note,
+        });
+      });
+
+    if (cartes.length === 0) {
+      return '<div class="etat-vide">Aucun indicateur opérationnel sur cette période.</div>';
+    }
+
+    return E.grilleKpi(cartes)
+      + E.avertissements(ops.avertissements)
+      + '<p style="margin:0"><a href="direction-operations-commerciales.html" '
+      + 'style="color:var(--vert);font-weight:600">Ouvrir la direction opérationnelle →</a></p>';
+  }
+
+  function financeHtml(f) {
+    var enc = f.encaissements;
+    var cartes = [
+      { nom: 'Encaissé', valeur: enc.encaisse, format: 'montant',
+        base: E.nombre(enc.reussies) + ' transaction(s)',
+        note: 'Aucune devise n’est stockée : montant dans l’unité de saisie.' },
+      { nom: 'Taux d’échec', valeur: enc.taux_echec_pct, format: 'pourcent',
+        base: 'sur ' + E.nombre(enc.base_taux_echec) + ' tranchée(s)' },
+      { nom: 'Payeurs distincts', valeur: enc.payeurs_distincts },
+      { nom: 'À renouveler sous 30 j', valeur: f.abonnements.valeur_a_renouveler_30j,
+        format: 'montant' },
+      { nom: 'Taux de renouvellement', valeur: f.abonnements.taux_renouvellement_pct,
+        format: 'pourcent' },
+    ];
+
+    // Marge et rentabilité, déclarées non mesurées AU MÊME RANG que le reste.
+    (f.non_mesures || []).slice(0, 3).forEach(function (k) {
+      cartes.push({ nom: k.nom, disponible: false, motif: k.motif });
+    });
+
+    return E.grilleKpi(cartes)
+      + '<p style="margin:0"><a href="direction-financiere.html" '
+      + 'style="color:var(--vert);font-weight:600">Ouvrir la direction financière →</a></p>';
+  }
+
+  function ressourcesHtml(eff, dispo) {
+    return E.grilleKpi([
+      { nom: 'Personnel actif', valeur: eff.total_actifs,
+        base: 'sur ' + E.nombre(eff.total_personnel) + ' compte(s)' },
+      { nom: 'Collecteurs actifs', valeur: dispo.collecteurs_actifs },
+      { nom: 'Capacité théorique max', valeur: dispo.capacite_theorique_max,
+        unite: ' clients/j',
+        note: 'THÉORIQUE : ignore la disponibilité des véhicules, dont la table n’existe '
+          + 'pas. Ne la traitez pas comme une prévision.' },
+      { nom: 'Sans fiche RH', valeur: eff.personnel_sans_profil_rh,
+        base: eff.personnel_sans_profil_rh > 0 ? 'ni contrat ni présence' : null },
+      { nom: 'Disponibilité véhicules', disponible: false,
+        motif: 'Les tables `vehicles` et `vehicle_availability` n’existent pas.' },
+    ])
+      + E.avertissements((eff.avertissements || []).concat(dispo.avertissements || []))
+      + '<p style="margin:0"><a href="direction-rh.html" '
+      + 'style="color:var(--vert);font-weight:600">Ouvrir les ressources humaines →</a></p>';
+  }
+
+  function mesureHtml(m) {
+    var pct = m.couverture_pct;
+    var couleur = pct === null ? 'var(--texte-faible)'
+      : pct >= 75 ? 'var(--vert)' : pct >= 50 ? 'var(--attention)' : 'var(--alerte)';
+
+    var manques = m.non_mesures.map(function (k) {
+      return '<tr><td><strong>' + E.echapper(k.nom) + '</strong></td>'
+        + '<td style="max-width:520px">' + E.echapper(k.motif) + '</td></tr>';
+    }).join('');
+
+    return '<p style="margin:0 0 10px">'
+      + '<strong style="font-size:26px;font-family:Montserrat,sans-serif;color:' + couleur + '">'
+      + E.pourcent(pct) + '</strong> des indicateurs déclarés sont réellement calculables '
+      + '(' + E.nombre(m.indicateurs_calculables) + ' sur ' + E.nombre(m.total_declares) + ').</p>'
+      + '<div style="height:9px;background:var(--surface-2);border-radius:99px;'
+      + 'overflow:hidden;margin:0 0 12px">'
+      + '<div style="height:100%;width:' + (pct || 0) + '%;background:' + couleur + '"></div></div>'
+      + '<p class="meta" style="color:var(--texte-doux)">' + E.echapper(m.lecture) + '</p>'
+      + '<details class="brut"><summary>Voir les indicateurs non mesurés et leur motif</summary>'
+      + E.tableau(['Indicateur', 'Pourquoi il n’est pas mesuré'], manques) + '</details>';
+  }
+
+  // ── Signaux ────────────────────────────────────────────────────────────────
+
+  function vueSignaux() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-generale/signaux').then(function (d) {
+      elSousTitre.textContent = d.aucun_signal
+        ? 'Aucun signal détecté'
+        : d.signaux.length + ' signal(aux) actif(s)';
+
+      elContenu.innerHTML = signauxHtml(d)
+        + E.panneau('Portée de cette détection',
+          '<p>' + E.echapper(d.note_couverture) + '</p>'
+          + '<p style="margin-top:10px"><a href="centre-analyse.html" '
+          + 'style="color:var(--vert);font-weight:600">Ouvrir le Centre d’analyse →</a></p>');
+    }).catch(function (err) {
+      elContenu.innerHTML = '<div class="note">' + E.echapper(err.message
+        || 'Les signaux transversaux exigent la permission executive.risk.manage.') + '</div>';
+      elSousTitre.textContent = 'Accès restreint';
+    });
+  }
+
+  // ── Suivi stratégique ──────────────────────────────────────────────────────
+
+  function vueStrategie() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-generale/suivi-strategique').then(function (d) {
+      var c = d.compteurs;
+      elSousTitre.textContent = E.nombre(c.total) + ' recommandation(s) · '
+        + E.nombre(c.en_attente) + ' en attente de décision';
+
+      if (d.etat_vide) {
+        elContenu.innerHTML = E.panneau('Suivi stratégique',
+          '<div class="etat-vide">' + E.echapper(d.etat_vide) + '</div>'
+          + '<p style="text-align:center"><a href="centre-analyse.html" '
+          + 'style="color:var(--vert);font-weight:600">Ouvrir le Centre d’analyse →</a></p>');
+        return;
+      }
+
+      var retards = '';
+      if (d.revisions_en_retard && d.revisions_en_retard.length > 0) {
+        retards = '<div class="avertissement"><strong>'
+          + d.revisions_en_retard.length + ' décision(s) attendent leur réévaluation.</strong><br>'
+          + 'Leur date de révision est passée et aucun résultat n’a été consigné. Une '
+          + 'décision jamais réévaluée n’apprend rien à l’entreprise.'
+          + '<ul class="compact" style="margin-top:7px">'
+          + d.revisions_en_retard.map(function (r) {
+            return '<li>' + E.echapper(r.titre) + ' — prévue le '
+              + E.dateCourte(r.prochaine_revision) + '</li>';
+          }).join('') + '</ul></div>';
+      }
+
+      var LIBELLE_NIVEAU = {
+        action_immediate: 'Action immédiate',
+        experimentation: 'Expérimentation',
+        decision_strategique: 'Décision stratégique',
+      };
+
+      var lignes = d.recommandations.map(function (r) {
+        var puce = { proposee: 'attention', acceptee: 'ok', rejetee: 'neutre',
+          reportee: 'info', realisee: 'ok', abandonnee: 'neutre' }[r.statut] || 'neutre';
+
+        return '<tr>'
+          + '<td style="max-width:400px"><strong>' + E.echapper(r.titre) + '</strong>'
+          + '<div class="meta" style="color:var(--texte-faible)">'
+          + E.echapper(LIBELLE_NIVEAU[r.niveau] || r.niveau)
+          + ' · priorité ' + E.nombre(r.priorite)
+          + ' · issue de l’analyse « ' + E.echapper(r.type_analyse) + ' »</div>'
+          + (r.decision
+            ? '<div class="meta" style="margin-top:6px"><strong>'
+              + E.echapper(r.decision) + '</strong> par ' + E.echapper(r.decideur || '—')
+              + '<br><em>' + E.echapper(r.justification) + '</em>'
+              + (r.enseignement
+                ? '<br><strong>Enseignement :</strong> ' + E.echapper(r.enseignement) : '')
+              + '</div>'
+            : '')
+          + '</td>'
+          + '<td><span class="puce ' + puce + '">' + E.echapper(r.statut) + '</span></td>'
+          + '<td>' + E.dateCourte(r.created_at) + '</td>'
+          + '<td>' + E.nombre(r.suivis) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = retards
+        + E.grilleKpi([
+          { nom: 'En attente de décision', valeur: c.en_attente },
+          { nom: 'Acceptées', valeur: c.acceptees },
+          { nom: 'Rejetées', valeur: c.rejetees },
+          { nom: 'Réalisées', valeur: c.realisees },
+          { nom: 'Reportées', valeur: c.reportees },
+        ])
+        + E.panneau('Registre des recommandations',
+          E.tableau(['Recommandation et suite donnée', 'Statut', 'Émise le', 'Suivis'], lignes),
+          { sousTitre: 'Le conseil initial est immuable ; seul son traitement évolue. '
+            + 'Les décisions s’enregistrent depuis le Centre d’analyse.' });
+    }).catch(echec);
+  }
+
+  // ── État de la mesure ──────────────────────────────────────────────────────
+
+  function vueMesure() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-generale/etat-de-la-mesure').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.indicateurs_calculables) + ' calculable(s), '
+        + E.nombre(d.indicateurs_non_mesures) + ' non mesuré(s)';
+
+      var registre = d.registre.map(function (k) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(k.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(k.code) + '</small></td>'
+          + '<td style="max-width:300px">' + E.echapper(k.definition || '') + '</td>'
+          + '<td><code style="font-size:11.5px">'
+          + E.echapper(k.formule || k.motif_indisponible || '—') + '</code></td>'
+          + '<td>' + (k.disponible
+            ? '<span class="puce ok">Calculé</span>'
+            : '<span class="puce neutre">Non mesuré</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Couverture de la mesure', mesureHtml(d))
+        + E.panneau('Registre complet dans votre périmètre',
+          E.tableau(['Indicateur', 'Définition', 'Formule ou motif', 'État'], registre),
+          { sousTitre: 'Chaque indicateur porte sa formule et ses sources — ou le motif '
+            + 'précis de son indisponibilité.' });
+    }).catch(echec);
+  }
+
+  // ── Liens vers les espaces accessibles ─────────────────────────────────────
+
+  var ESPACES = [
+    { page: 'direction-operations-commerciales.html', libelle: 'Opérations',
+      permission: 'operations.dashboard.read' },
+    { page: 'direction-financiere.html', libelle: 'Finance',
+      permission: 'finance.dashboard.read' },
+    { page: 'direction-rh.html', libelle: 'Ressources humaines',
+      permission: 'hr.employee.read' },
+    { page: 'centre-analyse.html', libelle: 'Centre d’analyse',
+      permission: 'ai.analysis.run' },
+  ];
+
+  function afficherLiens(permissions) {
+    var el = document.getElementById('liensEspaces');
+    var accessibles = ESPACES.filter(function (e) {
+      return permissions.indexOf(e.permission) !== -1;
+    });
+
+    if (accessibles.length === 0) {
+      el.innerHTML = '<span style="font-size:12px;color:var(--texte-faible)">Aucun</span>';
+      return;
+    }
+
+    el.innerHTML = accessibles.map(function (e) {
+      return '<a href="' + e.page + '" style="color:var(--texte-doux);text-decoration:none;'
+        + 'font-size:13px">' + E.echapper(e.libelle) + '</a>';
+    }).join('');
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    cockpit: vueCockpit,
+    signaux: vueSignaux,
+    strategie: vueStrategie,
+    mesure: vueMesure,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  EnviroAuth.proteger({ permissions: ['executive.dashboard.read'] })
+    .then(function (ctx) {
+      etat.permissions = ctx.permissions;
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+
+      // Le libellé suit le rôle réel : la même page sert le DGA et le PDG.
+      if (ctx.espace && ctx.espace.libelle) {
+        document.getElementById('libelleEspace').textContent = ctx.espace.libelle;
+        document.title = ctx.espace.libelle + ' - Enviro Cleans';
+      }
+
+      afficherLiens(ctx.permissions);
+      allerA('cockpit');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction marketing - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+<style>
+  /* Grille de cohortes : propre à cet écran, donc ici et pas dans le châssis commun. */
+  .cohortes td.cellule{ text-align:center; font-variant-numeric:tabular-nums; }
+  .cohortes td.vide{ color:var(--texte-faible); font-style:italic; font-size:11.5px; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Direction marketing</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="tableau">Tableau de bord</a>
+      <a href="#" data-vue="acquisition">Acquisition</a>
+      <a href="#" data-vue="territoire">Territoire</a>
+      <a href="#" data-vue="retention">Rétention</a>
+      <a href="#" data-vue="agents">Agents</a>
+      <a href="#" data-vue="canaux">Canaux</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Tableau de bord</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION MARKETING
+ * ════════════════════════════════════════
+ *
+ * C'est l'espace où les données manquent le plus, donc celui qui doit être le plus franc.
+ *
+ * Les trois chiffres qu'un directeur marketing cherche en premier — coût d'acquisition,
+ * ROI des campagnes, attribution par canal — n'existent pas dans cette base. Ils sont
+ * affichés « non mesuré » avec leur motif, DANS la même grille que les autres cartes.
+ * Les reléguer en bas de page laisserait croire que le tableau est complet.
+ *
+ * Ce qui EST mesurable, et qui est déjà utile : l'acquisition réelle, le délai médian
+ * entre création du dossier et premier paiement, la répartition territoriale, et surtout
+ * la rétention par cohorte — le seul indicateur marketing réellement stratégique que
+ * cette base permette, puisqu'il ne dépend d'aucune table manquante.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    tableau: 'Tableau de bord',
+    acquisition: 'Acquisition',
+    territoire: 'Territoire',
+    retention: 'Rétention par cohorte',
+    agents: 'Agents marketing',
+    canaux: 'Canaux',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  // ── Tableau de bord ────────────────────────────────────────────────────────
+
+  function vueTableau() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-marketing/tableau-de-bord' + periode()).then(function (d) {
+      var acq = d.acquisition;
+      elSousTitre.textContent = 'Du ' + d.periode.debut + ' au ' + d.periode.fin
+        + ' · ' + E.nombre(acq.total_dossiers) + ' dossier(s) créé(s)';
+
+      // Délai médian du dernier mois clos : le mois en cours est toujours incomplet.
+      var moisClos = acq.par_mois.length > 1
+        ? acq.par_mois[acq.par_mois.length - 2]
+        : acq.par_mois[0];
+
+      var cartes = [
+        { nom: 'Dossiers créés', valeur: acq.total_dossiers,
+          definition: 'Nouveaux dossiers abonnés sur la période.' },
+        { nom: 'Ayant payé au moins une fois', valeur: acq.total_ayant_paye },
+        { nom: 'Conversion dossier → paiement', valeur: acq.taux_conversion_global_pct,
+          format: 'pourcent',
+          note: 'Ce n’est PAS un entonnoir marketing : ce qui se passe avant la création '
+            + 'du dossier n’est enregistré nulle part.' },
+        { nom: 'Délai médian avant paiement',
+          valeur: moisClos ? moisClos.delai_median_jours : null,
+          unite: ' j',
+          base: moisClos ? 'cohorte ' + moisClos.mois : null,
+          definition: 'Médiane entre création du dossier et premier encaissement réussi.',
+          note: 'Médiane et non moyenne : un seul dossier réglé six mois plus tard '
+            + 'décalerait la moyenne et masquerait le comportement du plus grand nombre. '
+            + 'Un délai qui s’allonge signale un problème de relance bien avant que le '
+            + 'taux de conversion ne bouge.' },
+        { nom: 'Conversations WhatsApp',
+          valeur: d.canal_whatsapp.conversations.conversations,
+          base: E.nombre(d.canal_whatsapp.conversations.actives_7j) + ' active(s) sur 7 j' },
+        { nom: 'Rapports d’agents', valeur: d.agents.synthese.rapports,
+          base: E.nombre(d.agents.synthese.agents_actifs) + ' agent(s) actif(s)' },
+      ];
+
+      // Les trois grands absents, au même rang que le reste.
+      d.non_mesures.forEach(function (k) {
+        cartes.push({ nom: k.nom, disponible: false, motif: k.motif });
+      });
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi(cartes)
+        + E.panneau('Acquisition mensuelle', acquisitionHtml(acq),
+          { sousTitre: 'Le dernier mois affiche mécaniquement une conversion plus basse : '
+            + 'les dossiers récents n’ont pas encore eu le temps de payer.' })
+        + E.panneau('Rétention par cohorte', cohortesHtml(d.retention),
+          { sousTitre: 'Le seul indicateur marketing réellement stratégique que cette base '
+            + 'permette : il ne dépend d’aucune table manquante.' })
+        + E.panneau('Par segment de déchet', segmentsHtml(d.segments));
+    }).catch(echec);
+  }
+
+  function acquisitionHtml(acq) {
+    if (!acq.par_mois || acq.par_mois.length === 0) {
+      return '<div class="etat-vide">Aucun dossier créé sur cette période.</div>';
+    }
+
+    var max = Math.max.apply(null,
+      acq.par_mois.map(function (m) { return m.dossiers_crees; }).concat([1]));
+
+    // Barres empilées : payants en vert, non convertis en gris. Une barre montre le
+    // volume ET la conversion d'un coup d'œil.
+    var barres = acq.par_mois.map(function (m) {
+      var hTotal = Math.round((m.dossiers_crees / max) * 130);
+      var hPaye = m.dossiers_crees > 0
+        ? Math.round(hTotal * (m.ayant_paye / m.dossiers_crees)) : 0;
+
+      return '<div style="flex:1;min-width:26px;display:flex;flex-direction:column;'
+        + 'justify-content:flex-end;align-items:center;gap:4px">'
+        + '<div title="' + E.echapper(m.mois + ' : ' + m.dossiers_crees + ' dossier(s), '
+          + m.ayant_paye + ' ayant payé') + '" '
+        + 'style="width:100%;height:' + hTotal + 'px;background:var(--surface-2);'
+        + 'border-radius:3px 3px 0 0;display:flex;flex-direction:column;justify-content:flex-end">'
+        + '<div style="height:' + hPaye + 'px;background:var(--vert);border-radius:3px 3px 0 0"></div>'
+        + '</div>'
+        + '<small style="font-size:10px;color:var(--texte-faible)">'
+        + E.echapper(m.mois.slice(5)) + '</small></div>';
+    }).join('');
+
+    var lignes = acq.par_mois.map(function (m) {
+      return '<tr>'
+        + '<td>' + E.echapper(m.mois) + '</td>'
+        + '<td>' + E.nombre(m.dossiers_crees) + '</td>'
+        + '<td>' + E.nombre(m.ayant_paye) + '</td>'
+        + '<td>' + E.pourcent(m.taux_conversion_pct)
+        + (m.echantillon_faible
+          ? '<br><small style="color:var(--texte-faible)">échantillon &lt; 10</small>' : '')
+        + '</td>'
+        + '<td>' + (m.delai_median_jours === null ? '—' : E.nombre(m.delai_median_jours) + ' j')
+        + '</td></tr>';
+    }).join('');
+
+    return '<div style="display:flex;align-items:flex-end;gap:5px;height:155px;padding-top:8px">'
+      + barres + '</div>'
+      + '<div style="display:flex;gap:16px;font-size:12px;color:var(--texte-doux);margin-top:12px">'
+      + '<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;'
+      + 'background:var(--vert);margin-right:5px"></i>Ayant payé</span>'
+      + '<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;'
+      + 'background:var(--surface-2);border:1px solid var(--bordure);margin-right:5px"></i>'
+      + 'Sans paiement</span></div>'
+      + '<details class="brut"><summary>Voir les chiffres</summary>'
+      + E.tableau(['Mois', 'Dossiers', 'Ayant payé', 'Conversion', 'Délai médian'], lignes)
+      + '</details>';
+  }
+
+  /**
+   * Grille de cohortes.
+   *
+   * Une cellule vide signifie « recul insuffisant », pas « zéro client retenu ». Elle
+   * affiche donc un texte explicite, jamais un « 0 % » qui ferait apparaître un
+   * effondrement là où il n'y a qu'un manque de recul.
+   */
+  function cohortesHtml(ret) {
+    if (!ret.cohortes || ret.cohortes.length === 0) {
+      return '<div class="etat-vide">Aucune cohorte sur cette période.</div>';
+    }
+
+    function cellule(valeur, jalon, recul) {
+      if (valeur === null) {
+        return '<td class="cellule vide">'
+          + (recul < jalon ? 'recul&nbsp;insuffisant' : '—') + '</td>';
+      }
+      // Teinte proportionnelle : lisible sans dépendre de la couleur seule, puisque le
+      // pourcentage reste écrit.
+      var opacite = Math.max(0.08, Math.min(0.55, valeur / 100));
+      return '<td class="cellule" style="background:rgba(58,181,74,' + opacite + ')">'
+        + E.pourcent(valeur) + '</td>';
+    }
+
+    var lignes = ret.cohortes.map(function (c) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(c.cohorte) + '</strong>'
+        + (c.echantillon_faible
+          ? '<br><small style="color:var(--texte-faible)">échantillon &lt; 10</small>' : '')
+        + '</td>'
+        + '<td class="cellule">' + E.nombre(c.taille) + '</td>'
+        + cellule(c.m1_pct, 1, c.recul_mois)
+        + cellule(c.m3_pct, 3, c.recul_mois)
+        + cellule(c.m6_pct, 6, c.recul_mois)
+        + '</tr>';
+    }).join('');
+
+    return '<div class="table-wrap"><table class="cohortes"><thead><tr>'
+      + '<th>Cohorte d’entrée</th><th>Taille</th><th>M+1</th><th>M+3</th><th>M+6</th>'
+      + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
+      + E.avertissements(ret.avertissements);
+  }
+
+  function segmentsHtml(segments) {
+    var lignes = (segments || []).map(function (s) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(s.segment) + '</strong></td>'
+        + '<td>' + E.nombre(s.dossiers_crees) + '</td>'
+        + '<td>' + E.nombre(s.ayant_paye) + '</td>'
+        + '<td>' + E.pourcent(s.taux_conversion_pct) + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(['Type de déchet', 'Dossiers', 'Ayant payé', 'Conversion'], lignes,
+      { vide: 'Aucun dossier créé sur cette période.' })
+      + '<p class="meta" style="color:var(--texte-faible);margin-top:10px">'
+      + 'Le type de déchet est le seul segment produit réellement enregistré. Il n’existe '
+      + 'aucune segmentation par taille de foyer, par usage (ménage, restaurant, école) ni '
+      + 'par capacité de paiement.</p>';
+  }
+
+  // ── Acquisition ────────────────────────────────────────────────────────────
+
+  function vueAcquisition() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/acquisition' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total_dossiers) + ' dossier(s) créé(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Dossiers créés', valeur: d.total_dossiers },
+          { nom: 'Ayant payé', valeur: d.total_ayant_paye },
+          { nom: 'Conversion globale', valeur: d.taux_conversion_global_pct, format: 'pourcent' },
+        ])
+        + E.panneau('Acquisition mensuelle', acquisitionHtml(d))
+        + E.panneau('Par segment', segmentsHtml(d.segments));
+    }).catch(echec);
+  }
+
+  // ── Territoire ─────────────────────────────────────────────────────────────
+
+  function vueTerritoire() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/territoire' + periode()).then(function (d) {
+      elSousTitre.textContent = d.territoire.length + ' zone(s) représentée(s)';
+
+      var lignes = d.territoire.map(function (t) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(t.zone) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(t.commune) + '</small></td>'
+          + '<td>' + E.nombre(t.dossiers_crees) + '</td>'
+          + '<td>' + E.nombre(t.ayant_paye) + '</td>'
+          + '<td>' + E.pourcent(t.taux_conversion_pct) + '</td>'
+          + '<td>' + E.nombre(t.actifs_aujourdhui) + '</td>'
+          + '<td>' + E.pourcent(t.encore_actifs_pct) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Acquisition par territoire',
+          E.tableau(['Zone / commune', 'Dossiers', 'Ayant payé', 'Conversion',
+            'Actifs aujourd’hui', 'Encore actifs'], lignes, { vide: d.etat_vide }),
+          { sousTitre: '« Encore actifs » rapporte les abonnements couvrant aujourd’hui '
+            + 'aux clients ayant payé au moins une fois — une rétention brute, par zone.' });
+    }).catch(echec);
+  }
+
+  // ── Rétention ──────────────────────────────────────────────────────────────
+
+  function vueRetention() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/retention' + periode()).then(function (d) {
+      elSousTitre.textContent = d.cohortes.length + ' cohorte(s) mensuelle(s)';
+
+      elContenu.innerHTML = E.panneau('Rétention par cohorte d’acquisition',
+        cohortesHtml(d),
+        { sousTitre: 'Chaque ligne est un mois d’entrée. Les colonnes indiquent la part '
+          + 'de la cohorte ayant encaissé un paiement 1, 3 et 6 mois plus tard.' })
+        + E.panneau('Comment lire ce tableau',
+          '<ul class="compact">'
+          + '<li>Une cellule <em>« recul insuffisant »</em> n’est pas un zéro : la cohorte '
+          + 'est trop récente pour avoir atteint ce jalon.</li>'
+          + '<li>La rétention est mesurée par l’existence d’un <strong>paiement réussi</strong> '
+          + 'le mois considéré. Un client sous abonnement annuel n’apparaît pas actif à '
+          + 'M+3 puisqu’il n’a rien réglé ce mois-là — cet indicateur convient aux cycles '
+          + 'courts.</li>'
+          + '<li>Une cohorte de moins de dix clients est signalée : son pourcentage varie '
+          + 'de plus de dix points pour un seul départ.</li>'
+          + '</ul>');
+    }).catch(echec);
+  }
+
+  // ── Agents ─────────────────────────────────────────────────────────────────
+
+  function vueAgents() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/agents' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.synthese.agents_actifs) + ' agent(s) actif(s)';
+
+      var lignes = d.par_agent.map(function (a) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(a.agent) + '</strong></td>'
+          + '<td>' + E.nombre(a.rapports) + '</td>'
+          + '<td>' + E.nombre(a.valides) + '</td>'
+          + '<td>' + (a.en_attente > 0
+            ? '<span class="puce attention">' + E.nombre(a.en_attente) + '</span>' : '—') + '</td>'
+          + '<td>' + E.nombre(a.clients_declares) + '</td>'
+          + '<td>' + E.nombre(a.dossiers_constates) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Rapports soumis', valeur: d.synthese.rapports },
+          { nom: 'Agents actifs', valeur: d.synthese.agents_actifs },
+          { nom: 'En attente de validation', valeur: d.synthese.en_attente_validation },
+        ])
+        + E.panneau('Activité par agent',
+          E.tableau(['Agent', 'Rapports', 'Validés', 'En attente',
+            'Clients déclarés', 'Dossiers constatés'], lignes, { vide: d.etat_vide }),
+          { sousTitre: '« Déclarés » et « constatés » sont présentés côte à côte sans en '
+            + 'dériver un écart : ce ne sont pas deux mesures de la même chose.' });
+    }).catch(function (err) {
+      elContenu.innerHTML = '<div class="note">' + E.echapper(err.message
+        || 'Le suivi des agents exige la permission marketing.lead.manage.') + '</div>';
+      elSousTitre.textContent = 'Accès restreint';
+    });
+  }
+
+  // ── Canaux ─────────────────────────────────────────────────────────────────
+
+  function vueCanaux() {
+    elContenu.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-marketing/canaux' + periode()).then(function (d) {
+      var wa = d.whatsapp.conversations;
+      elSousTitre.textContent = E.nombre(wa.conversations) + ' conversation(s) WhatsApp';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + '<div class="note">' + E.echapper(d.note) + '</div>'
+        + E.grilleKpi([
+          { nom: 'Conversations', valeur: wa.conversations },
+          { nom: 'Rattachées à un abonné', valeur: wa.rattachees_a_un_abonne },
+          { nom: 'Non rattachées', valeur: wa.non_rattachees },
+          { nom: 'Actives sur 7 jours', valeur: wa.actives_7j },
+          { nom: 'Attribution par canal', disponible: false,
+            motif: 'La source d’acquisition d’un abonné n’est enregistrée nulle part. '
+              + 'Ajouter une colonne `source` sur `subscribers` serait le premier pas — et '
+              + 'le moins coûteux — vers un pilotage marketing réel.' },
+        ])
+        + E.panneau('Conversations non rattachées',
+          '<p><strong style="font-size:22px;font-family:Montserrat,sans-serif">'
+          + E.nombre(d.whatsapp.proxy_prospects.valeur) + '</strong></p>'
+          + '<div class="avertissement" style="margin-top:10px">'
+          + E.echapper(d.whatsapp.proxy_prospects.avertissement) + '</div>',
+          { sousTitre: 'Le plus proche équivalent d’un prospect dont dispose cette base — '
+            + 'ce qui ne veut pas dire que c’en est un.' });
+    }).catch(echec);
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    tableau: vueTableau,
+    acquisition: vueAcquisition,
+    territoire: vueTerritoire,
+    retention: vueRetention,
+    agents: vueAgents,
+    canaux: vueCanaux,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  EnviroAuth.proteger({ permissions: ['marketing.dashboard.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('tableau');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

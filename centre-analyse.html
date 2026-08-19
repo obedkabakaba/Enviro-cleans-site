@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Centre d'analyse Claude - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<style>
+  :root{
+    --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
+    --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+    --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
+    --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a; --info:#3f6fd8;
+    --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+      --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+      --info:#7ba0f0;
+      --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--fond); color:var(--texte);
+    font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+
+  .shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+  .sidebar{
+    background:var(--surface); border-right:1px solid var(--bordure);
+    padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .marque{ padding:0 20px 20px; border-bottom:1px solid var(--bordure); margin-bottom:14px; }
+  .marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
+  .marque span{ font-size:11.5px; color:var(--texte-faible); }
+  .menu a{
+    display:block; padding:10px 20px; color:var(--texte-doux);
+    text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
+  }
+  .menu a:hover{ background:var(--surface-2); color:var(--texte); }
+  .menu a.actif{ color:var(--vert); border-left-color:var(--vert); background:var(--surface-2); font-weight:600; }
+
+  .principal{ padding:22px 26px 60px; min-width:0; }
+  .topbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:22px; }
+  h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
+  .sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
+
+  .filtres{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  input[type=date], select, input[type=text], textarea{
+    padding:7px 10px; border:1px solid var(--bordure); border-radius:7px;
+    background:var(--surface); color:var(--texte); font-size:13px; font-family:inherit;
+  }
+  textarea{ width:100%; resize:vertical; min-height:70px; }
+  button.action{
+    padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
+    color:#fff; font-weight:600; font-size:13px; cursor:pointer;
+  }
+  button.action:hover{ background:var(--vert-profond); }
+  button.action:disabled{ opacity:.55; cursor:not-allowed; }
+  button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
+  button.danger{ background:var(--alerte); }
+
+  .panneau{
+    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+    box-shadow:var(--ombre); margin-bottom:20px; overflow:hidden;
+  }
+  .panneau > header{
+    padding:14px 17px; border-bottom:1px solid var(--bordure);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14.5px; margin:0; }
+  .panneau .corps{ padding:16px 17px; }
+
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:560px; }
+  th{
+    text-align:left; padding:9px 11px; font-size:11.5px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--texte-faible); border-bottom:1px solid var(--bordure); white-space:nowrap;
+  }
+  td{ padding:10px 11px; border-bottom:1px solid var(--bordure); vertical-align:top; }
+  tbody tr:last-child td{ border-bottom:none; }
+
+  .puce{ display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
+  .puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
+  .puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
+  .puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
+  .puce.info{ background:rgba(63,111,216,.14); color:var(--info); }
+
+  /* ── Typologie §19.3 : la nature d'une affirmation doit se voir d'un coup d'œil.
+     Un FAIT INTERNE et une HYPOTHÈSE ne se lisent pas de la même façon. ── */
+  .etiquette{
+    display:inline-block; padding:2px 8px; border-radius:4px; font-size:10.5px;
+    font-weight:800; letter-spacing:.04em; text-transform:uppercase; margin-right:8px;
+  }
+  .etiquette.fait_interne{ background:rgba(58,181,74,.16); color:var(--vert-profond); }
+  .etiquette.fait_externe{ background:rgba(63,111,216,.16); color:var(--info); }
+  .etiquette.signal{ background:rgba(23,162,162,.16); color:var(--teal); }
+  .etiquette.hypothese{ background:rgba(224,138,30,.16); color:var(--attention); }
+  .etiquette.risque{ background:rgba(217,83,79,.16); color:var(--alerte); }
+  .etiquette.opportunite{ background:rgba(58,181,74,.16); color:var(--vert); }
+  @media (prefers-color-scheme: dark){
+    .etiquette.fait_interne{ color:#6fdb82; }
+  }
+
+  .bloc{ border:1px solid var(--bordure); border-radius:9px; padding:13px 15px; margin-bottom:11px; background:var(--surface-2); }
+  .bloc h3{ font-size:13px; margin:0 0 7px; font-family:'Montserrat',sans-serif; }
+  .bloc p{ margin:0 0 6px; }
+  .bloc .meta{ font-size:11.5px; color:var(--texte-faible); }
+
+  .etat-vide{ padding:28px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
+  .squelette{ background:var(--surface-2); border-radius:6px; height:15px; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
+
+  .erreur{
+    padding:13px 15px; border-radius:9px; font-size:13.5px; margin-bottom:14px;
+    background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
+  }
+  .avertissement{
+    padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
+    background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
+  }
+  .note{
+    padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
+    background:rgba(63,111,216,.08); border:1px solid rgba(63,111,216,.26); color:var(--texte-doux);
+  }
+
+  .grille-kpi{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:20px; }
+  .kpi{ background:var(--surface); border:1px solid var(--bordure); border-radius:11px; padding:15px 16px; box-shadow:var(--ombre); }
+  .kpi .libelle{ font-size:12px; color:var(--texte-doux); font-weight:600; margin-bottom:7px; }
+  .kpi .valeur{ font-family:'Montserrat',sans-serif; font-size:24px; font-weight:800; line-height:1.1; }
+  .kpi .base{ font-size:11.5px; color:var(--texte-faible); margin-top:6px; }
+
+  .liste-analyses{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+  .carte-analyse{
+    border:1px solid var(--bordure); border-radius:10px; padding:14px 15px;
+    background:var(--surface-2); cursor:pointer; text-align:left; width:100%;
+    color:var(--texte); font-family:inherit; font-size:13px;
+  }
+  .carte-analyse:hover{ border-color:var(--vert); }
+  .carte-analyse strong{ display:block; font-family:'Montserrat',sans-serif; font-size:13.5px; margin-bottom:5px; }
+  .carte-analyse .q{ color:var(--texte-doux); font-size:12.5px; }
+  .carte-analyse .tags{ margin-top:9px; display:flex; gap:6px; flex-wrap:wrap; }
+
+  ul.compact{ margin:0; padding-left:19px; }
+  ul.compact li{ margin-bottom:5px; }
+  a.citation{ color:var(--info); word-break:break-word; }
+
+  details.brut summary{ cursor:pointer; font-size:12.5px; color:var(--texte-doux); margin-top:14px; }
+  details.brut pre{
+    background:var(--surface-2); padding:12px; border-radius:8px; overflow-x:auto;
+    font-size:11.5px; margin-top:9px;
+  }
+
+  /* ── Conversation ── */
+  .fil{ max-height:58vh; overflow-y:auto; padding-right:6px; }
+  .tour{ margin-bottom:14px; display:flex; }
+  .tour.moi{ justify-content:flex-end; }
+  .bulle{
+    max-width:78%; padding:11px 14px; border-radius:12px; font-size:13.5px;
+    white-space:pre-wrap; word-wrap:break-word;
+  }
+  .tour.moi .bulle{ background:var(--vert); color:#fff; border-bottom-right-radius:3px; }
+  .tour.analyste .bulle{
+    background:var(--surface-2); border:1px solid var(--bordure);
+    border-bottom-left-radius:3px;
+  }
+  .bulle .outils{
+    font-size:11px; opacity:.7; margin-top:8px; padding-top:7px;
+    border-top:1px solid rgba(128,128,128,.25);
+  }
+  .composer{ display:flex; gap:8px; margin-top:14px; align-items:flex-end; }
+  .composer textarea{ flex:1; min-height:52px; }
+
+  @media (max-width:900px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
+    .menu{ display:flex; overflow-x:auto; }
+    .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
+    .menu a.actif{ border-left:none; border-bottom-color:var(--vert); }
+    .principal{ padding:18px 15px 50px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Centre d'analyse</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="lancer">Lancer une analyse</a>
+      <a href="#" data-vue="historique">Analyses produites</a>
+      <a href="#" data-vue="memoire">Mémoire décisionnelle</a>
+      <a href="#" data-vue="conversation">Conversation</a>
+      <a href="#" data-vue="veille">Veille externe</a>
+      <a href="#" data-vue="consommation">Consommation et coûts</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Lancer une analyse</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="zoneEtat"></div>
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * CENTRE D'ANALYSE CLAUDE
+ * ════════════════════════════════════════
+ *
+ * Cet écran n'affiche RIEN qu'il ait produit lui-même. Chaque section provient de
+ * /api/analyse/*, qui provient d'une analyse réellement exécutée sur les données réelles.
+ * Aucun exemple de rapport, aucune recommandation de démonstration.
+ *
+ * Trois principes guident l'affichage :
+ *
+ *   1. LA NATURE AVANT LE CONTENU. Un FAIT INTERNE, un FAIT EXTERNE, un SIGNAL et une
+ *      HYPOTHÈSE portent une étiquette visuellement distincte (§19.3). Le lecteur doit
+ *      voir en un coup d'œil ce qui est mesuré et ce qui est supposé — c'est ce qui
+ *      empêche une corrélation de se faire passer pour une cause.
+ *
+ *   2. CE QUI MANQUE EST AFFICHÉ. « informations_manquantes » et « contexte externe non
+ *      actualisé » ne sont pas des notes de bas de page : ils sont montrés en haut du
+ *      rapport, parce qu'ils conditionnent la valeur de tout ce qui suit.
+ *
+ *   3. LECTURE SEULE, SAUF UN BOUTON. La seule écriture possible depuis cet écran est
+ *      d'enregistrer une décision humaine sur une recommandation. Elle exige une
+ *      justification et passe par une confirmation explicite (§19.7).
+ */
+(function () {
+  'use strict';
+
+  var etat = {
+    vue: 'lancer', debut: null, fin: null,
+    capacites: null, enCours: false,
+  };
+
+  var elContenu = document.getElementById('contenu');
+  var elTitre = document.getElementById('titreVue');
+  var elSousTitre = document.getElementById('sousTitre');
+  var elEtat = document.getElementById('zoneEtat');
+
+  var TITRES = {
+    lancer: 'Lancer une analyse',
+    historique: 'Analyses produites',
+    memoire: 'Mémoire décisionnelle',
+    conversation: 'Conversation avec l’analyste',
+    veille: 'Veille externe',
+    consommation: 'Consommation et coûts',
+  };
+
+  // ── Utilitaires ────────────────────────────────────────────────────────────
+
+  function echapper(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function nombre(v) {
+    if (v === null || v === undefined) return '—';
+    return typeof v === 'number' ? v.toLocaleString('fr-FR') : echapper(v);
+  }
+
+  function usd(v) {
+    if (v === null || v === undefined) return '—';
+    return Number(v).toFixed(4) + ' USD';
+  }
+
+  function dateCourte(v) {
+    if (!v) return '—';
+    var d = new Date(v);
+    return isNaN(d.getTime()) ? echapper(v) : d.toLocaleString('fr-FR');
+  }
+
+  function squelette(n) {
+    var html = '';
+    for (var i = 0; i < (n || 4); i += 1) {
+      html += '<div class="squelette" style="margin-bottom:9px;width:' + (100 - i * 9) + '%"></div>';
+    }
+    return html;
+  }
+
+  function afficherErreur(err) {
+    var message = (err && err.message) ? err.message : 'Erreur inattendue.';
+    elContenu.innerHTML = '<div class="erreur">' + echapper(message) + '</div>';
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  /**
+   * Liste de chaînes, avec état vide explicite.
+   * Une section vide doit se lire « rien à signaler », pas disparaître silencieusement.
+   */
+  function listeOuVide(items, vide) {
+    if (!items || items.length === 0) {
+      return '<p class="meta">' + echapper(vide) + '</p>';
+    }
+    return '<ul class="compact">' + items.map(function (i) {
+      return '<li>' + echapper(i) + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  // ── Bandeau d'état du service ──────────────────────────────────────────────
+
+  function bandeauService(service) {
+    if (!service) return '';
+
+    if (service.etat === 'non_configure') {
+      return '<div class="note"><strong>Centre d’analyse non configuré.</strong><br>'
+        + echapper(service.message)
+        + '<br><small>Le reste de la plateforme — collectes, paiements, tournées — '
+        + 'fonctionne normalement. Aucune analyse ne peut être lancée tant que la clé et '
+        + 'le plafond de dépense ne sont pas posés.</small></div>';
+    }
+
+    if (service.etat === 'echec') {
+      return '<div class="erreur"><strong>Service d’analyse indisponible.</strong><br>'
+        + echapper(service.message) + '</div>';
+    }
+
+    return '';
+  }
+
+  // ── Vue : lancer une analyse ───────────────────────────────────────────────
+
+  function vueLancer() {
+    var cap = etat.capacites;
+    if (!cap) { elContenu.innerHTML = squelette(3); return; }
+
+    elSousTitre.textContent = cap.analyses.length + ' analyse(s) accessible(s) avec vos droits';
+
+    if (cap.service.etat !== 'ok') {
+      elContenu.innerHTML = '<div class="panneau"><div class="corps">'
+        + '<div class="etat-vide">Aucune analyse ne peut être lancée dans l’état actuel du '
+        + 'service. Voir le bandeau ci-dessus.</div></div></div>';
+      return;
+    }
+
+    if (cap.analyses.length === 0) {
+      elContenu.innerHTML = '<div class="panneau"><div class="corps">'
+        + '<div class="etat-vide">Aucune analyse n’est accessible avec vos permissions. '
+        + 'Chaque type d’analyse exige la permission de son domaine : une analyse financière '
+        + 'exige finance.dashboard.read, une analyse RH exige hr.employee.read.</div>'
+        + '</div></div>';
+      return;
+    }
+
+    // Avertissement recherche web : il conditionne la valeur de tout fait externe.
+    var avertWeb = cap.recherche_web && !cap.recherche_web.activee
+      ? '<div class="avertissement">' + echapper(cap.recherche_web.note) + '</div>'
+      : '';
+
+    var cartes = cap.analyses.map(function (a) {
+      return '<button class="carte-analyse" data-type="' + echapper(a.code) + '">'
+        + '<strong>' + echapper(a.libelle) + '</strong>'
+        + '<span class="q">' + echapper(a.question) + '</span>'
+        + '<span class="tags">'
+        + '<span class="puce ' + (a.profondeur === 'profonde' ? 'info' : 'neutre') + '">'
+        + (a.profondeur === 'profonde' ? 'Analyse approfondie' : 'Analyse rapide') + '</span>'
+        + (a.recherche_web
+          ? '<span class="puce ' + (cap.recherche_web.activee ? 'ok' : 'neutre') + '">'
+            + (cap.recherche_web.activee ? 'Avec recherche web' : 'Web indisponible') + '</span>'
+          : '')
+        + '</span></button>';
+    }).join('');
+
+    elContenu.innerHTML = avertWeb
+      + '<div class="panneau">'
+      + '<header><h2>Choisir une analyse</h2>'
+      + '<small style="color:var(--texte-faible)">Période : les dates ci-dessus. '
+      + 'Par défaut, les 30 derniers jours.</small></header>'
+      + '<div class="corps">'
+      + '<div class="liste-analyses">' + cartes + '</div>'
+      + '<div style="margin-top:16px">'
+      + '<label for="questionLibre" style="font-size:12.5px;color:var(--texte-doux);display:block;margin-bottom:5px">'
+      + 'Précision facultative (une question, un scénario à tester) :</label>'
+      + '<textarea id="questionLibre" maxlength="1500" '
+      + 'placeholder="Ex. : que se passe-t-il si nous augmentons le tarif ménage de 15 % ?"></textarea>'
+      + '</div>'
+      + '</div></div>'
+      + '<div id="resultatAnalyse"></div>';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.carte-analyse'), function (b) {
+      b.addEventListener('click', function () { lancer(b.getAttribute('data-type')); });
+    });
+  }
+
+  function lancer(type) {
+    if (etat.enCours) return;
+    etat.enCours = true;
+
+    var zone = document.getElementById('resultatAnalyse');
+    var question = document.getElementById('questionLibre');
+
+    Array.prototype.forEach.call(document.querySelectorAll('.carte-analyse'), function (b) {
+      b.disabled = true;
+    });
+
+    zone.innerHTML = '<div class="panneau"><div class="corps">'
+      + '<p style="margin:0 0 10px"><strong>Analyse en cours…</strong></p>'
+      + '<p class="meta" style="margin:0 0 12px">Claude interroge les outils de données '
+      + 'autorisés, puis rédige le rapport. Une analyse approfondie avec recherche web peut '
+      + 'demander une à deux minutes.</p>'
+      + squelette(4) + '</div></div>';
+
+    EnviroAPI.post('/api/analyse/analyses', {
+      type: type,
+      debut: etat.debut,
+      fin: etat.fin,
+      question: question ? question.value : null,
+    }).then(function (data) {
+      zone.innerHTML = rendreRapport(data);
+      brancherDecisions(zone);
+      zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function (err) {
+      zone.innerHTML = '<div class="erreur"><strong>L’analyse n’a pas abouti.</strong><br>'
+        + echapper(err && err.message ? err.message : 'Erreur inattendue.')
+        + '<br><small>Elle est enregistrée dans l’historique avec son coût, afin que rien ne '
+        + 'soit consommé sans trace.</small></div>';
+    }).then(function () {
+      etat.enCours = false;
+      Array.prototype.forEach.call(document.querySelectorAll('.carte-analyse'), function (b) {
+        b.disabled = false;
+      });
+    });
+  }
+
+  // ── Rendu d'un rapport ─────────────────────────────────────────────────────
+
+  function rendreRapport(data) {
+    var r = data.rapport;
+    var t = data.transparence || {};
+
+    // ── En-tête : ce qui manque, AVANT le contenu ──
+    var alertes = '';
+
+    if (t.avertissement_contexte) {
+      alertes += '<div class="avertissement"><strong>Contexte externe non actualisé.</strong><br>'
+        + echapper(t.avertissement_contexte) + '</div>';
+    }
+
+    if (t.borne_atteinte) {
+      alertes += '<div class="avertissement">Le nombre maximal d’allers-retours d’outils a été '
+        + 'atteint. Le rapport peut être partiel.</div>';
+    }
+
+    if (r.informations_manquantes && r.informations_manquantes.length > 0) {
+      alertes += '<div class="note"><strong>Informations manquantes déclarées par l’analyse :</strong>'
+        + '<ul class="compact" style="margin-top:6px">'
+        + r.informations_manquantes.map(function (i) { return '<li>' + echapper(i) + '</li>'; }).join('')
+        + '</ul></div>';
+    }
+
+    // ── Faits ──
+    var faitsInternes = (r.faits_internes || []).map(function (f) {
+      return '<div class="bloc">'
+        + '<span class="etiquette fait_interne">Fait interne</span>'
+        + echapper(f.enonce)
+        + (f.chiffre ? ' <strong>' + echapper(f.chiffre) + '</strong>' : '')
+        + '<div class="meta">Source : ' + echapper(f.source || '—')
+        + (f.periode ? ' · Période : ' + echapper(f.periode) : '') + '</div>'
+        + '</div>';
+    }).join('') || '<p class="meta">Aucun fait interne chiffré n’a été produit.</p>';
+
+    var faitsExternes = (r.faits_externes || []).map(function (f) {
+      // Citation cliquable (§19.5). `rel=noopener` : la page ouverte ne doit pas
+      // pouvoir manipuler celle-ci.
+      return '<div class="bloc">'
+        + '<span class="etiquette fait_externe">Fait externe</span>'
+        + echapper(f.enonce)
+        + '<div class="meta">' + echapper(f.organisme || 'organisme non précisé')
+        + (f.date_publication ? ' · publié le ' + echapper(f.date_publication) : ' · date de publication inconnue')
+        + '<br><a class="citation" href="' + echapper(f.url) + '" target="_blank" rel="noopener noreferrer">'
+        + echapper(f.url) + '</a></div>'
+        + '</div>';
+    }).join('')
+      || '<p class="meta">Aucun fait externe cité. Sans recherche web, l’analyse repose '
+         + 'uniquement sur les données internes.</p>';
+
+    var causes = (r.causes_probables || []).map(function (c) {
+      return '<div class="bloc">'
+        + '<span class="etiquette hypothese">Hypothèse</span>'
+        + echapper(c.hypothese)
+        + '<div class="meta" style="margin-top:6px">'
+        + (c.preuves_pour ? '<div><strong>Pour :</strong> ' + echapper(c.preuves_pour) + '</div>' : '')
+        + (c.preuves_contre ? '<div><strong>Contre :</strong> ' + echapper(c.preuves_contre) + '</div>' : '')
+        + '<div><strong>Comment trancher :</strong> ' + echapper(c.comment_trancher || '—') + '</div>'
+        + '</div></div>';
+    }).join('') || '<p class="meta">Aucune cause probable formulée.</p>';
+
+    var options = (r.options_comparees || []).map(function (o) {
+      return '<tr>'
+        + '<td><strong>' + echapper(o.option) + '</strong></td>'
+        + '<td>' + echapper(o.avantages) + '</td>'
+        + '<td>' + echapper(o.limites) + '</td>'
+        + '<td>' + echapper(o.cout_estime || '—') + '</td>'
+        + '<td>' + echapper(o.impact_attendu || '—') + '</td>'
+        + '</tr>';
+    }).join('');
+
+    var LIBELLE_NIVEAU = {
+      action_immediate: 'Action immédiate — faible risque',
+      experimentation: 'Expérimentation contrôlée',
+      decision_strategique: 'Décision stratégique',
+    };
+
+    var recos = (r.recommandations || []).map(function (rec, i) {
+      // L'identifiant en base n'est pas renvoyé par ce point d'entrée : la décision se
+      // prend depuis la mémoire décisionnelle, où chaque recommandation porte son id.
+      return '<div class="bloc">'
+        + '<span class="puce ' + (rec.niveau === 'action_immediate' ? 'ok'
+          : rec.niveau === 'experimentation' ? 'attention' : 'alerte') + '">'
+        + echapper(LIBELLE_NIVEAU[rec.niveau] || rec.niveau) + '</span>'
+        + '<h3 style="margin-top:8px">' + (i + 1) + '. ' + echapper(rec.titre) + '</h3>'
+        + '<p>' + echapper(rec.contenu) + '</p>'
+        + '<p class="meta"><strong>Justification :</strong> ' + echapper(rec.justification) + '</p>'
+        + '<div class="meta">'
+        + (rec.responsable_suggere ? 'Responsable suggéré : ' + echapper(rec.responsable_suggere) + ' · ' : '')
+        + (rec.echeance_suggeree ? 'Échéance : ' + echapper(rec.echeance_suggeree) + ' · ' : '')
+        + 'Confiance : ' + echapper(rec.confiance || 'non précisée')
+        + (rec.cout_plafond_usd ? ' · Coût plafond : ' + echapper(rec.cout_plafond_usd) + ' USD' : '')
+        + '</div>'
+        + (rec.condition_arret
+          ? '<div class="meta" style="margin-top:5px"><strong>Règle d’arrêt :</strong> '
+            + echapper(rec.condition_arret) + '</div>'
+          : '')
+        + (rec.kpi_suivi && rec.kpi_suivi.length
+          ? '<div class="meta" style="margin-top:5px">KPI de suivi : '
+            + echapper(rec.kpi_suivi.join(', ')) + '</div>'
+          : '')
+        + '</div>';
+    }).join('') || '<p class="meta">Aucune recommandation formulée.</p>';
+
+    var decisionsHumaines = r.decisions_humaines_requises || [];
+
+    return alertes
+      + '<div class="panneau">'
+      + '<header><h2>' + echapper(data.libelle) + '</h2>'
+      + '<span class="puce neutre">' + echapper(data.periode.debut) + ' → '
+      + echapper(data.periode.fin) + '</span></header>'
+      + '<div class="corps">'
+
+      + '<h3 style="font-family:Montserrat,sans-serif;font-size:13.5px;margin:0 0 8px">Résumé exécutif</h3>'
+      + '<p>' + echapper(r.resume_executif) + '</p>'
+      + '<p class="meta"><strong>Question traitée :</strong> ' + echapper(r.question_de_decision) + '</p>'
+      + '<p class="meta"><strong>Niveau de confiance de l’analyse :</strong> '
+      + '<span class="puce ' + (r.niveau_de_confiance === 'elevee' ? 'ok'
+        : r.niveau_de_confiance === 'moyenne' ? 'attention' : 'alerte') + '">'
+      + echapper(r.niveau_de_confiance) + '</span></p>'
+
+      + '</div></div>'
+
+      + '<div class="panneau"><header><h2>Faits internes</h2>'
+      + '<small style="color:var(--texte-faible)">Calculés depuis les données Envirocleans</small>'
+      + '</header><div class="corps">' + faitsInternes + '</div></div>'
+
+      + '<div class="panneau"><header><h2>Faits externes</h2>'
+      + '<small style="color:var(--texte-faible)">Sources datées et vérifiables</small>'
+      + '</header><div class="corps">' + faitsExternes + '</div></div>'
+
+      + '<div class="panneau"><header><h2>Variations et anomalies</h2></header>'
+      + '<div class="corps">'
+      + listeOuVide(r.variations_et_anomalies, 'Aucune variation notable relevée sur la période.')
+      + '</div></div>'
+
+      + '<div class="panneau"><header><h2>Causes probables</h2>'
+      + '<small style="color:var(--texte-faible)">Hypothèses — pas des causes établies</small>'
+      + '</header><div class="corps">' + causes + '</div></div>'
+
+      + '<div class="panneau"><header><h2>Risques et opportunités</h2></header>'
+      + '<div class="corps">'
+      + '<h3 style="font-size:13px;margin:0 0 6px"><span class="etiquette risque">Risque</span>'
+      + 'Ne rien faire</h3>'
+      + listeOuVide(r.risques_de_ne_rien_faire, 'Aucun risque d’inaction identifié.')
+      + '<h3 style="font-size:13px;margin:14px 0 6px"><span class="etiquette opportunite">Opportunité</span>'
+      + 'Pistes relevées</h3>'
+      + listeOuVide(r.opportunites, 'Aucune opportunité identifiée sur cette période.')
+      + '</div></div>'
+
+      + (options
+        ? '<div class="panneau"><header><h2>Options comparées</h2></header>'
+          + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+          + '<th>Option</th><th>Avantages</th><th>Limites</th><th>Coût</th><th>Impact attendu</th>'
+          + '</tr></thead><tbody>' + options + '</tbody></table></div></div></div>'
+        : '')
+
+      + '<div class="panneau"><header><h2>Recommandations</h2>'
+      + '<small style="color:var(--texte-faible)">Consultables et décidables depuis la mémoire décisionnelle</small>'
+      + '</header><div class="corps">' + recos + '</div></div>'
+
+      + (decisionsHumaines.length
+        ? '<div class="panneau"><header><h2>Décisions humaines requises</h2></header>'
+          + '<div class="corps"><div class="avertissement" style="margin:0">'
+          + 'Ces actions ne sont jamais exécutées automatiquement. Elles relèvent d’une '
+          + 'décision humaine explicite.</div>'
+          + '<ul class="compact" style="margin-top:10px">'
+          + decisionsHumaines.map(function (d) { return '<li>' + echapper(d) + '</li>'; }).join('')
+          + '</ul></div></div>'
+        : '')
+
+      + '<div class="panneau"><header><h2>Suivi et transparence</h2></header><div class="corps">'
+      + '<p class="meta"><strong>KPI de suivi :</strong> '
+      + echapper((r.kpi_de_suivi || []).join(', ') || 'aucun') + '</p>'
+      + '<p class="meta"><strong>Date de réévaluation :</strong> '
+      + echapper(r.date_de_reevaluation || 'non précisée') + '</p>'
+      + '<p class="meta"><strong>Modèle :</strong> ' + echapper(data.modele)
+      + ' · <strong>Version des consignes :</strong> ' + echapper(t.version_prompt || '—') + '</p>'
+      + '<p class="meta"><strong>Recherches web :</strong> ' + nombre(t.recherches_web)
+      + ' · <strong>Coût estimé :</strong> ' + usd(t.cout_estime_usd)
+      + (t.tarif_inconnu ? ' <span class="puce attention">tarif du modèle inconnu</span>' : '')
+      + '</p>'
+      + '<p class="meta"><strong>Outils appelés :</strong> '
+      + echapper((t.outils_appeles || []).map(function (o) {
+        return o.outil + (o.refuse ? ' (refusé)' : '');
+      }).join(', ') || 'aucun') + '</p>'
+      + '<details class="brut"><summary>Voir le rapport JSON brut</summary>'
+      + '<pre>' + echapper(JSON.stringify(r, null, 2)) + '</pre></details>'
+      + '</div></div>';
+  }
+
+  // ── Vue : historique ───────────────────────────────────────────────────────
+
+  function vueHistorique() {
+    elContenu.innerHTML = squelette(5);
+
+    EnviroAPI.get('/api/analyse/analyses?limite=50').then(function (data) {
+      elSousTitre.textContent = data.analyses.length + ' analyse(s)';
+
+      if (data.etat_vide) {
+        elContenu.innerHTML = '<div class="panneau"><div class="corps">'
+          + '<div class="etat-vide">' + echapper(data.etat_vide) + '</div></div></div>';
+        return;
+      }
+
+      var lignes = data.analyses.map(function (a) {
+        var puce = a.statut === 'terminee' ? 'ok' : a.statut === 'echec' ? 'alerte' : 'attention';
+        return '<tr>'
+          + '<td><strong>' + echapper(a.titre || a.type_analyse) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(a.demandeur || '—') + '</small></td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(a.statut) + '</span>'
+          + (a.erreur ? '<br><small style="color:var(--texte-faible)">'
+            + echapper(String(a.erreur).slice(0, 120)) + '</small>' : '') + '</td>'
+          + '<td>' + echapper(a.periode_debut || '—') + '<br>' + echapper(a.periode_fin || '') + '</td>'
+          + '<td>' + nombre(a.recommandations) + '</td>'
+          + '<td>' + (a.contexte_externe_frais
+            ? '<span class="puce ok">' + nombre(a.recherches_web) + ' recherche(s)</span>'
+            : '<span class="puce neutre">non actualisé</span>') + '</td>'
+          + '<td>' + usd(a.cout_estime_usd) + '</td>'
+          + '<td>' + dateCourte(a.started_at) + '</td>'
+          + '<td><button class="action secondaire" data-run="' + a.id + '">Ouvrir</button></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Analyses produites</h2>'
+        + '<small style="color:var(--texte-faible)">Les analyses en échec figurent ici avec '
+        + 'leur coût : rien n’est consommé sans trace.</small></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Analyse</th><th>Statut</th><th>Période</th><th>Reco.</th>'
+        + '<th>Contexte externe</th><th>Coût estimé</th><th>Lancée le</th><th></th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div></div>'
+        + '<div id="detailRun"></div>';
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-run]'), function (b) {
+        b.addEventListener('click', function () { ouvrirRun(b.getAttribute('data-run')); });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function ouvrirRun(id) {
+    var zone = document.getElementById('detailRun');
+    zone.innerHTML = '<div class="panneau"><div class="corps">' + squelette(3) + '</div></div>';
+
+    EnviroAPI.get('/api/analyse/analyses/' + encodeURIComponent(id)).then(function (d) {
+      if (!d.run.resultat) {
+        zone.innerHTML = '<div class="panneau"><header><h2>' + echapper(d.run.titre) + '</h2></header>'
+          + '<div class="corps"><div class="erreur" style="margin:0">'
+          + '<strong>Cette analyse n’a pas produit de rapport.</strong><br>'
+          + echapper(d.run.erreur || 'Aucun détail enregistré.') + '</div></div></div>';
+        zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      zone.innerHTML = rendreRapport({
+        libelle: d.run.titre,
+        modele: d.run.modele,
+        periode: { debut: d.run.periode_debut, fin: d.run.periode_fin },
+        rapport: d.run.resultat,
+        transparence: {
+          version_prompt: d.run.version_prompt,
+          recherches_web: d.run.recherches_web,
+          cout_estime_usd: d.run.cout_estime_usd,
+          outils_appeles: d.run.outils_appeles,
+          avertissement_contexte: d.run.contexte_externe_frais
+            ? null
+            : 'contexte externe non actualisé — aucune recherche web n’a été effectuée '
+              + 'pour cette analyse.',
+        },
+      });
+      zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function (err) {
+      zone.innerHTML = '<div class="erreur">' + echapper(err.message) + '</div>';
+    });
+  }
+
+  // ── Vue : mémoire décisionnelle ────────────────────────────────────────────
+
+  function vueMemoire() {
+    elContenu.innerHTML = squelette(5);
+
+    EnviroAPI.get('/api/analyse/recommandations?limite=100').then(function (data) {
+      var c = data.compteurs;
+      elSousTitre.textContent = c.total + ' recommandation(s) · ' + c.en_attente + ' en attente';
+
+      var kpis = '<div class="grille-kpi">'
+        + carteSimple('En attente de décision', c.en_attente)
+        + carteSimple('Acceptées', c.acceptees)
+        + carteSimple('Rejetées', c.rejetees)
+        + carteSimple('Réalisées', c.realisees)
+        + '</div>';
+
+      var retards = '';
+      if (data.revisions_en_retard && data.revisions_en_retard.length > 0) {
+        retards = '<div class="avertissement"><strong>'
+          + data.revisions_en_retard.length + ' décision(s) attendent leur réévaluation.</strong><br>'
+          + 'Leur date de révision est passée et aucun résultat n’a été consigné. Une décision '
+          + 'jamais réévaluée n’apprend rien à l’entreprise.<ul class="compact" style="margin-top:7px">'
+          + data.revisions_en_retard.map(function (r) {
+            return '<li>' + echapper(r.titre) + ' — prévue le ' + echapper(r.prochaine_revision) + '</li>';
+          }).join('') + '</ul></div>';
+      }
+
+      if (data.etat_vide) {
+        elContenu.innerHTML = kpis + '<div class="panneau"><div class="corps">'
+          + '<div class="etat-vide">' + echapper(data.etat_vide) + '</div></div></div>';
+        return;
+      }
+
+      var peutDecider = etat.capacites && etat.capacites.peut_decider;
+
+      var LIBELLE_NIVEAU = {
+        action_immediate: 'Action immédiate',
+        experimentation: 'Expérimentation',
+        decision_strategique: 'Décision stratégique',
+      };
+
+      var lignes = data.recommandations.map(function (r) {
+        var puce = { proposee: 'attention', acceptee: 'ok', rejetee: 'neutre',
+          reportee: 'info', realisee: 'ok', abandonnee: 'neutre' }[r.statut] || 'neutre';
+
+        var suite = r.decision
+          ? '<div class="meta" style="margin-top:6px"><strong>'
+            + echapper(r.decision) + '</strong> par ' + echapper(r.decideur || '—')
+            + ' le ' + dateCourte(r.decide_le)
+            + '<br><em>' + echapper(r.justification) + '</em>'
+            + (r.enseignement ? '<br><strong>Enseignement :</strong> ' + echapper(r.enseignement) : '')
+            + '</div>'
+          : '<div class="meta" style="margin-top:6px">Aucune décision enregistrée.</div>';
+
+        var actions = (peutDecider && r.statut === 'proposee')
+          ? '<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">'
+            + '<button class="action" data-decider="' + r.id + '" data-choix="acceptee">Accepter</button>'
+            + '<button class="action secondaire" data-decider="' + r.id + '" data-choix="reportee">Reporter</button>'
+            + '<button class="action danger" data-decider="' + r.id + '" data-choix="rejetee">Rejeter</button>'
+            + '</div>'
+            + '<div id="formDecision-' + r.id + '"></div>'
+          : '';
+
+        return '<tr>'
+          + '<td style="max-width:380px"><strong>' + echapper(r.titre) + '</strong>'
+          + '<div class="meta">' + echapper(LIBELLE_NIVEAU[r.niveau] || r.niveau)
+          + ' · priorité ' + nombre(r.priorite)
+          + ' · confiance ' + echapper(r.confiance) + '</div>'
+          + suite + actions + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(r.statut) + '</span></td>'
+          + '<td>' + echapper(r.type_analyse || '—') + '<br>'
+          + '<small style="color:var(--texte-faible)">' + dateCourte(r.created_at) + '</small></td>'
+          + '<td>' + nombre(r.suivis) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = kpis + retards
+        + (peutDecider ? '' : '<div class="note">Vous consultez la mémoire décisionnelle en '
+          + 'lecture seule. Enregistrer une décision exige la permission '
+          + '<code>ai.decision.manage</code>, réservée à la direction générale.</div>')
+        + '<div class="panneau">'
+        + '<header><h2>Registre des recommandations</h2>'
+        + '<small style="color:var(--texte-faible)">Le conseil initial est immuable. Seul son '
+        + 'traitement évolue.</small></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Recommandation</th><th>Statut</th><th>Origine</th><th>Suivis</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div></div>';
+
+      brancherDecisions(elContenu);
+    }).catch(afficherErreur);
+  }
+
+  function carteSimple(libelle, valeur, base) {
+    return '<div class="kpi">'
+      + '<div class="libelle">' + echapper(libelle) + '</div>'
+      + '<div class="valeur">' + nombre(valeur) + '</div>'
+      + (base ? '<div class="base">' + echapper(base) + '</div>' : '')
+      + '</div>';
+  }
+
+  /**
+   * Branche les boutons de décision.
+   *
+   * Le formulaire s'ouvre au clic plutôt que d'être toujours visible : enregistrer une
+   * décision est la SEULE écriture de cet écran, elle mérite un geste délibéré. La
+   * justification est exigée côté serveur ; on la rend obligatoire ici aussi pour éviter
+   * un aller-retour inutile.
+   */
+  function brancherDecisions(racine) {
+    Array.prototype.forEach.call(racine.querySelectorAll('[data-decider]'), function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-decider');
+        var choix = b.getAttribute('data-choix');
+        var zone = document.getElementById('formDecision-' + id);
+        if (!zone) return;
+
+        zone.innerHTML = '<div class="bloc" style="margin-top:10px">'
+          + '<h3>Enregistrer : ' + echapper(choix) + '</h3>'
+          + '<p class="meta">La justification est obligatoire, y compris pour un rejet. '
+          + 'Sans elle, il sera impossible de savoir plus tard si le conseil était mauvais ou '
+          + 'si le moment l’était.</p>'
+          + '<textarea id="just-' + id + '" placeholder="Pourquoi cette décision ? (10 caractères minimum)"></textarea>'
+          + '<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap;align-items:center">'
+          + '<label style="font-size:12.5px;color:var(--texte-doux)">Prochaine révision :</label>'
+          + '<input type="date" id="rev-' + id + '"/>'
+          + '<button class="action" id="valider-' + id + '">Confirmer</button>'
+          + '<button class="action secondaire" id="annuler-' + id + '">Annuler</button>'
+          + '</div><div id="msg-' + id + '"></div></div>';
+
+        document.getElementById('annuler-' + id).addEventListener('click', function () {
+          zone.innerHTML = '';
+        });
+
+        document.getElementById('valider-' + id).addEventListener('click', function () {
+          var just = document.getElementById('just-' + id).value.trim();
+          var msg = document.getElementById('msg-' + id);
+
+          if (just.length < 10) {
+            msg.innerHTML = '<div class="erreur" style="margin-top:9px">'
+              + 'Une justification d’au moins 10 caractères est requise.</div>';
+            return;
+          }
+
+          this.disabled = true;
+          EnviroAPI.post('/api/analyse/recommandations/' + id + '/decision', {
+            decision: choix,
+            justification: just,
+            prochaine_revision: document.getElementById('rev-' + id).value || null,
+          }).then(function () {
+            vueMemoire();
+          }).catch(function (err) {
+            msg.innerHTML = '<div class="erreur" style="margin-top:9px">'
+              + echapper(err.message) + '</div>';
+            document.getElementById('valider-' + id).disabled = false;
+          });
+        });
+      });
+    });
+  }
+
+  // ── Vue : conversation ─────────────────────────────────────────────────────
+
+  function vueConversation() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/analyse/conversations').then(function (d) {
+      elSousTitre.textContent = d.conversations.length + ' conversation(s)';
+
+      var liste = d.conversations.map(function (cv) {
+        return '<tr>'
+          + '<td><strong>' + echapper(cv.titre) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper(String(cv.dernier_message || '').slice(0, 90)) + '</small></td>'
+          + '<td>' + nombre(cv.messages) + '</td>'
+          + '<td>' + dateCourte(cv.updated_at) + '</td>'
+          + '<td><button class="action secondaire" data-conv="' + cv.id + '">Ouvrir</button></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML =
+        '<div class="note">L’analyste répond en <strong>texte libre</strong> sur les mêmes '
+        + 'données et avec les mêmes permissions qu’une analyse. Il n’a aucune mémoire des '
+        + 'chiffres entre deux messages : il rappelle un outil à chaque question chiffrée, '
+        + 'et cite sa source. Il ne modifie jamais rien.</div>'
+        + '<div class="panneau"><header><h2>Mes conversations</h2>'
+        + '<button class="action" id="nouvelleConv">Nouvelle conversation</button></header>'
+        + '<div class="corps">'
+        + (d.etat_vide
+          ? '<div class="etat-vide">' + echapper(d.etat_vide) + '</div>'
+          : '<div class="table-wrap"><table><thead><tr>'
+            + '<th>Conversation</th><th>Messages</th><th>Dernière activité</th><th></th>'
+            + '</tr></thead><tbody>' + liste + '</tbody></table></div>')
+        + '</div></div>'
+        + '<div id="filConversation"></div>';
+
+      document.getElementById('nouvelleConv').addEventListener('click', function () {
+        EnviroAPI.post('/api/analyse/conversations', {})
+          .then(function (cv) { ouvrirConversation(cv.id); })
+          .catch(afficherErreur);
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-conv]'), function (b) {
+        b.addEventListener('click', function () { ouvrirConversation(b.getAttribute('data-conv')); });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function ouvrirConversation(id) {
+    var zone = document.getElementById('filConversation');
+    zone.innerHTML = '<div class="panneau"><div class="corps">' + squelette(3) + '</div></div>';
+
+    EnviroAPI.get('/api/analyse/conversations/' + encodeURIComponent(id)).then(function (d) {
+      zone.innerHTML = '<div class="panneau">'
+        + '<header><h2>' + echapper(d.conversation.titre) + '</h2>'
+        + '<button class="action secondaire" id="archiverConv">Archiver</button></header>'
+        + '<div class="corps">'
+        + '<div class="fil" id="fil">' + tousLesTours(d.messages) + '</div>'
+        + '<div id="avertConv"></div>'
+        + '<div class="composer">'
+        + '<textarea id="saisieConv" maxlength="2000" '
+        + 'placeholder="Ex. : pourquoi la zone Nsele a-t-elle plus d’échecs ce mois-ci ?"></textarea>'
+        + '<button class="action" id="envoyerConv">Envoyer</button>'
+        + '</div></div></div>';
+
+      var fil = document.getElementById('fil');
+      fil.scrollTop = fil.scrollHeight;
+
+      document.getElementById('archiverConv').addEventListener('click', function () {
+        EnviroAPI.post('/api/analyse/conversations/' + id + '/archiver', {})
+          .then(vueConversation).catch(afficherErreur);
+      });
+
+      var saisie = document.getElementById('saisieConv');
+      var bouton = document.getElementById('envoyerConv');
+
+      function envoyer() {
+        var texte = saisie.value.trim();
+        if (!texte) return;
+
+        bouton.disabled = true;
+        saisie.disabled = true;
+
+        fil.insertAdjacentHTML('beforeend', unTour({ role: 'user', contenu: texte }));
+        fil.insertAdjacentHTML('beforeend',
+          '<div class="tour analyste" id="attente"><div class="bulle">'
+          + '<em style="opacity:.7">L’analyste consulte les données…</em></div></div>');
+        fil.scrollTop = fil.scrollHeight;
+        saisie.value = '';
+
+        EnviroAPI.post('/api/analyse/conversations/' + id + '/messages', { message: texte })
+          .then(function (r) {
+            document.getElementById('attente').remove();
+            fil.insertAdjacentHTML('beforeend', unTour({
+              role: 'assistant',
+              contenu: r.reponse.contenu,
+              outils_appeles: r.transparence.outils_appeles,
+            }));
+            fil.scrollTop = fil.scrollHeight;
+
+            // La troncature est annoncée, jamais silencieuse : un utilisateur qui
+            // référence « ce dont on parlait tout à l’heure » doit savoir que le modèle
+            // ne l’a peut-être plus.
+            document.getElementById('avertConv').innerHTML = r.transparence.note_troncature
+              ? '<div class="avertissement" style="margin-top:10px">'
+                + echapper(r.transparence.note_troncature) + '</div>'
+              : '';
+          })
+          .catch(function (err) {
+            var att = document.getElementById('attente');
+            if (att) att.remove();
+            document.getElementById('avertConv').innerHTML = '<div class="erreur" '
+              + 'style="margin-top:10px">'
+              + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+          })
+          .then(function () {
+            bouton.disabled = false;
+            saisie.disabled = false;
+            saisie.focus();
+          });
+      }
+
+      bouton.addEventListener('click', envoyer);
+      saisie.addEventListener('keydown', function (e) {
+        // Entrée envoie, Maj+Entrée saute une ligne — la convention attendue d’un fil.
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); envoyer(); }
+      });
+
+      zone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(afficherErreur);
+  }
+
+  function tousLesTours(messages) {
+    if (!messages || messages.length === 0) {
+      return '<div class="etat-vide">Posez votre première question.</div>';
+    }
+    return messages.map(unTour).join('');
+  }
+
+  function unTour(m) {
+    var outilsHtml = '';
+    var appeles = m.outils_appeles || [];
+
+    if (appeles.length > 0) {
+      outilsHtml = '<div class="outils">Outils : '
+        + echapper(appeles.map(function (o) {
+          return o.outil + (o.refuse ? ' (refusé)' : '');
+        }).join(', ')) + '</div>';
+    }
+
+    return '<div class="tour ' + (m.role === 'user' ? 'moi' : 'analyste') + '">'
+      + '<div class="bulle">' + echapper(m.contenu) + outilsHtml + '</div></div>';
+  }
+
+  // ── Vue : veille externe ───────────────────────────────────────────────────
+
+  function vueVeille() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/analyse/veilles?limite=30').then(function (d) {
+      elSousTitre.textContent = d.veilles.length + ' veille(s) exécutée(s)';
+
+      var peutLancer = etat.capacites && etat.capacites.peut_lancer_veille;
+
+      // Sans recherche web, une veille produirait la connaissance antérieure du modèle
+      // présentée comme actuelle — exactement ce que la politique des sources interdit.
+      var bandeauWeb = d.recherche_web
+        ? ''
+        : '<div class="avertissement"><strong>Recherche web désactivée.</strong><br>'
+          + 'Aucune veille ne peut aboutir : elle produirait la connaissance antérieure du '
+          + 'modèle présentée comme actuelle. Activez CLAUDE_WEB_SEARCH_ENABLED.</div>';
+
+      var themes = d.themes_disponibles.map(function (t) {
+        return '<tr>'
+          + '<td><strong>' + echapper(t.libelle) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(t.code) + '</small></td>'
+          + '<td>' + nombre(t.validite_jours) + ' j</td>'
+          + '<td>' + (peutLancer && d.recherche_web
+            ? '<button class="action secondaire" data-veille="' + echapper(t.code) + '">Lancer</button>'
+            : '<span class="puce neutre">indisponible</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var historique = d.veilles.map(function (v) {
+        var puce = v.statut === 'terminee' ? 'ok' : v.statut === 'echec' ? 'alerte' : 'neutre';
+        return '<tr>'
+          + '<td>' + dateCourte(v.executed_at) + '</td>'
+          + '<td>' + echapper((v.themes || []).join(', ')) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(v.statut) + '</span></td>'
+          + '<td>' + nombre(v.sources_trouvees) + '</td>'
+          + '<td>' + nombre(v.signaux_crees) + '</td>'
+          + '<td style="max-width:320px">' + echapper(v.message || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = bandeauWeb
+        + '<div class="note">La veille <strong>collecte</strong> du contexte daté et '
+        + 'citable ; elle ne conclut jamais. Une veille qui recommanderait serait une '
+        + 'analyse déguisée, lancée sans demandeur et sans question posée. Les conclusions '
+        + 'se tirent depuis « Lancer une analyse ».</div>'
+        + '<div class="panneau"><header><h2>Thèmes suivis</h2>'
+        + '<small style="color:var(--texte-faible)">La durée de validité détermine quand '
+        + 'une source cesse d’être présentée comme actuelle.</small></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Thème</th><th>Validité</th><th></th></tr></thead><tbody>'
+        + themes + '</tbody></table></div>'
+        + (peutLancer ? '' : '<p class="meta" style="color:var(--texte-faible);margin-top:12px">'
+          + 'Déclencher une veille exige la permission <code>ai.watch.run</code> : chaque '
+          + 'exécution consomme des recherches web facturées.</p>')
+        + '<div id="resultatVeille"></div></div></div>'
+        + '<div class="panneau"><header><h2>Historique</h2></header><div class="corps">'
+        + (d.etat_vide
+          ? '<div class="etat-vide">' + echapper(d.etat_vide) + '</div>'
+          : '<div class="table-wrap"><table><thead><tr>'
+            + '<th>Date</th><th>Thèmes</th><th>Statut</th><th>Sources</th>'
+            + '<th>Signaux</th><th>Message</th></tr></thead><tbody>'
+            + historique + '</tbody></table></div>')
+        + '</div></div>';
+
+      Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+        b.addEventListener('click', function () { lancerVeille(b.getAttribute('data-veille'), b); });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function lancerVeille(theme, bouton) {
+    var zone = document.getElementById('resultatVeille');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+      b.disabled = true;
+    });
+
+    zone.innerHTML = '<div class="bloc" style="margin-top:12px">'
+      + '<p><strong>Veille en cours…</strong></p>'
+      + '<p class="meta">Claude interroge le web sur ce thème et enregistre les sources '
+      + 'datées. Une minute environ.</p></div>';
+
+    EnviroAPI.post('/api/analyse/veilles', { theme: theme }).then(function (r) {
+      zone.innerHTML = '<div class="bloc" style="margin-top:12px">'
+        + '<h3>Veille terminée — ' + echapper(theme) + '</h3>'
+        + '<p>' + nombre(r.sources) + ' source(s) enregistrée(s), '
+        + nombre(r.observations) + ' observation(s), ' + nombre(r.signaux) + ' signal(aux).</p>'
+        + (r.sources_rejetees > 0
+          ? '<p class="meta"><strong>' + nombre(r.sources_rejetees) + ' source(s) écartée(s)</strong>'
+            + ' : URL ou organisme manquant. Une information dont la provenance n’est pas '
+            + 'vérifiable ne devient jamais une source.</p>'
+          : '')
+        + '<p class="meta">' + nombre(r.recherches_web) + ' recherche(s) web · coût estimé '
+        + usd(r.cout_estime_usd) + '</p></div>';
+      setTimeout(vueVeille, 2500);
+    }).catch(function (err) {
+      zone.innerHTML = '<div class="erreur" style="margin-top:12px">'
+        + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-veille]'), function (b) {
+        b.disabled = false;
+      });
+    });
+  }
+
+  // ── Vue : consommation ─────────────────────────────────────────────────────
+
+  function vueConsommation() {
+    elContenu.innerHTML = squelette(3);
+
+    EnviroAPI.get('/api/analyse/consommation').then(function (d) {
+      elSousTitre.textContent = 'Journée du ' + echapper(d.jour) + ' (Africa/Kinshasa)';
+
+      var pct = d.budget_quotidien_usd > 0
+        ? Math.min(100, Math.round((d.cout_estime_usd / d.budget_quotidien_usd) * 100))
+        : 0;
+
+      elContenu.innerHTML = '<div class="grille-kpi">'
+        + carteSimple('Appels du jour', d.appels, d.appels_en_echec + ' en échec')
+        + carteSimple('Tokens en entrée', d.tokens_entree)
+        + carteSimple('Tokens en sortie', d.tokens_sortie)
+        + carteSimple('Recherches web', d.recherches_web)
+        + '</div>'
+        + '<div class="panneau"><header><h2>Budget quotidien</h2></header><div class="corps">'
+        + '<p><strong style="font-size:22px;font-family:Montserrat,sans-serif">'
+        + usd(d.cout_estime_usd) + '</strong> consommés sur '
+        + (d.budget_quotidien_usd > 0 ? usd(d.budget_quotidien_usd) : 'aucun plafond défini')
+        + ' — ' + pct + ' %</p>'
+        + '<div style="height:9px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:10px 0">'
+        + '<div style="height:100%;width:' + pct + '%;background:'
+        + (pct >= 90 ? 'var(--alerte)' : pct >= 65 ? 'var(--attention)' : 'var(--vert)') + '"></div>'
+        + '</div>'
+        + '<p class="meta">Restant : ' + usd(d.restant_usd) + '. Le compteur repart à minuit, '
+        + 'heure de Kinshasa.</p>'
+        + '<div class="note" style="margin-top:12px">' + echapper(d.note) + '</div>'
+        + '</div></div>';
+    }).catch(function (err) {
+      // `ai.usage.read` peut manquer : ce n'est pas une panne, c'est un périmètre.
+      elContenu.innerHTML = '<div class="panneau"><div class="corps"><div class="etat-vide">'
+        + echapper(err.message || 'Consommation non accessible avec vos permissions.')
+        + '</div></div></div>';
+    });
+  }
+
+  // ── Routage ────────────────────────────────────────────────────────────────
+
+  var VUES = {
+    lancer: vueLancer, historique: vueHistorique,
+    memoire: vueMemoire, conversation: vueConversation,
+    veille: vueVeille, consommation: vueConsommation,
+  };
+
+  function allerA(vue) {
+    etat.vue = vue;
+    elTitre.textContent = TITRES[vue];
+    elSousTitre.textContent = 'Chargement…';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+      a.classList.toggle('actif', a.getAttribute('data-vue') === vue);
+    });
+
+    (VUES[vue] || vueLancer)();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      allerA(a.getAttribute('data-vue'));
+    });
+  });
+
+  document.getElementById('dateDebut').addEventListener('change', function () {
+    etat.debut = this.value || null;
+  });
+  document.getElementById('dateFin').addEventListener('change', function () {
+    etat.fin = this.value || null;
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+  EnviroAuth.proteger({
+    permissions: [],
+  }).then(function () {
+    // `/capacites` est la source de vérité : elle dit ce que CE demandeur peut faire et
+    // dans quel état est le service. L'écran ne suppose rien de son côté.
+    return EnviroAPI.get('/api/analyse/capacites');
+  }).then(function (cap) {
+    etat.capacites = cap;
+    elEtat.innerHTML = bandeauService(cap.service);
+    allerA('lancer');
+  }).catch(function (err) {
+    elEtat.innerHTML = '<div class="erreur"><strong>Accès au Centre d’analyse refusé.</strong><br>'
+      + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+    elSousTitre.textContent = '—';
+  });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

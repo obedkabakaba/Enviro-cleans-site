@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Définir mon mot de passe - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    font-family:'Open Sans', system-ui, Arial, sans-serif;
+    background:#0f1b2d; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; margin:0; padding:24px;
+  }
+  .box{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px; padding:36px 32px;
+    max-width:440px; width:100%;
+    box-shadow:0 10px 40px rgba(0,0,0,.3);
+  }
+  h1{ font-family:'Montserrat',sans-serif; font-weight:800; font-size:21px; margin:0 0 10px; }
+  p.intro{ color:rgba(255,255,255,.72); font-size:14px; line-height:1.6; margin:0 0 24px; }
+  label{ display:block; font-size:13px; font-weight:600; margin:0 0 6px; }
+  input[type=password]{
+    width:100%; padding:12px 14px; border-radius:8px;
+    border:1.5px solid rgba(255,255,255,.18);
+    background:rgba(0,0,0,.20); color:#fff; font-size:15px; margin-bottom:16px;
+  }
+  input[type=password]:focus{ outline:none; border-color:#3ab54a; }
+  button{
+    width:100%; padding:13px; background:#3ab54a; color:#fff;
+    border:none; border-radius:8px; font-weight:700; font-size:14px;
+    cursor:pointer; font-family:'Montserrat',sans-serif;
+  }
+  button:hover:not(:disabled){ background:#2d9a3c; }
+  button:disabled{ opacity:.55; cursor:not-allowed; }
+  .exigences{ font-size:12.5px; color:rgba(255,255,255,.6); line-height:1.9; margin:0 0 18px; padding-left:18px; }
+  .exigences li.ok{ color:#5fd06f; }
+  .message{ padding:12px 14px; border-radius:8px; font-size:13.5px; line-height:1.5; margin-bottom:18px; display:none; }
+  .message.erreur{ background:rgba(229,57,53,.14); border:1px solid rgba(229,57,53,.4); color:#ff8a85; display:block; }
+  .message.succes{ background:rgba(58,181,74,.14); border:1px solid rgba(58,181,74,.4); color:#5fd06f; display:block; }
+  a.lien{ color:#5fd06f; font-weight:700; text-decoration:none; font-size:13.5px; }
+  .centre{ text-align:center; margin-top:18px; }
+
+  @media (prefers-color-scheme: light){
+    body{ background:#f4f6f8; color:#0f1b2d; }
+    .box{ background:#fff; border-color:rgba(0,0,0,.08); }
+    p.intro, .exigences{ color:#5a6672; }
+    input[type=password]{ background:#fff; border-color:#d5dbe0; color:#0f1b2d; }
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1 id="titre">Définir mon mot de passe</h1>
+    <p class="intro" id="intro">Vérification de votre invitation…</p>
+
+    <div class="message" id="message"></div>
+
+    <form id="formulaire" style="display:none" autocomplete="off">
+      <label for="mdp">Nouveau mot de passe</label>
+      <input type="password" id="mdp" autocomplete="new-password"/>
+
+      <label for="mdp2">Confirmer le mot de passe</label>
+      <input type="password" id="mdp2" autocomplete="new-password"/>
+
+      <ul class="exigences">
+        <li id="r-longueur">Au moins 10 caractères</li>
+        <li id="r-identique">Les deux saisies correspondent</li>
+      </ul>
+
+      <button type="submit" id="valider" disabled>Définir mon mot de passe</button>
+    </form>
+
+    <div class="centre" id="versConnexion" style="display:none">
+      <a class="lien" href="espace-client.html">Aller à la connexion</a>
+    </div>
+  </div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script>
+/**
+ * Écran de définition du mot de passe employé.
+ *
+ * Remplace le mot de passe partagé 'ChangeMoi123!', qui était écrit en clair dans le
+ * dépôt backend, ouvrait tous les comptes employés jamais modifiés, et n'expirait jamais.
+ *
+ * Le jeton vient de l'URL. Il ne transite jamais ailleurs que vers l'API, n'est pas
+ * stocké, et n'est utilisable qu'une fois.
+ */
+(function () {
+  'use strict';
+
+  var params = new URLSearchParams(location.search);
+  var token = params.get('token');
+
+  var elIntro = document.getElementById('intro');
+  var elMessage = document.getElementById('message');
+  var elForm = document.getElementById('formulaire');
+  var elMdp = document.getElementById('mdp');
+  var elMdp2 = document.getElementById('mdp2');
+  var elValider = document.getElementById('valider');
+  var elVersConnexion = document.getElementById('versConnexion');
+
+  function afficher(texte, type) {
+    elMessage.textContent = texte;
+    elMessage.className = 'message ' + type;
+  }
+
+  if (!token) {
+    elIntro.textContent = '';
+    afficher('Lien d’invitation incomplet. Demandez un nouveau lien à votre responsable.', 'erreur');
+    return;
+  }
+
+  // ── Étape 1 : valider le jeton avant d'afficher quoi que ce soit ──
+  // Évite qu'un employé saisisse un mot de passe pour découvrir ensuite que son lien
+  // a expiré.
+  fetch(EnviroAPI.BASE_URL + '/api/auth/invitation/valider?token=' + encodeURIComponent(token))
+    .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+    .then(function (res) {
+      if (!res.ok || !res.body.valide) {
+        elIntro.textContent = '';
+        afficher(res.body.message || 'Cette invitation n’est plus valide.', 'erreur');
+        return;
+      }
+
+      elIntro.textContent = res.body.prenom
+        ? 'Bonjour ' + res.body.prenom + '. Choisissez le mot de passe qui protégera votre compte.'
+        : 'Choisissez le mot de passe qui protégera votre compte.';
+      elForm.style.display = 'block';
+    })
+    .catch(function () {
+      elIntro.textContent = '';
+      afficher(
+        'Impossible de contacter le serveur. Réessayez dans un instant — il peut mettre '
+        + '30 à 50 secondes à démarrer s’il était inactif.',
+        'erreur'
+      );
+    });
+
+  // ── Étape 2 : retour visuel en direct sur les exigences ──
+  function verifier() {
+    var assezLong = elMdp.value.length >= 10;
+    var identiques = elMdp.value.length > 0 && elMdp.value === elMdp2.value;
+
+    document.getElementById('r-longueur').className = assezLong ? 'ok' : '';
+    document.getElementById('r-identique').className = identiques ? 'ok' : '';
+
+    elValider.disabled = !(assezLong && identiques);
+  }
+
+  elMdp.addEventListener('input', verifier);
+  elMdp2.addEventListener('input', verifier);
+
+  // ── Étape 3 : consommer l'invitation ──
+  elForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    elValider.disabled = true;
+    elValider.textContent = 'Enregistrement…';
+
+    fetch(EnviroAPI.BASE_URL + '/api/auth/invitation/definir-mot-de-passe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token, mot_de_passe: elMdp.value }),
+    })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          afficher(res.body.message || 'Impossible de définir le mot de passe.', 'erreur');
+          elValider.disabled = false;
+          elValider.textContent = 'Définir mon mot de passe';
+          return;
+        }
+
+        elForm.style.display = 'none';
+        elIntro.textContent = '';
+        afficher('Mot de passe défini. Vous pouvez maintenant vous connecter.', 'succes');
+        elVersConnexion.style.display = 'block';
+      })
+      .catch(function () {
+        afficher('Impossible de contacter le serveur. Réessayez dans un instant.', 'erreur');
+        elValider.disabled = false;
+        elValider.textContent = 'Définir mon mot de passe';
+      });
+  });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

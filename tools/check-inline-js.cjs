@@ -26,7 +26,18 @@ for (const file of files) {
   }
 }
 
-for (const file of ['assets/js/theme-init.js', 'assets/js/theme.js']) {
+// Tous les scripts partagés, pas seulement ceux du thème. Une erreur de syntaxe dans un
+// module chargé par plusieurs espaces les casse tous d'un coup, et ne se verrait sinon
+// qu'à l'ouverture d'une page dans un navigateur.
+for (const file of [
+  'assets/js/theme-init.js',
+  'assets/js/theme.js',
+  'assets/js/enviro-api.js',
+  'assets/js/enviro-auth.js',
+  'assets/js/enviro-session-compat.js',
+  'assets/js/espace-direction.js',
+]) {
+  if (!fs.existsSync(path.join(root, file))) continue;
   checked += 1;
   try {
     new vm.Script(fs.readFileSync(path.join(root, file), 'utf8'), { filename: file });

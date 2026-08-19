@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction opérationnelle et commerciale - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<style>
+  /* ── Jetons de couleur : définis en clair sur :root, redéfinis en sombre.
+     Aucun contour blanc en dur, qui casserait le mode sombre. ── */
+  :root{
+    --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
+    --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+    --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
+    --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a;
+    --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+      --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+      --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--fond); color:var(--texte);
+    font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size:14px; line-height:1.5;
+  }
+
+  /* ── Shell ── */
+  .shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+  .sidebar{
+    background:var(--surface); border-right:1px solid var(--bordure);
+    padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .marque{ padding:0 20px 20px; border-bottom:1px solid var(--bordure); margin-bottom:14px; }
+  .marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
+  .marque span{ font-size:11.5px; color:var(--texte-faible); }
+  .menu a{
+    display:block; padding:10px 20px; color:var(--texte-doux);
+    text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
+  }
+  .menu a:hover{ background:var(--surface-2); color:var(--texte); }
+  .menu a.actif{ color:var(--vert); border-left-color:var(--vert); background:var(--surface-2); font-weight:600; }
+
+  .principal{ padding:22px 26px 60px; min-width:0; }
+  .topbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:22px; }
+  h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
+  .sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
+
+  .filtres{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  input[type=date], select{
+    padding:7px 10px; border:1px solid var(--bordure); border-radius:7px;
+    background:var(--surface); color:var(--texte); font-size:13px;
+  }
+  button.action{
+    padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
+    color:#fff; font-weight:600; font-size:13px; cursor:pointer;
+  }
+  button.action:hover{ background:var(--vert-profond); }
+  button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
+
+  /* ── Cartes KPI ── */
+  .grille-kpi{ display:grid; grid-template-columns:repeat(auto-fill,minmax(228px,1fr)); gap:14px; margin-bottom:22px; }
+  .kpi{
+    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+    padding:16px 17px; box-shadow:var(--ombre); position:relative;
+  }
+  .kpi .libelle{ font-size:12px; color:var(--texte-doux); font-weight:600; margin-bottom:8px; padding-right:22px; }
+  .kpi .valeur{ font-family:'Montserrat',sans-serif; font-size:27px; font-weight:800; line-height:1.1; }
+  .kpi .unite{ font-size:14px; color:var(--texte-faible); font-weight:600; margin-left:3px; }
+  .kpi .base{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; }
+  .kpi.non-mesure .valeur{ color:var(--texte-faible); font-size:18px; font-weight:600; }
+  .kpi .motif{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; font-style:italic; }
+
+  /* Info-bulle portant la définition et la formule : un chiffre sans définition
+     n'est pas exploitable. */
+  .info{
+    position:absolute; top:13px; right:13px; width:17px; height:17px;
+    border-radius:50%; border:1px solid var(--bordure); color:var(--texte-faible);
+    font-size:11px; line-height:15px; text-align:center; cursor:help; user-select:none;
+  }
+  .info:hover{ border-color:var(--vert); color:var(--vert); }
+
+  /* ── Panneaux ── */
+  .panneau{
+    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+    box-shadow:var(--ombre); margin-bottom:20px; overflow:hidden;
+  }
+  .panneau > header{
+    padding:14px 17px; border-bottom:1px solid var(--bordure);
+    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14.5px; margin:0; }
+  .panneau .corps{ padding:16px 17px; }
+
+  /* ── Tableaux : défilement propre, jamais de débordement de page ── */
+  .table-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:560px; }
+  th{
+    text-align:left; padding:9px 11px; font-size:11.5px; text-transform:uppercase;
+    letter-spacing:.03em; color:var(--texte-faible); border-bottom:1px solid var(--bordure); white-space:nowrap;
+  }
+  td{ padding:10px 11px; border-bottom:1px solid var(--bordure); }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-2); }
+
+  .puce{ display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; }
+  .puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
+  .puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
+  .puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
+  .puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
+
+  .barre{ height:6px; background:var(--surface-2); border-radius:99px; overflow:hidden; min-width:80px; }
+  .barre span{ display:block; height:100%; background:var(--vert); }
+  .barre span.charge-haute{ background:var(--attention); }
+  .barre span.charge-critique{ background:var(--alerte); }
+
+  /* ── Graphique en barres, accessible : un tableau équivalent l'accompagne ── */
+  .graphique{ display:flex; align-items:flex-end; gap:3px; height:150px; padding-top:10px; }
+  .graphique .jour{ flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:2px; min-width:6px; }
+  .graphique .part-ok{ background:var(--vert); border-radius:2px 2px 0 0; }
+  .graphique .part-echec{ background:var(--alerte); }
+  .legende{ display:flex; gap:16px; font-size:12px; color:var(--texte-doux); margin-top:12px; flex-wrap:wrap; }
+  .legende i{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; }
+
+  details.donnees summary{ cursor:pointer; font-size:12.5px; color:var(--texte-doux); margin-top:12px; }
+
+  /* ── États ── */
+  .squelette{ background:var(--surface-2); border-radius:6px; height:15px; animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
+  .etat-vide{ padding:28px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
+  .erreur{
+    padding:13px 15px; border-radius:9px; font-size:13.5px;
+    background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
+  }
+  .avertissement{
+    padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:10px;
+    background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
+  }
+
+  @media (max-width:900px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
+    .menu{ display:flex; overflow-x:auto; }
+    .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
+    .menu a.actif{ border-left:none; border-bottom-color:var(--vert); }
+    .principal{ padding:18px 15px 50px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Direction opérationnelle</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="controle">Centre de contrôle</a>
+      <a href="#" data-vue="tournees">Tournées</a>
+      <a href="#" data-vue="equipes">Équipes</a>
+      <a href="#" data-vue="zones">Zones</a>
+      <a href="#" data-vue="qualite">Qualité de service</a>
+      <a href="#" data-vue="registre">Registre des KPI</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Centre de contrôle</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="zoneAvertissements"></div>
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION OPÉRATIONNELLE ET COMMERCIALE
+ * ════════════════════════════════════════
+ *
+ * Règle absolue de cet écran (§8 du cahier des charges) : AUCUNE valeur n'est écrite
+ * en dur. Chaque chiffre provient de /api/direction-operations/*, calculé en SQL sur
+ * les tables réelles.
+ *
+ * Ce qui n'est pas mesurable est affiché comme « non mesuré », avec le motif renvoyé
+ * par le registre des KPI — jamais un zéro, jamais une estimation. Environ un tiers des
+ * cartes décrites au cahier des charges sont dans ce cas : véhicules, carburant, tonnage,
+ * SLA, incidents. Les tables correspondantes n'existent pas encore.
+ */
+(function () {
+  'use strict';
+
+  var etat = { vue: 'controle', debut: null, fin: null, donnees: {} };
+
+  var elContenu = document.getElementById('contenu');
+  var elTitre = document.getElementById('titreVue');
+  var elSousTitre = document.getElementById('sousTitre');
+  var elAvertissements = document.getElementById('zoneAvertissements');
+
+  var TITRES = {
+    controle: 'Centre de contrôle',
+    tournees: 'Tournées',
+    equipes: 'Équipes',
+    zones: 'Zones',
+    qualite: 'Qualité de service',
+    registre: 'Registre des KPI',
+  };
+
+  // ── Utilitaires d'affichage ────────────────────────────────────────────────
+
+  function echapper(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /** `null` doit se lire « non mesuré », jamais « 0 ». La nuance est essentielle. */
+  function nombre(v) {
+    if (v === null || v === undefined) return '—';
+    return typeof v === 'number' ? v.toLocaleString('fr-FR') : echapper(v);
+  }
+
+  function squelette(lignes) {
+    var html = '';
+    for (var i = 0; i < (lignes || 4); i += 1) {
+      html += '<div class="squelette" style="margin-bottom:9px;width:' + (100 - i * 8) + '%"></div>';
+    }
+    return html;
+  }
+
+  function carteKpi(k) {
+    if (k.disponible === false) {
+      return '<div class="kpi non-mesure">'
+        + '<div class="libelle">' + echapper(k.nom) + '</div>'
+        + '<div class="valeur">Non mesuré</div>'
+        + '<div class="motif">' + echapper(k.motif || '') + '</div>'
+        + '</div>';
+    }
+
+    // L'info-bulle porte définition, formule et sources : le lecteur peut vérifier
+    // ce que le chiffre veut dire sans quitter l'écran.
+    var infoBulle = [k.definition, k.formule ? 'Formule : ' + k.formule : '',
+      k.sources && k.sources.length ? 'Sources : ' + k.sources.join(', ') : '',
+      k.note ? '⚠ ' + k.note : '']
+      .filter(Boolean).join('\n\n');
+
+    var valeur = k.valeur === null || k.valeur === undefined
+      ? '<span style="color:var(--texte-faible);font-size:18px">Aucune donnée</span>'
+      : nombre(k.valeur) + (k.unite && k.unite !== 'tournées' && k.unite !== 'collectes'
+        && k.unite !== 'abonnés' && k.unite !== 'clients'
+        ? '<span class="unite">' + echapper(k.unite) + '</span>' : '');
+
+    return '<div class="kpi">'
+      + '<span class="info" title="' + echapper(infoBulle) + '">i</span>'
+      + '<div class="libelle">' + echapper(k.nom) + '</div>'
+      + '<div class="valeur">' + valeur + '</div>'
+      + (k.etat_vide ? '<div class="base">' + echapper(k.etat_vide) + '</div>'
+        : (k.base ? '<div class="base">' + echapper(k.base) + '</div>' : ''))
+      + '</div>';
+  }
+
+  function puceStatut(statut) {
+    var classes = {
+      terminee: 'ok', en_cours: 'attention', planifiee: 'neutre',
+      manquee: 'alerte', annulee: 'neutre',
+    };
+    var libelles = {
+      terminee: 'Terminée', en_cours: 'En cours', planifiee: 'Planifiée',
+      manquee: 'Manquée', annulee: 'Annulée',
+    };
+    return '<span class="puce ' + (classes[statut] || 'neutre') + '">'
+      + echapper(libelles[statut] || statut) + '</span>';
+  }
+
+  function barreCharge(pourcent) {
+    var p = Math.min(100, Math.max(0, pourcent || 0));
+    var classe = p >= 100 ? 'charge-critique' : (p >= 80 ? 'charge-haute' : '');
+    return '<div class="barre"><span class="' + classe + '" style="width:' + p + '%"></span></div>';
+  }
+
+  function etatVide(message) {
+    return '<div class="etat-vide">' + echapper(message) + '</div>';
+  }
+
+  // ── Chargement ─────────────────────────────────────────────────────────────
+
+  function parametres() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + etat.debut);
+    if (etat.fin) p.push('fin=' + etat.fin);
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function charger(chemin) {
+    return EnviroAPI.get('/api/direction-operations/' + chemin + parametres());
+  }
+
+  function afficherErreur(err) {
+    elContenu.innerHTML = '<div class="erreur">'
+      + echapper(err.message || 'Impossible de charger les données.')
+      + (err.permissionsRequises
+        ? '<br><small>Permission requise : ' + echapper(err.permissionsRequises.join(', ')) + '</small>'
+        : '')
+      + '</div>';
+  }
+
+  function afficherAvertissements(liste) {
+    if (!liste || liste.length === 0) { elAvertissements.innerHTML = ''; return; }
+    elAvertissements.innerHTML = liste.map(function (a) {
+      return '<div class="avertissement">' + echapper(a) + '</div>';
+    }).join('');
+  }
+
+  // ── Vue : centre de contrôle ───────────────────────────────────────────────
+
+  function vueControle() {
+    elContenu.innerHTML = '<div class="grille-kpi">'
+      + '<div class="kpi">' + squelette(2) + '</div>'.repeat(4) + '</div>';
+
+    return charger('centre-de-controle').then(function (d) {
+      etat.donnees.controle = d;
+      afficherAvertissements(d.avertissements);
+      elSousTitre.textContent = 'Du ' + d.periode.debut + ' au ' + d.periode.fin
+        + ' — fuseau ' + d.periode.fuseau;
+
+      var html = '<div class="grille-kpi">'
+        + d.kpi.map(carteKpi).join('')
+        + d.non_mesures.map(carteKpi).join('')
+        + '</div>';
+
+      html += graphiqueSerie(d.serie_quotidienne);
+      html += tableauCharge(d.charge_collecteurs);
+
+      elContenu.innerHTML = html;
+    }).catch(afficherErreur);
+  }
+
+  function graphiqueSerie(serie) {
+    if (!serie || serie.length === 0) {
+      return '<div class="panneau"><header><h2>Activité quotidienne</h2></header>'
+        + etatVide('Aucune activité enregistrée sur cette période.') + '</div>';
+    }
+
+    var max = Math.max(1, Math.apply(null, serie.map(function (j) { return j.arrets; })));
+
+    var barres = serie.map(function (j) {
+      var hOk = Math.round((j.effectuees / max) * 130);
+      var hEchec = Math.round((j.echecs / max) * 130);
+      var titre = j.date + ' — ' + j.effectuees + ' effectuée(s), ' + j.echecs + ' échec(s)';
+      return '<div class="jour" title="' + echapper(titre) + '">'
+        + (hEchec > 0 ? '<div class="part-echec" style="height:' + hEchec + 'px"></div>' : '')
+        + '<div class="part-ok" style="height:' + hOk + 'px"></div>'
+        + '</div>';
+    }).join('');
+
+    // Tableau équivalent : le graphique seul n'est pas accessible au lecteur d'écran.
+    var lignes = serie.map(function (j) {
+      return '<tr><td>' + echapper(j.date) + '</td><td>' + j.tournees + '</td><td>'
+        + j.arrets + '</td><td>' + j.effectuees + '</td><td>' + j.echecs + '</td></tr>';
+    }).join('');
+
+    return '<div class="panneau">'
+      + '<header><h2>Activité quotidienne</h2></header>'
+      + '<div class="corps">'
+      + '<div class="graphique" role="img" aria-label="Collectes effectuées et échecs par jour">'
+      + barres + '</div>'
+      + '<div class="legende">'
+      + '<span><i style="background:var(--vert)"></i>Collectes effectuées</span>'
+      + '<span><i style="background:var(--alerte)"></i>Échecs</span>'
+      + '</div>'
+      + '<details class="donnees"><summary>Voir les données du graphique</summary>'
+      + '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Tournées</th>'
+      + '<th>Arrêts</th><th>Effectuées</th><th>Échecs</th></tr></thead><tbody>'
+      + lignes + '</tbody></table></div></details>'
+      + '</div></div>';
+  }
+
+  function tableauCharge(charge) {
+    if (!charge || charge.length === 0) {
+      return '<div class="panneau"><header><h2>Charge des collecteurs</h2></header>'
+        + etatVide('Aucun collecteur mobilisé sur cette période.') + '</div>';
+    }
+
+    var lignes = charge.map(function (c) {
+      return '<tr>'
+        + '<td>' + echapper(c.collecteur) + '</td>'
+        + '<td>' + echapper(c.zone || '—') + '</td>'
+        + '<td>' + c.tournees + '</td>'
+        + '<td>' + c.clients_total + '</td>'
+        + '<td>' + c.charge_moyenne + '</td>'
+        + '<td>' + c.pic_journalier + ' / ' + c.plafond + '</td>'
+        + '<td style="min-width:120px">' + barreCharge(c.occupation_pic)
+        + '<small style="color:var(--texte-faible)">' + c.occupation_pic + ' %</small></td>'
+        + '<td>' + (c.depassement
+          ? '<span class="puce alerte">Dépassement</span>'
+          : '<span class="puce ok">Dans la limite</span>') + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return '<div class="panneau">'
+      + '<header><h2>Charge des collecteurs</h2>'
+      + '<small style="color:var(--texte-faible)">Le taux porte sur le PIC journalier, '
+      + 'pas sur la moyenne : c’est lui qui dit si le plafond a tenu.</small></header>'
+      + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+      + '<th>Collecteur</th><th>Zone</th><th>Tournées</th><th>Clients</th>'
+      + '<th>Moyenne/jour</th><th>Pic</th><th>Occupation</th><th>État</th>'
+      + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div></div>';
+  }
+
+  // ── Vue : tournées ─────────────────────────────────────────────────────────
+
+  function vueTournees(page) {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(6) + '</div></div>';
+
+    var suffixe = parametres() ? parametres() + '&page=' + (page || 1) : '?page=' + (page || 1);
+
+    return EnviroAPI.get('/api/direction-operations/tournees' + suffixe).then(function (d) {
+      elSousTitre.textContent = d.pagination.total + ' tournée(s) — du '
+        + d.periode.debut + ' au ' + d.periode.fin;
+      afficherAvertissements([]);
+
+      if (d.etat_vide) { elContenu.innerHTML = '<div class="panneau">' + etatVide(d.etat_vide) + '</div>'; return; }
+
+      var lignes = d.tournees.map(function (t) {
+        return '<tr>'
+          + '<td>' + echapper(String(t.date_tournee).slice(0, 10)) + '</td>'
+          + '<td>' + echapper(t.zone || '—') + '</td>'
+          + '<td>' + echapper(t.collecteur || '—') + '</td>'
+          + '<td>' + puceStatut(t.statut) + '</td>'
+          + '<td>' + t.clients + '</td>'
+          + '<td>' + t.effectuees + '</td>'
+          + '<td>' + (t.echecs > 0 ? '<span style="color:var(--alerte)">' + t.echecs + '</span>' : '0') + '</td>'
+          + '<td style="min-width:110px">' + barreCharge(t.progression)
+          + '<small style="color:var(--texte-faible)">' + t.progression + ' %</small></td>'
+          + '</tr>';
+      }).join('');
+
+      var p = d.pagination;
+      var pagination = '<div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;padding-top:12px">'
+        + '<button class="action secondaire" ' + (p.page <= 1 ? 'disabled' : '') + ' data-page="' + (p.page - 1) + '">Précédent</button>'
+        + '<span style="font-size:12.5px;color:var(--texte-faible)">Page ' + p.page + ' / ' + p.pages + '</span>'
+        + '<button class="action secondaire" ' + (p.page >= p.pages ? 'disabled' : '') + ' data-page="' + (p.page + 1) + '">Suivant</button>'
+        + '</div>';
+
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Tournées</h2><span style="font-size:12.5px;color:var(--texte-faible)">'
+        + p.total + ' au total</span></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Date</th><th>Zone</th><th>Collecteur</th><th>Statut</th>'
+        + '<th>Clients</th><th>Effectuées</th><th>Échecs</th><th>Progression</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
+        + pagination + '</div></div>';
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-page]'), function (b) {
+        b.addEventListener('click', function () {
+          if (!b.disabled) vueTournees(parseInt(b.getAttribute('data-page'), 10));
+        });
+      });
+    }).catch(afficherErreur);
+  }
+
+  // ── Vue : équipes ──────────────────────────────────────────────────────────
+
+  function vueEquipes() {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(5) + '</div></div>';
+
+    return charger('equipes').then(function (d) {
+      afficherAvertissements([]);
+      elSousTitre.textContent = d.resume.collecteurs_mobilises + ' collecteur(s) mobilisé(s)'
+        + (d.resume.depassements_plafond > 0
+          ? ' — ' + d.resume.depassements_plafond + ' dépassement(s) de plafond' : '');
+
+      if (d.etat_vide) { elContenu.innerHTML = '<div class="panneau">' + etatVide(d.etat_vide) + '</div>'; return; }
+      elContenu.innerHTML = tableauCharge(d.collecteurs);
+    }).catch(afficherErreur);
+  }
+
+  // ── Vue : zones ────────────────────────────────────────────────────────────
+
+  function vueZones() {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(5) + '</div></div>';
+
+    return charger('zones').then(function (d) {
+      afficherAvertissements([]);
+      elSousTitre.textContent = d.zones.length + ' zone(s)';
+
+      if (d.etat_vide) { elContenu.innerHTML = '<div class="panneau">' + etatVide(d.etat_vide) + '</div>'; return; }
+
+      var lignes = d.zones.map(function (z) {
+        var ecart = z.dossiers_actifs - z.abonnes_actifs;
+        return '<tr>'
+          + '<td>' + echapper(z.zone) + '</td>'
+          + '<td>' + echapper(z.commune || '—') + '</td>'
+          + '<td>' + echapper(z.superviseur || '<span style="color:var(--alerte)">non assigné</span>') + '</td>'
+          + '<td>' + z.dossiers_actifs + '</td>'
+          + '<td><strong>' + z.abonnes_actifs + '</strong></td>'
+          + '<td>' + (ecart > 0
+            ? '<span class="puce attention">' + ecart + ' sans abonnement payé</span>'
+            : '<span class="puce ok">à jour</span>') + '</td>'
+          + '<td>' + (z.sans_gps > 0
+            ? '<span style="color:var(--attention)">' + z.sans_gps + '</span>' : '0') + '</td>'
+          + '<td>' + z.tournees_periode + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Couverture par zone</h2>'
+        + '<small style="color:var(--texte-faible)">« Abonnés actifs » = dossier actif ET '
+        + 'abonnement payé couvrant aujourd’hui. L’écart mesure le service rendu sans contrepartie.</small>'
+        + '</header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Zone</th><th>Commune</th><th>Superviseur</th><th>Dossiers actifs</th>'
+        + '<th>Abonnés actifs</th><th>Écart</th><th>Sans GPS</th><th>Tournées</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div></div>';
+    }).catch(afficherErreur);
+  }
+
+  // ── Vue : qualité ──────────────────────────────────────────────────────────
+
+  function vueQualite() {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(5) + '</div></div>';
+
+    return charger('qualite').then(function (d) {
+      afficherAvertissements([]);
+      elSousTitre.textContent = 'Du ' + d.periode.debut + ' au ' + d.periode.fin;
+
+      var c = d.collectes;
+      var kpis = [
+        { nom: 'Taux de réussite', valeur: c.taux_reussite, unite: '%',
+          base: c.effectuees + ' sur ' + c.arrets_traites + ' arrêt(s) traité(s)',
+          definition: 'Part des arrêts servis avec succès.' },
+        { nom: 'Taux d’échec', valeur: c.taux_echec, unite: '%',
+          base: c.echecs + ' échec(s)', definition: 'Absences, problèmes sur place et rejets.' },
+        { nom: 'Rattrapages en attente', valeur: d.rattrapage.total,
+          base: d.rattrapage.anciennete_max_jours !== null
+            ? 'Le plus ancien date de ' + d.rattrapage.anciennete_max_jours + ' jour(s)'
+            : 'Aucun en attente',
+          definition: 'Clients dont la collecte a échoué sans rattrapage planifié.' },
+        { nom: 'Réclamations', valeur: d.reclamations.total,
+          base: d.reclamations.ouvertes + ' ouverte(s), ' + d.reclamations.prioritaires + ' prioritaire(s)',
+          definition: 'Tickets de support créés sur la période.' },
+      ];
+
+      var motifs = d.motifs_echec.length > 0
+        ? d.motifs_echec.map(function (m) {
+          return '<tr><td>' + echapper(m.statut) + '</td><td>' + m.nombre + '</td>'
+            + '<td>' + m.avec_commentaire + '</td></tr>';
+        }).join('')
+        : null;
+
+      elContenu.innerHTML = '<div class="grille-kpi">'
+        + kpis.map(carteKpi).join('')
+        + d.non_mesures.map(function (k) {
+          return carteKpi({ nom: k.nom, disponible: false, motif: k.motif });
+        }).join('')
+        + '</div>'
+        + '<div class="panneau"><header><h2>Motifs d’échec</h2></header>'
+        + (motifs
+          ? '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+            + '<th>Statut</th><th>Nombre</th><th>Avec commentaire</th></tr></thead><tbody>'
+            + motifs + '</tbody></table></div></div>'
+          : etatVide('Aucun échec de collecte sur cette période.'))
+        + '</div>';
+    }).catch(afficherErreur);
+  }
+
+  // ── Vue : registre des KPI ─────────────────────────────────────────────────
+
+  function vueRegistre() {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(6) + '</div></div>';
+
+    return EnviroAPI.get('/api/direction-operations/registre-kpi').then(function (d) {
+      afficherAvertissements([]);
+      elSousTitre.textContent = d.disponibles + ' indicateur(s) calculable(s), '
+        + d.indisponibles.length + ' non mesuré(s)';
+
+      var lignes = d.kpi.map(function (k) {
+        return '<tr>'
+          + '<td><strong>' + echapper(k.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(k.code) + '</small></td>'
+          + '<td style="max-width:320px">' + echapper(k.definition || '') + '</td>'
+          + '<td><code style="font-size:11.5px">' + echapper(k.formule || '—') + '</code></td>'
+          + '<td>' + echapper((k.sources || []).join(', ') || '—') + '</td>'
+          + '<td>' + (k.disponible
+            ? '<span class="puce ok">Calculé</span>'
+            : '<span class="puce neutre">Non mesuré</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Registre des indicateurs</h2>'
+        + '<small style="color:var(--texte-faible)">Un chiffre sans définition n’est pas '
+        + 'exploitable. Chaque indicateur porte sa formule et ses tables sources.</small></header>'
+        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<th>Indicateur</th><th>Définition</th><th>Formule</th><th>Sources</th><th>État</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div></div></div>';
+    }).catch(afficherErreur);
+  }
+
+  // ── Routage ────────────────────────────────────────────────────────────────
+
+  var VUES = {
+    controle: vueControle, tournees: vueTournees, equipes: vueEquipes,
+    zones: vueZones, qualite: vueQualite, registre: vueRegistre,
+  };
+
+  function allerA(vue) {
+    etat.vue = vue;
+    elTitre.textContent = TITRES[vue];
+    elSousTitre.textContent = 'Chargement…';
+
+    Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+      a.classList.toggle('actif', a.getAttribute('data-vue') === vue);
+    });
+
+    (VUES[vue] || vueControle)();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.menu a'), function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      allerA(a.getAttribute('data-vue'));
+    });
+  });
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(etat.vue);
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+  // La garde revalide le rôle auprès du backend avant d'afficher quoi que ce soit.
+  // Le contrôle réel reste côté serveur : chaque appel API vérifie la permission.
+  EnviroAuth.proteger({ permissions: ['operations.dashboard.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('controle');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

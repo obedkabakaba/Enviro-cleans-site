@@ -1,0 +1,216 @@
+/**
+ * ════════════════════════════════════════
+ * CHÂSSIS COMMUN DES ESPACES DE DIRECTION
+ * ════════════════════════════════════════
+ *
+ * Extrait de `direction-operations-commerciales.html` et `centre-analyse.html`, qui
+ * embarquaient chacune leur copie du même bloc. À la troisième page, la duplication
+ * cesse d'être un raccourci : elle devient trois endroits où corriger le même bug de
+ * contraste, et deux qu'on oubliera.
+ *
+ * ── Thème ──
+ * Les jetons sont définis en clair sur `:root` et redéfinis sous
+ * `prefers-color-scheme: dark`. Aucune couleur n'a sa seule définition dans le bloc
+ * sombre : une page qui s'ouvre en clair doit être complète sans lui.
+ *
+ * ── Ce que ce fichier ne fait pas ──
+ * Il ne contient aucune règle spécifique à un métier. Les particularités d'un espace
+ * (étiquettes de typologie du Centre d'analyse, barres de charge des opérations) restent
+ * dans leur page.
+ */
+
+:root{
+  --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
+  --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+  --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
+  --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a; --info:#3f6fd8;
+  --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+    --info:#7ba0f0;
+    --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+  }
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  margin:0; background:var(--fond); color:var(--texte);
+  font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size:14px; line-height:1.5;
+}
+
+/* ── Structure ── */
+.shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+
+.sidebar{
+  background:var(--surface); border-right:1px solid var(--bordure);
+  padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.marque{ padding:0 20px 20px; border-bottom:1px solid var(--bordure); margin-bottom:14px; }
+.marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
+.marque span{ font-size:11.5px; color:var(--texte-faible); }
+
+.menu a{
+  display:block; padding:10px 20px; color:var(--texte-doux);
+  text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
+}
+.menu a:hover{ background:var(--surface-2); color:var(--texte); }
+.menu a.actif{
+  color:var(--vert); border-left-color:var(--vert);
+  background:var(--surface-2); font-weight:600;
+}
+
+.principal{ padding:22px 26px 60px; min-width:0; }
+.topbar{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  justify-content:space-between; margin-bottom:22px;
+}
+h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
+.sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
+
+/* ── Contrôles ── */
+.filtres{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+input[type=date], select, input[type=text], textarea{
+  padding:7px 10px; border:1px solid var(--bordure); border-radius:7px;
+  background:var(--surface); color:var(--texte); font-size:13px; font-family:inherit;
+}
+textarea{ width:100%; resize:vertical; min-height:70px; }
+
+button.action{
+  padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
+  color:#fff; font-weight:600; font-size:13px; cursor:pointer;
+}
+button.action:hover{ background:var(--vert-profond); }
+button.action:disabled{ opacity:.55; cursor:not-allowed; }
+button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
+button.danger{ background:var(--alerte); }
+
+/* ── Cartes d'indicateur ── */
+.grille-kpi{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  gap:14px; margin-bottom:22px;
+}
+.kpi{
+  background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+  padding:16px 17px; box-shadow:var(--ombre); position:relative;
+}
+.kpi .libelle{
+  font-size:12px; color:var(--texte-doux); font-weight:600;
+  margin-bottom:8px; padding-right:22px;
+}
+.kpi .valeur{ font-family:'Montserrat',sans-serif; font-size:26px; font-weight:800; line-height:1.1; }
+.kpi .unite{ font-size:13px; color:var(--texte-faible); font-weight:600; margin-left:3px; }
+.kpi .base{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; }
+
+/* Un indicateur non mesuré ne doit JAMAIS ressembler à un zéro : plus petit, grisé,
+   et accompagné de son motif. C'est la règle centrale de tous ces écrans. */
+.kpi.non-mesure .valeur{ color:var(--texte-faible); font-size:17px; font-weight:600; }
+.kpi .motif{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; font-style:italic; }
+
+/* Info-bulle portant définition, formule et sources. */
+.info{
+  position:absolute; top:13px; right:13px; width:17px; height:17px;
+  border-radius:50%; border:1px solid var(--bordure); color:var(--texte-faible);
+  font-size:11px; line-height:15px; text-align:center; cursor:help; user-select:none;
+}
+.info:hover{ border-color:var(--vert); color:var(--vert); }
+
+/* ── Panneaux ── */
+.panneau{
+  background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
+  box-shadow:var(--ombre); margin-bottom:20px; overflow:hidden;
+}
+.panneau > header{
+  padding:14px 17px; border-bottom:1px solid var(--bordure);
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14.5px; margin:0; }
+.panneau .corps{ padding:16px 17px; }
+
+/* ── Tableaux : ils défilent dans leur conteneur, la page ne déborde jamais ── */
+.table-wrap{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; font-size:13px; min-width:560px; }
+th{
+  text-align:left; padding:9px 11px; font-size:11.5px; text-transform:uppercase;
+  letter-spacing:.03em; color:var(--texte-faible);
+  border-bottom:1px solid var(--bordure); white-space:nowrap;
+}
+td{ padding:10px 11px; border-bottom:1px solid var(--bordure); vertical-align:top; }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr:hover{ background:var(--surface-2); }
+
+/* ── Puces d'état ── */
+.puce{
+  display:inline-block; padding:2px 9px; border-radius:99px;
+  font-size:11px; font-weight:700; white-space:nowrap;
+}
+.puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
+.puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
+.puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
+.puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
+.puce.info{ background:rgba(63,111,216,.14); color:var(--info); }
+
+/* ── Blocs de contenu ── */
+.bloc{
+  border:1px solid var(--bordure); border-radius:9px; padding:13px 15px;
+  margin-bottom:11px; background:var(--surface-2);
+}
+.bloc h3{ font-size:13px; margin:0 0 7px; font-family:'Montserrat',sans-serif; }
+.bloc p{ margin:0 0 6px; }
+.bloc .meta{ font-size:11.5px; color:var(--texte-faible); }
+
+.barre{ height:6px; background:var(--surface-2); border-radius:99px; overflow:hidden; min-width:80px; }
+.barre span{ display:block; height:100%; background:var(--vert); }
+.barre span.charge-haute{ background:var(--attention); }
+.barre span.charge-critique{ background:var(--alerte); }
+
+ul.compact{ margin:0; padding-left:19px; }
+ul.compact li{ margin-bottom:5px; }
+a.citation{ color:var(--info); word-break:break-word; }
+
+/* ── États de chargement, vide et erreur ── */
+.squelette{
+  background:var(--surface-2); border-radius:6px; height:15px;
+  animation:pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
+
+.etat-vide{ padding:28px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
+
+.erreur{
+  padding:13px 15px; border-radius:9px; font-size:13.5px; margin-bottom:14px;
+  background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
+}
+.avertissement{
+  padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
+  background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
+}
+.note{
+  padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
+  background:rgba(63,111,216,.08); border:1px solid rgba(63,111,216,.26); color:var(--texte-doux);
+}
+
+details.brut summary{ cursor:pointer; font-size:12.5px; color:var(--texte-doux); margin-top:14px; }
+details.brut pre{
+  background:var(--surface-2); padding:12px; border-radius:8px; overflow-x:auto;
+  font-size:11.5px; margin-top:9px;
+}
+
+/* ── Mobile : la barre latérale devient un ruban horizontal ── */
+@media (max-width:900px){
+  .shell{ grid-template-columns:1fr; }
+  .sidebar{
+    position:static; height:auto; border-right:none;
+    border-bottom:1px solid var(--bordure);
+  }
+  .menu{ display:flex; overflow-x:auto; }
+  .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
+  .menu a.actif{ border-left:none; border-bottom-color:var(--vert); }
+  .principal{ padding:18px 15px 50px; }
+}
