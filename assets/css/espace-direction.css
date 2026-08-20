@@ -19,19 +19,57 @@
  * dans leur page.
  */
 
+/* ── Deux familles de couleurs, et pourquoi il en faut deux ──
+ *
+ * Une couleur de marque lisible en aplat ne l'est pas forcément en TEXTE. Le vert
+ * Envirocleans (#3ab54a) est superbe sur une barre de progression ; en texte sur fond
+ * clair il tombe à 2,55:1, et du blanc posé dessus à 2,66:1 — très en dessous du seuil
+ * d'accessibilité de 4,5:1. Le bouton d'action principal, présent sur chaque écran,
+ * était donc illisible pour une partie des utilisateurs.
+ *
+ * Les jetons sont donc dédoublés :
+ *   --vert, --teal, --alerte…            → APLATS (barres, pastilles, fonds teintés)
+ *   --vert-texte, --teal-texte, …        → TEXTE, contraste vérifié ≥ 4,5:1
+ *
+ * L'identité visuelle ne change pas : ce sont les mêmes teintes, assombries juste assez
+ * pour être lues. Chaque valeur a été calculée, pas choisie à l'œil, et le contrôle
+ * `verif-theme` les remesure sur les écrans réels dans les deux thèmes.
+ */
 :root{
   --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
-  --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+  --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#636f7c;
   --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
   --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a; --info:#3f6fd8;
+
+  /* Variantes de TEXTE — contraste ≥ 4,5:1 sur --surface et --surface-2. */
+  --vert-texte:#277a31; --teal-texte:#117878; --ok-texte:#25722e;
+  --alerte-texte:#c22f2a; --attention-texte:#8f5813; --info-texte:#2f60cc;
+
+  /* Fonds de bouton portant du texte blanc — contraste vérifié. */
+  --bouton:#1f6b3a; --bouton-survol:#17532d; --bouton-danger:#b8322e;
+
+  /* Chaque valeur ci-dessus est vérifiée contre le PIRE fond sur lequel elle se pose —
+   * --fond, --surface et --surface-2 pour le texte courant, le fond teinté propre à
+   * chaque état pour les puces et les bandeaux. Viser seulement le blanc laissait
+   * passer du 4,35:1 sur le gris de page. */
+
   --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
 }
 
 @media (prefers-color-scheme: dark){
   :root{
     --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#77889a;
     --info:#7ba0f0;
+
+    /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce
+     * sont les sombres qui échouent. Les variantes de texte y sont donc plus CLAIRES,
+     * et non plus foncées — sauf le rouge, qui reste sous le seuil et est éclairci. */
+    --vert-texte:#3ab54a; --teal-texte:#17a2a2; --ok-texte:#3ab54a;
+    --alerte-texte:#ef8f8b; --attention-texte:#e08a1e; --info-texte:#7ba0f0;
+
+    --bouton:#2a8335; --bouton-survol:#1f6b3a; --bouton-danger:#c22f2a;
+
     --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
   }
 }
@@ -45,7 +83,13 @@ body{
 }
 
 /* ── Structure ── */
-.shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+/* `minmax(0, 1fr)` et non `1fr` : la taille minimale par défaut d'une piste de grille
+ * est `auto`, c'est-à-dire la largeur du CONTENU. Un tableau large refuse alors de se
+ * réduire, la colonne s'élargit, et la page entière défile horizontalement — même quand
+ * le tableau est pourtant dans un conteneur `overflow-x:auto` censé le contenir. C'est
+ * la cause la plus fréquente de débordement horizontal dans une mise en page en grille,
+ * et elle est invisible tant qu'aucun contenu n'est assez large pour la déclencher. */
+.shell{ display:grid; grid-template-columns:248px minmax(0, 1fr); min-height:100vh; }
 
 .sidebar{
   background:var(--surface); border-right:1px solid var(--bordure);
@@ -61,7 +105,8 @@ body{
 }
 .menu a:hover{ background:var(--surface-2); color:var(--texte); }
 .menu a.actif{
-  color:var(--vert); border-left-color:var(--vert);
+  /* Texte : la variante lisible. Barre latérale : la couleur de marque, en aplat. */
+  color:var(--vert-texte); border-left-color:var(--vert);
   background:var(--surface-2); font-weight:600;
 }
 
@@ -83,13 +128,14 @@ input[type=date], select, input[type=text], textarea{
 textarea{ width:100%; resize:vertical; min-height:70px; }
 
 button.action{
-  padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
+  padding:7px 14px; border:none; border-radius:7px; background:var(--bouton);
   color:#fff; font-weight:600; font-size:13px; cursor:pointer;
 }
-button.action:hover{ background:var(--vert-profond); }
+button.action:hover{ background:var(--bouton-survol); }
 button.action:disabled{ opacity:.55; cursor:not-allowed; }
 button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
-button.danger{ background:var(--alerte); }
+button.danger{ background:var(--bouton-danger); }
+button.danger:hover{ background:var(--alerte-texte); }
 
 /* ── Cartes d'indicateur ── */
 .grille-kpi{
@@ -150,11 +196,11 @@ tbody tr:hover{ background:var(--surface-2); }
   display:inline-block; padding:2px 9px; border-radius:99px;
   font-size:11px; font-weight:700; white-space:nowrap;
 }
-.puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
-.puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
-.puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
+.puce.ok{ background:rgba(58,181,74,.14); color:var(--ok-texte); }
+.puce.attention{ background:rgba(224,138,30,.14); color:var(--attention-texte); }
+.puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte-texte); }
 .puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
-.puce.info{ background:rgba(63,111,216,.14); color:var(--info); }
+.puce.info{ background:rgba(63,111,216,.14); color:var(--info-texte); }
 
 /* ── Blocs de contenu ── */
 .bloc{
@@ -172,7 +218,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 ul.compact{ margin:0; padding-left:19px; }
 ul.compact li{ margin-bottom:5px; }
-a.citation{ color:var(--info); word-break:break-word; }
+a.citation{ color:var(--info-texte); word-break:break-word; }
 
 /* ── États de chargement, vide et erreur ── */
 .squelette{
@@ -185,11 +231,13 @@ a.citation{ color:var(--info); word-break:break-word; }
 
 .erreur{
   padding:13px 15px; border-radius:9px; font-size:13.5px; margin-bottom:14px;
-  background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
+  background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32);
+  color:var(--alerte-texte);
 }
 .avertissement{
   padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
-  background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
+  background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30);
+  color:var(--attention-texte);
 }
 .note{
   padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
