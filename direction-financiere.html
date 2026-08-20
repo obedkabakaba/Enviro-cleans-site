@@ -31,6 +31,7 @@
       <a href="#" data-vue="approbations">Approbations</a>
       <a href="#" data-vue="fournisseurs">Fournisseurs</a>
       <a href="#" data-vue="audit">Audit financier</a>
+      <a href="#" data-vue="rapports">Rapports</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
   </nav>
@@ -98,6 +99,7 @@
     approbations: 'Approbations',
     fournisseurs: 'Fournisseurs',
     audit: 'Audit financier',
+    rapports: 'Rapports',
     registre: 'Registre des KPI',
   };
 
@@ -967,6 +969,106 @@
     }).catch(echec);
   }
 
+
+  // ── Rapports ───────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables — construits sur les données servies';
+
+    E.vueRapports({
+      cible: elContenu,
+      catalogue: [
+        {
+          nom: 'Journal des encaissements',
+          description: 'Paiements réussis de la période, avec canal, client et référence.',
+          chemin: '/api/direction-financiere/encaissements' + periode(),
+          fichier: 'encaissements',
+          extraire: function (d) {
+            var liste = d.paiements || d.encaissements || [];
+            return {
+              entetes: ['Date', 'Client', 'Numéro abonné', 'Montant', 'Devise', 'Méthode',
+                'Référence', 'Statut'],
+              vide: 'Aucun encaissement sur la période.',
+              lignes: liste.map(function (p) {
+                return [p.date_paiement, p.client, p.numero_abonne, p.montant,
+                  p.devise || 'non renseignée', p.methode_paiement,
+                  p.reference_transaction, p.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Dépenses de la période',
+          description: 'Demandes de dépense, leur statut d’approbation et leur pièce.',
+          chemin: '/api/direction-financiere/depenses' + periode(),
+          fichier: 'depenses',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Date', 'Objet', 'Catégorie', 'Département',
+                'Fournisseur', 'Montant', 'Devise', 'Pièces', 'Risque', 'Statut'],
+              vide: 'Aucune dépense sur la période.',
+              lignes: (d.depenses || []).map(function (x) {
+                return [x.reference, x.date_demande, x.objet, x.categorie, x.departement,
+                  x.fournisseur, x.montant, x.devise, x.pieces_jointes, x.risque, x.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Budget contre réalisé',
+          description: 'Écart par département et par catégorie, sur l’exercice courant.',
+          chemin: '/api/direction-financiere/budgets',
+          fichier: 'budget-vs-realise',
+          extraire: function (d) {
+            return {
+              entetes: ['Département', 'Catégorie', 'Budget', 'Réalisé', 'Écart',
+                'Écart %', 'Devise'],
+              vide: 'Aucune ligne budgétaire pour cet exercice.',
+              lignes: (d.comparaison || []).map(function (b) {
+                return [b.departement, b.categorie, b.budget, b.realise, b.ecart,
+                  b.ecart_pct, b.devise];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Transactions non rapprochées',
+          description: 'Ce qui reste à rapprocher, avec son ancienneté.',
+          chemin: '/api/direction-financiere/rapprochement?statut=non_rapproche' ,
+          fichier: 'non-rapprochees',
+          extraire: function (d) {
+            return {
+              entetes: ['Date', 'Compte', 'Sens', 'Montant', 'Devise', 'Référence',
+                'Contrepartie', 'Âge (jours)'],
+              vide: 'Aucune transaction non rapprochée.',
+              lignes: (d.transactions || []).map(function (t) {
+                return [t.date_operation, t.compte, t.sens, t.montant, t.devise,
+                  t.reference, t.contrepartie, t.age_jours];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Piste d’audit financière',
+          description: 'Qui a décidé quoi, quand, pour quel montant et pour quel motif.',
+          chemin: '/api/direction-financiere/audit' + periode(),
+          fichier: 'audit-financier',
+          extraire: function (d) {
+            return {
+              entetes: ['Date', 'Utilisateur', 'Rôle', 'Source', 'Objet', 'Montant',
+                'Devise', 'Action', 'Motif', 'IP'],
+              vide: 'Aucun mouvement tracé sur la période.',
+              lignes: (d.evenements || []).map(function (e) {
+                return [e.date_evenement, e.utilisateur, e.role, e.source, e.objet,
+                  e.montant, e.devise, e.action, e.motif, e.ip_address];
+              }),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   var allerA = E.router({
     tableau: vueTableau,
     encaissements: vueEncaissements,
@@ -982,6 +1084,7 @@
     approbations: vueApprobations,
     fournisseurs: vueFournisseurs,
     audit: vueAudit,
+    rapports: vueRapports,
     registre: vueRegistre,
   }, TITRES);
 

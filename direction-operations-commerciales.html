@@ -175,6 +175,7 @@
       <a href="#" data-vue="abonnements">Abonnements</a>
       <a href="#" data-vue="stocks" data-permission="operations.inventory.manage">Stocks</a>
       <a href="#" data-vue="qualite">Qualité de service</a>
+      <a href="#" data-vue="rapports">Rapports</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
   </nav>
@@ -240,6 +241,7 @@
     abonnements: 'Abonnements',
     stocks: 'Stocks',
     qualite: 'Qualité de service',
+    rapports: 'Rapports',
     registre: 'Registre des KPI',
   };
 
@@ -1119,6 +1121,128 @@
     }).catch(afficherErreur);
   }
 
+
+  // ── Rapports ───────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables';
+    elAvertissements.innerHTML = '';
+
+    E.vueRapports({
+      cible: elContenu,
+      catalogue: [
+        {
+          nom: 'Journal des collectes',
+          description: 'Collectes de la période, avec preuve, poids pesé et motif d’échec.',
+          chemin: '/api/direction-operations/collectes' + parametres(),
+          fichier: 'collectes',
+          extraire: function (d) {
+            return {
+              entetes: ['Date', 'Heure', 'Client', 'Numéro abonné', 'Zone', 'Catégorie',
+                'Poids (kg)', 'Preuves', 'Statut', 'Motif d’échec', 'Collecteur'],
+              vide: 'Aucune collecte sur la période.',
+              lignes: (d.collectes || []).map(function (c) {
+                return [c.date_collecte, c.heure_collecte, c.client, c.numero_abonne,
+                  c.zone || c.commune, c.type_dechet,
+                  c.poids_kg === null ? 'non pesé' : c.poids_kg,
+                  c.preuves, c.statut, c.motif_echec, c.collecteur];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Incidents et causes racines',
+          description: 'Incidents de la période, leur SLA et leur cause identifiée.',
+          chemin: '/api/direction-operations/incidents' + parametres(),
+          fichier: 'incidents',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Type', 'Sévérité', 'Titre', 'Zone', 'Signalé le',
+                'Résolu le', 'SLA (min)', 'Cause racine', 'Statut'],
+              vide: 'Aucun incident sur la période.',
+              lignes: (d.incidents || []).map(function (i) {
+                return [i.reference, i.type_incident, i.severite, i.titre,
+                  i.zone || i.commune, i.signale_le, i.resolu_le, i.sla_minutes,
+                  i.cause_racine, i.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'État de la flotte',
+          description: 'Véhicules, disponibilité du jour et maintenance planifiée.',
+          chemin: '/api/direction-operations/vehicules',
+          fichier: 'flotte',
+          extraire: function (d) {
+            return {
+              entetes: ['Code', 'Immatriculation', 'Type', 'Capacité m³', 'Zone',
+                'Kilométrage', 'Indisponible', 'Motif', 'Statut'],
+              vide: 'Aucun véhicule enregistré.',
+              lignes: (d.flotte || []).map(function (v) {
+                return [v.code, v.immatriculation, v.type_vehicule, v.capacite_m3, v.zone,
+                  v.kilometrage, v.indisponible_aujourdhui ? 'oui' : 'non',
+                  v.motif_indisponibilite, v.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Inventaire des stocks',
+          description: 'Stock calculé depuis les mouvements, avec ses seuils.',
+          chemin: '/api/direction-operations/stocks',
+          fichier: 'stocks',
+          extraire: function (d) {
+            return {
+              entetes: ['Code', 'Article', 'Catégorie', 'Stock actuel', 'Unité',
+                'Seuil alerte', 'Seuil critique', 'État', 'Dernier mouvement'],
+              vide: 'Aucun article en stock déclaré.',
+              lignes: (d.articles || []).map(function (a) {
+                return [a.code, a.libelle, a.categorie, a.stock_actuel, a.unite,
+                  a.seuil_alerte, a.seuil_critique, a.etat, a.dernier_mouvement];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Abonnements expirant sous 30 jours',
+          description: 'Ce qu’il faut relancer pour ne pas perdre le service.',
+          chemin: '/api/direction-operations/abonnements',
+          fichier: 'abonnements-a-renouveler',
+          extraire: function (d) {
+            return {
+              entetes: ['Numéro abonné', 'Client', 'Téléphone', 'Commune', 'Offre',
+                'Montant', 'Devise', 'Fin', 'Jours restants', 'Renouvellement'],
+              vide: 'Aucun abonnement n’expire dans les 30 prochains jours.',
+              lignes: (d.expirations_proches || []).map(function (a) {
+                return [a.numero_abonne, a.client, a.telephone, a.commune, a.offre,
+                  a.montant, a.devise, a.date_fin, a.jours_restants,
+                  a.renouvellement_auto ? 'automatique' : 'manuel'];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Contrats commerciaux',
+          description: 'Contrats et leur échéance, pour anticiper les renouvellements.',
+          chemin: '/api/direction-operations/contrats',
+          fichier: 'contrats',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Intitulé', 'Client', 'Type', 'Montant', 'Devise',
+                'Début', 'Fin', 'Renouvellement', 'Statut'],
+              vide: 'Aucun contrat commercial enregistré.',
+              lignes: (d.contrats || []).map(function (c) {
+                return [c.reference, c.intitule, c.client, c.type_contrat, c.montant,
+                  c.devise, c.date_debut, c.date_fin,
+                  c.renouvellement_auto ? 'automatique' : 'manuel', c.statut];
+              }),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   // ── Routage ────────────────────────────────────────────────────────────────
 
   var VUES = {
@@ -1126,7 +1250,7 @@
     zones: vueZones, qualite: vueQualite, registre: vueRegistre,
     carte: vueCarte, collectes: vueCollectes, vehicules: vueVehicules,
     incidents: vueIncidents, clients: vueClients, contrats: vueContrats,
-    abonnements: vueAbonnements, stocks: vueStocks,
+    abonnements: vueAbonnements, stocks: vueStocks, rapports: vueRapports,
   };
 
   function allerA(vue) {

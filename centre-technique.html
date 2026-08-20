@@ -150,6 +150,8 @@
       <a href="#" data-vue="registre">Registre des intégrations</a>
       <a href="#" data-vue="flags" data-permission="technical.config.manage">Feature flags</a>
       <a href="#" data-vue="sauvegardes">Sauvegardes</a>
+      <a href="#" data-vue="acces" data-permission="technical.user_access.manage">Utilisateurs &amp; accès</a>
+      <a href="#" data-vue="ia" data-permission="ai.usage.read">IA, consommation &amp; coûts</a>
       <a href="#" data-vue="incidents" data-permission="technical.incident.manage">Incidents techniques</a>
       <a href="#" data-vue="audit">Audit technique</a>
     </div>
@@ -214,6 +216,8 @@
     registre: 'Registre des intégrations',
     flags: 'Drapeaux de fonctionnalité',
     sauvegardes: 'Sauvegardes',
+    acces: 'Utilisateurs & accès',
+    ia: 'IA, consommation & coûts',
     incidents: 'Incidents techniques',
     audit: 'Audit technique',
   };
@@ -718,12 +722,112 @@
     }).catch(echecTech);
   }
 
+
+  // ── Utilisateurs & accès ───────────────────────────────────────────────────
+
+  function vueAcces() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/utilisateurs').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.utilisateurs.length) + ' compte(s) de personnel';
+
+      var comptes = d.utilisateurs.map(function (u) {
+        return '<tr>'
+          + '<td><strong>' + echapper((u.prenom || '') + ' ' + u.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(u.telephone || u.email || '')
+          + '</small></td>'
+          + '<td>' + echapper(u.role_libelle || u.role) + '</td>'
+          + '<td><span class="puce ' + (u.statut === 'actif' ? 'ok' : 'neutre') + '">'
+          + echapper(u.statut) + '</span></td>'
+          + '<td>' + (u.dernier_login_at ? E.dateHeure(u.dernier_login_at)
+            : '<span class="puce attention">jamais</span>') + '</td>'
+          + '<td>' + (u.sessions_actives > 0
+            ? '<span class="puce ok">' + u.sessions_actives + '</span>' : '0') + '</td>'
+          + '<td>' + (u.doit_definir_mot_de_passe
+            ? '<span class="puce alerte">non défini</span>'
+            : E.dateCourte(u.mot_de_passe_defini_le)) + '</td>'
+          + '<td>' + (u.email_verifie ? 'oui' : 'non') + '</td>'
+          + '<td>' + E.dateCourte(u.created_at) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var invitations = d.invitations.map(function (i) {
+        var puce = i.statut === 'utilisee' ? 'ok'
+          : i.statut === 'active' ? 'info' : 'neutre';
+        return '<tr>'
+          + '<td>' + echapper(i.destinataire) + '</td>'
+          + '<td>' + echapper(i.role) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(i.statut) + '</span></td>'
+          + '<td>' + E.dateHeure(i.created_at) + '</td>'
+          + '<td>' + E.dateHeure(i.expires_at) + '</td>'
+          + '<td>' + (i.used_at ? E.dateHeure(i.used_at) : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + '<div class="note">' + echapper(d.perimetre) + '</div>'
+        + E.panneau('Comptes de personnel',
+          E.tableau(['Compte', 'Rôle', 'Statut', 'Dernière connexion', 'Sessions actives',
+            'Mot de passe', 'E-mail vérifié', 'Créé le'], comptes,
+          { vide: 'Aucun compte de personnel.' }))
+        + E.panneau('Invitations',
+          E.tableau(['Destinataire', 'Rôle', 'Statut', 'Émise le', 'Expire le',
+            'Utilisée le'], invitations, { vide: 'Aucune invitation émise.' }));
+    }).catch(echecTech);
+  }
+
+  // ── IA, consommation & coûts ───────────────────────────────────────────────
+
+  function vueIa() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/ia-consommation?jours=30').then(function (d) {
+      elSousTitre.textContent = d.configure
+        ? 'Consommation sur ' + d.fenetre_jours + ' jours'
+        : 'Anthropic non configuré';
+
+      var lignes = d.historique.map(function (j) {
+        return '<tr>'
+          + '<td>' + E.dateCourte(j.jour) + '</td>'
+          + '<td>' + E.nombre(j.appels) + '</td>'
+          + '<td>' + (j.appels_en_echec > 0
+            ? '<span class="puce alerte">' + j.appels_en_echec + '</span>' : '0') + '</td>'
+          + '<td>' + E.nombre(j.tokens_entree) + '</td>'
+          + '<td>' + E.nombre(j.tokens_sortie) + '</td>'
+          + '<td>' + E.nombre(j.recherches_web) + '</td>'
+          + '<td>' + E.montant(j.cout_estime_usd) + ' USD</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Appels', valeur: d.cumul.appels,
+            base: 'sur ' + d.fenetre_jours + ' jours' },
+          { nom: 'Appels en échec', valeur: d.cumul.appels_en_echec },
+          { nom: 'Recherches web', valeur: d.cumul.recherches_web },
+          { nom: 'Coût estimé', valeur: d.cumul.cout_estime_usd, format: 'montant',
+            base: 'USD — estimation, la facturation Anthropic fait foi' },
+          d.budget_quotidien_usd
+            ? { nom: 'Budget quotidien', valeur: d.budget_quotidien_usd, format: 'montant',
+              base: 'USD' }
+            : { nom: 'Budget quotidien', disponible: false,
+              motif: 'Aucun budget déclaré : le disjoncteur de coût ne peut pas s’armer.' },
+        ])
+        + '<div class="note">' + echapper(d.note) + '</div>'
+        + E.panneau('Consommation quotidienne',
+          E.tableau(['Jour', 'Appels', 'Échecs', 'Tokens entrée', 'Tokens sortie',
+            'Recherches web', 'Coût estimé'], lignes,
+          { vide: 'Aucune consommation enregistrée sur la fenêtre.' }));
+    }).catch(echecTech);
+  }
+
   var VUES = {
     cockpit: vueCockpit, integrations: vueIntegrations,
     jobs: vueJobs, securite: vueSecurite, audit: vueAudit,
     evenements: vueEvenements, historique: vueHistorique,
     registre: vueRegistreIntegrations, flags: vueFlags,
     sauvegardes: vueSauvegardes, incidents: vueIncidentsTechniques,
+    acces: vueAcces, ia: vueIa,
   };
 
   function allerA(vue) {

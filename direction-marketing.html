@@ -34,6 +34,7 @@
       <a href="#" data-vue="satisfaction">Satisfaction</a>
       <a href="#" data-vue="contenus">Contenus</a>
       <a href="#" data-vue="budget">Budget marketing</a>
+      <a href="#" data-vue="rapports">Rapports</a>
     </div>
   </nav>
 
@@ -97,6 +98,7 @@
     satisfaction: 'Satisfaction',
     contenus: 'Contenus',
     budget: 'Budget marketing',
+    rapports: 'Rapports',
   };
 
   function periode() {
@@ -828,6 +830,110 @@
     }).catch(echec);
   }
 
+
+  // ── Rapports ───────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables';
+
+    E.vueRapports({
+      cible: elContenu,
+      catalogue: [
+        {
+          nom: 'Performance des campagnes',
+          description: 'Budget, dépense, leads, conversions et coût d’acquisition.',
+          chemin: '/api/direction-marketing/campagnes' + periode(),
+          fichier: 'campagnes',
+          extraire: function (d) {
+            return {
+              entetes: ['Campagne', 'Canal', 'Zone', 'Début', 'Fin', 'Budget', 'Dépensé',
+                'Leads', 'Conversions', 'Taux %', 'Coût d’acquisition', 'Statut'],
+              vide: 'Aucune campagne sur la période.',
+              lignes: (d.campagnes || []).map(function (c) {
+                return [c.nom, c.canal, c.commune || c.zone, c.date_debut, c.date_fin,
+                  c.budget_prevu, c.depense, c.leads, c.conversions, c.taux_conversion,
+                  c.cout_acquisition === null ? c.cout_acquisition_motif : c.cout_acquisition,
+                  c.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Pipeline de prospects',
+          description: 'Prospects ouverts, leur étape, leur valeur et leur prochaine action.',
+          chemin: '/api/direction-marketing/prospects',
+          fichier: 'prospects',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Prospect', 'Type', 'Commune', 'Étape', 'Valeur',
+                'Devise', 'Probabilité %', 'Propriétaire', 'Prochaine action'],
+              vide: 'Aucun prospect enregistré.',
+              lignes: (d.prospects || []).map(function (p) {
+                return [p.reference, p.nom, p.type_prospect, p.commune, p.etape,
+                  p.valeur_estimee, p.devise, p.probabilite, p.proprietaire,
+                  p.prochaine_action];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Satisfaction par commune',
+          description: 'Retours, réclamations et note moyenne, commune par commune.',
+          chemin: '/api/direction-marketing/satisfaction' + periode(),
+          fichier: 'satisfaction',
+          extraire: function (d) {
+            return {
+              entetes: ['Commune', 'Retours', 'Réclamations', 'Note moyenne / 10'],
+              vide: 'Aucun retour client sur la période.',
+              lignes: (d.par_commune || []).map(function (c) {
+                return [c.commune, c.total, c.reclamations, c.note_moyenne];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Budget marketing par canal',
+          description: 'Budget, dépense réelle et consommation, par canal.',
+          chemin: '/api/direction-marketing/budget',
+          fichier: 'budget-marketing',
+          extraire: function (d) {
+            return {
+              entetes: ['Canal', 'Campagne', 'Budget', 'Devise', 'Dépensé', 'Écart',
+                'Consommation %'],
+              vide: 'Aucune ligne de budget marketing.',
+              lignes: (d.lignes || []).map(function (l) {
+                return [l.canal, l.campagne || l.libelle, l.budget, l.devise, l.depense,
+                  l.ecart, l.consommation_pct];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Catalogue des offres',
+          description: 'Offres publiées et propositions en cours, avec leur étape.',
+          chemin: '/api/direction-marketing/offres',
+          fichier: 'offres',
+          extraire: function (d) {
+            var publiees = (d.offres_publiees || []).map(function (o) {
+              return ['publiée', o.nom, o.prix, o.devise || 'non renseignée',
+                o.frequence_collecte, o.abonnes_actifs, o.statut];
+            });
+            var propositions = (d.propositions || []).map(function (o) {
+              return ['proposition', o.nom, o.prix, o.devise, o.frequence_collecte, '',
+                o.statut];
+            });
+            return {
+              entetes: ['Nature', 'Offre', 'Prix', 'Devise', 'Fréquence', 'Abonnés actifs',
+                'Statut'],
+              vide: 'Aucune offre publiée ni proposée.',
+              lignes: publiees.concat(propositions),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   var allerA = E.router({
     tableau: vueTableau,
     acquisition: vueAcquisition,
@@ -841,6 +947,7 @@
     satisfaction: vueSatisfaction,
     contenus: vueContenus,
     budget: vueBudget,
+    rapports: vueRapports,
   }, TITRES);
 
   document.getElementById('appliquer').addEventListener('click', function () {

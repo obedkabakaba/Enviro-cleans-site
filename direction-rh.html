@@ -29,6 +29,7 @@
       <a href="#" data-vue="formations">Formations</a>
       <a href="#" data-vue="discipline" data-permission="hr.discipline.restricted">Discipline &amp; sécurité</a>
       <a href="#" data-vue="organigramme">Organigramme</a>
+      <a href="#" data-vue="rapports">Rapports RH</a>
     </div>
   </nav>
 
@@ -94,7 +95,8 @@
     performance: 'Performance',
     formations: 'Formations',
     discipline: 'Discipline & sécurité',
-    organigramme: 'Organigramme & rapports RH',
+    organigramme: 'Organigramme',
+    rapports: 'Rapports RH',
   };
 
   function periode() {
@@ -808,6 +810,122 @@
     }).catch(echec);
   }
 
+
+  // ── Rapports RH ────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables — aucune rémunération individuelle';
+
+    E.vueRapports({
+      cible: elContenu,
+      sousTitre: 'Ces rapports ne portent ni rémunération individuelle, ni dossier '
+        + 'disciplinaire : le service ne les sélectionne pas. La paie nominative s’exporte '
+        + 'depuis l’écran Paie, réservé à la préparation RH.',
+      catalogue: [
+        {
+          nom: 'Effectifs par rôle',
+          description: 'Comptes de personnel actifs et inactifs, par rôle.',
+          chemin: '/api/direction-rh/effectifs',
+          fichier: 'effectifs-par-role',
+          extraire: function (d) {
+            return {
+              entetes: ['Rôle', 'Libellé', 'Total', 'Actifs', 'Inactifs'],
+              vide: 'Aucun compte de personnel enregistré.',
+              lignes: (d.par_role || []).map(function (r) {
+                return [r.role, r.role_libelle, r.total, r.actifs, r.inactifs];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Contrats arrivant à échéance',
+          description: 'Contrats dont la fin approche — perte de capacité si non renouvelés.',
+          chemin: '/api/direction-rh/contrats',
+          fichier: 'contrats-echeances',
+          extraire: function (d) {
+            return {
+              entetes: ['Matricule', 'Employé', 'Poste', 'Département', 'Type', 'Début', 'Fin'],
+              vide: 'Aucun contrat à échéance — ou aucun contrat enregistré.',
+              lignes: (d.echeances_90j || []).map(function (c) {
+                return [c.matricule, c.employe, c.poste, c.departement, c.type_contrat,
+                  c.date_debut, c.date_fin];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Plan d’effectifs',
+          description: 'Effectif sous contrat, postes à pourvoir et cible, par département.',
+          chemin: '/api/direction-rh/organigramme',
+          fichier: 'plan-effectifs',
+          extraire: function (d) {
+            return {
+              entetes: ['Département', 'Effectif actuel', 'Postes à pourvoir', 'Cible',
+                'Profils sans contrat'],
+              vide: 'Aucun département renseigné.',
+              lignes: (d.plan_effectifs || []).map(function (x) {
+                return [x.departement, x.effectif_actuel, x.postes_a_pourvoir, x.cible,
+                  x.profils_sans_contrat];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Conformité aux formations obligatoires',
+          description: 'Part des employés sous contrat détenant un certificat VALIDE.',
+          chemin: '/api/direction-rh/formations',
+          fichier: 'conformite-formations',
+          extraire: function (d) {
+            return {
+              entetes: ['Formation', 'Effectif visé', 'Conformes', 'Non conformes',
+                'Certificats expirés', 'Taux %'],
+              vide: 'Aucune formation obligatoire déclarée.',
+              lignes: (d.conformite_obligatoire || []).map(function (c) {
+                return [c.intitule, c.effectif_cible, c.conformes, c.non_conformes,
+                  c.expires, c.taux.disponible ? c.taux.valeur : 'non mesuré'];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Entonnoir de recrutement',
+          description: 'Candidats parvenus à chaque étape sur la période.',
+          chemin: '/api/direction-rh/recrutement' + periode(),
+          fichier: 'recrutement',
+          extraire: function (d) {
+            var e = d.entonnoir || {};
+            return {
+              entetes: ['Étape', 'Candidats'],
+              vide: 'Aucune candidature sur la période.',
+              lignes: [
+                ['Candidatures', e.candidatures], ['Présélection', e.preselection],
+                ['Entretiens', e.entretiens], ['Évaluations', e.evaluations],
+                ['Offres', e.offres], ['Embauches', e.embauches],
+              ].filter(function (l) { return l[1] !== undefined; }),
+            };
+          },
+        },
+        {
+          nom: 'Incidents de sécurité au travail',
+          description: 'Faits d’exploitation déclarés. N’est PAS un registre disciplinaire.',
+          chemin: '/api/direction-rh/securite' + periode(),
+          fichier: 'securite-travail',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Date', 'Type', 'Gravité', 'Avec arrêt',
+                'Jours d’arrêt', 'Zone', 'Statut'],
+              vide: 'Aucun incident déclaré sur la période.',
+              lignes: (d.incidents || []).map(function (i) {
+                return [i.reference, i.date_incident, i.type_incident, i.gravite,
+                  i.avec_arret ? 'oui' : 'non', i.jours_arret, i.zone, i.statut];
+              }),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
   var allerA = E.router({
@@ -823,6 +941,7 @@
     formations: vueFormations,
     discipline: vueDiscipline,
     organigramme: vueOrganigramme,
+    rapports: vueRapports,
   }, TITRES);
 
   document.getElementById('appliquer').addEventListener('click', function () {

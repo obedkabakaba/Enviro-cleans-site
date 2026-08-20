@@ -28,6 +28,7 @@
       <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
       <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
       <a href="#" data-vue="approbations">Approbations</a>
+      <a href="#" data-vue="rapports">Rapports exécutifs</a>
       <a href="#" data-vue="journal">Journal de direction</a>
       <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
     </div>
@@ -96,6 +97,7 @@
     investissements: 'Investissements',
     conseil: 'Conseil de direction',
     approbations: 'Approbations',
+    rapports: 'Rapports exécutifs',
     journal: 'Journal de direction',
     administration: 'Administration métier',
   };
@@ -845,6 +847,152 @@
     }).catch(echec);
   }
 
+
+  // ── Rapports exécutifs ─────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables du périmètre exécutif';
+
+    E.vueRapports({
+      cible: elContenu,
+      sousTitre: 'Chaque rapport reprend les données servies par l’API, sans recalcul : '
+        + 'un second calcul finirait par diverger de celui affiché dans l’espace de la '
+        + 'direction concernée.',
+      catalogue: [
+        {
+          nom: 'Registre des risques',
+          description: 'Risques ouverts, leur niveau calculé et leur échéance de traitement.',
+          chemin: '/api/pdg/risques',
+          fichier: 'registre-risques',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Risque', 'Catégorie', 'Probabilité', 'Impact',
+                'Score', 'Niveau', 'Propriétaire', 'Stratégie', 'Échéance', 'Statut'],
+              vide: 'Registre des risques vide.',
+              lignes: (d.risques || []).map(function (r) {
+                return [r.reference, r.intitule, r.categorie, r.probabilite, r.impact,
+                  r.score, r.niveau, r.proprietaire, r.strategie, r.echeance_traitement,
+                  r.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Registre de conformité',
+          description: 'Exigences et leur statut. « Non évalué » n’est pas « conforme ».',
+          chemin: '/api/pdg/risques',
+          fichier: 'conformite',
+          extraire: function (d) {
+            var c = d.conformite || {};
+            return {
+              entetes: ['Référence', 'Exigence', 'Domaine', 'Autorité', 'Statut',
+                'Échéance', 'Propriétaire', 'Dernière vérification'],
+              vide: 'Aucune exigence de conformité recensée.',
+              lignes: (c.exigences || []).map(function (e) {
+                return [e.reference, e.intitule, e.domaine, e.autorite, e.statut,
+                  e.echeance, e.proprietaire, e.derniere_verification];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Objectifs et résultats clés',
+          description: 'Progression de chaque résultat clé, dans le sens de l’objectif.',
+          chemin: '/api/pdg/strategie',
+          fichier: 'okr',
+          extraire: function (d) {
+            var lignes = [];
+            (d.objectifs || []).forEach(function (o) {
+              (o.resultats_cles || []).forEach(function (k) {
+                lignes.push([o.code, o.intitule, k.code, k.intitule, k.valeur_initiale,
+                  k.valeur_actuelle, k.valeur_cible, k.unite, k.sens,
+                  k.progression === null ? 'non mesuré' : k.progression,
+                  k.confiance, k.proprietaire]);
+              });
+            });
+            return {
+              entetes: ['Objectif', 'Intitulé', 'KR', 'Résultat clé', 'Initiale',
+                'Actuelle', 'Cible', 'Unité', 'Sens', 'Progression %', 'Confiance',
+                'Propriétaire'],
+              vide: 'Aucun objectif ne porte de résultat clé.',
+              lignes: lignes,
+            };
+          },
+        },
+        {
+          nom: 'Scénarios d’investissement',
+          description: 'Capex, VAN, TRI et présence des hypothèses.',
+          chemin: '/api/pdg/investissements',
+          fichier: 'investissements',
+          extraire: function (d) {
+            return {
+              entetes: ['Code', 'Scénario', 'Capex', 'Devise', 'VAN', 'TRI %',
+                'Retour (ans)', 'Hypothèses documentées', 'Statut', 'Recommandé'],
+              vide: 'Aucun scénario d’investissement enregistré.',
+              lignes: (d.scenarios || []).map(function (x) {
+                return [x.code, x.nom, x.capex, x.devise, x.van, x.tri_pct,
+                  x.payback_annees, x.hypotheses ? 'oui' : 'non', x.statut,
+                  x.recommande ? 'oui' : 'non'];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Journal de direction',
+          description: 'Décisions horodatées, chaînées et vérifiables.',
+          chemin: '/api/pdg/journal',
+          fichier: 'journal-direction',
+          extraire: function (d) {
+            return {
+              entetes: ['Date', 'Décideur', 'Rôle', 'Catégorie', 'Objet', 'Décision',
+                'Montant', 'Devise', 'En vertu de', 'Empreinte'],
+              vide: 'Journal de direction vide.',
+              lignes: (d.decisions || []).map(function (x) {
+                return [x.decide_le, x.decide_par, x.decide_par_role, x.categorie, x.objet,
+                  x.decision, x.montant, x.devise,
+                  x.delegation_domaine ? 'délégation ' + x.delegation_domaine : 'pouvoir propre',
+                  x.empreinte];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Décisions du conseil',
+          description: 'Résolutions et votes, séance par séance.',
+          chemin: '/api/pdg/conseil',
+          fichier: 'conseil-decisions',
+          extraire: function (d) {
+            return {
+              entetes: ['Séance', 'Sujet', 'Résolution', 'Pour', 'Contre', 'Abstentions',
+                'Résultat'],
+              vide: 'Aucune décision de conseil enregistrée.',
+              lignes: (d.decisions || []).map(function (x) {
+                return [x.date_seance, x.sujet, x.resolution, x.votes_pour, x.votes_contre,
+                  x.abstentions, x.resultat];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'État de la mesure',
+          description: 'Ce que la plateforme ne mesure pas, et pourquoi.',
+          chemin: '/api/pdg/vue-executive',
+          fichier: 'etat-de-la-mesure',
+          extraire: function (d) {
+            var m = d.etat_de_la_mesure || {};
+            return {
+              entetes: ['Indicateur', 'Code', 'Motif de non-mesure'],
+              vide: 'Tous les indicateurs du registre sont mesurés.',
+              lignes: (m.non_mesures || []).map(function (x) {
+                return [x.nom, x.code, x.motif || x.motif_indisponible];
+              }),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
   var allerA = E.router({
@@ -859,6 +1007,7 @@
     investissements: vueInvestissements,
     conseil: vueConseil,
     approbations: vueApprobations,
+    rapports: vueRapports,
     journal: vueJournal,
     administration: vueAdministration,
   }, TITRES);
