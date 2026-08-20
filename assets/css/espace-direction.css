@@ -196,6 +196,39 @@ a.citation{ color:var(--info); word-break:break-word; }
   background:rgba(63,111,216,.08); border:1px solid rgba(63,111,216,.26); color:var(--texte-doux);
 }
 
+/* ── Signal métier — à ne pas confondre avec `.erreur` ──
+ *
+ * `.erreur` signifie « cet écran n'a pas pu charger ses données ». Un signal, lui,
+ * signifie « l'écran fonctionne, et voici ce qu'il a trouvé ». Les rendre identiques
+ * était une confusion coûteuse : un constat parfaitement valable — « deux traitements
+ * automatiques ne tournent plus » — s'affichait exactement comme une page cassée, et se
+ * lisait donc comme un bug de la plateforme plutôt que comme l'alerte qu'il était.
+ *
+ * Le signal grave reste visuellement fort (c'est le but), mais il porte une barre
+ * latérale et son propre fond : à un coup d'œil, on distingue « la plateforme a un
+ * problème » de « la plateforme signale un problème ».
+ */
+.signal{
+  padding:13px 15px 13px 16px; border-radius:9px; font-size:13.5px; margin-bottom:14px;
+  background:var(--surface-2); border:1px solid var(--bordure);
+  border-left:4px solid var(--texte-faible); color:var(--texte);
+}
+.signal .entete{ font-weight:700; margin-bottom:4px; }
+.signal .chiffre{ font-size:15px; font-weight:800; font-family:'Montserrat',sans-serif; }
+.signal .explication{ margin:8px 0 0; font-size:12.5px; color:var(--texte-doux); }
+.signal .source{ font-size:11.5px; color:var(--texte-faible); margin-top:6px; }
+
+.signal.grave{
+  border-left-color:var(--alerte);
+  background:rgba(217,83,79,.07);
+  border-color:rgba(217,83,79,.26);
+}
+.signal.moyen{
+  border-left-color:var(--attention);
+  background:rgba(224,138,30,.07);
+  border-color:rgba(224,138,30,.24);
+}
+
 details.brut summary{ cursor:pointer; font-size:12.5px; color:var(--texte-doux); margin-top:14px; }
 details.brut pre{
   background:var(--surface-2); padding:12px; border-radius:8px; overflow-x:auto;

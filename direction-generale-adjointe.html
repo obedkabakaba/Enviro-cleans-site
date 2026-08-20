@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Direction générale adjointe - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Direction générale adjointe</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="cockpit">Cockpit DGA</a>
+      <a href="#" data-vue="departements">Départements</a>
+      <a href="#" data-vue="plan">Plan d’action</a>
+      <a href="#" data-vue="projets">Projets</a>
+      <a href="#" data-vue="approbations">Approbations</a>
+      <a href="#" data-vue="incidents">Incidents critiques</a>
+      <a href="#" data-vue="reunions">Réunions &amp; tâches</a>
+      <a href="#" data-vue="objectifs">Objectifs</a>
+      <a href="#" data-vue="rapports">Rapports consolidés</a>
+      <a href="#" data-vue="delegations">Délégations</a>
+      <a href="#" data-vue="journal">Journal de direction</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Cockpit DGA</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * DIRECTION GÉNÉRALE ADJOINTE
+ * ════════════════════════════════════════
+ *
+ * Onze vues, servies par /api/dga/*. Le DGA coordonne l'EXÉCUTION : ce qui bloque, qui
+ * en est responsable, ce qui attend une décision. Le PDG, lui, regarde la trajectoire.
+ * Les deux lisent les mêmes tables ; ils ne posent pas les mêmes questions.
+ *
+ * ── Pourquoi les demandes non décidables restent VISIBLES ──
+ *
+ * Une délégation précise un domaine, un plafond, des dates. Une demande au-delà du
+ * plafond ne peut pas être approuvée par le DGA — mais la lui cacher l'empêcherait de
+ * l'ESCALADER, alors que c'est précisément son rôle. Chaque demande porte donc son
+ * verdict (`decidable_par_moi`) et, si c'est non, le motif exact : « montant supérieur
+ * au plafond délégué (10 000 USD) ». Le bouton n'apparaît pas, l'explication oui.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    cockpit: 'Cockpit de coordination',
+    departements: 'Départements',
+    plan: 'Plan d’action',
+    projets: 'Projets',
+    approbations: 'Approbations',
+    incidents: 'Incidents critiques',
+    reunions: 'Réunions & tâches',
+    objectifs: 'Objectifs',
+    rapports: 'Rapports consolidés',
+    delegations: 'Délégations',
+    journal: 'Journal de direction',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  function section(titre, donnees, rendu) {
+    if (!donnees) return '';
+    if (donnees.indisponible) {
+      return E.panneau(titre, '<div class="erreur">' + E.echapper(donnees.motif) + '</div>');
+    }
+    return rendu(donnees);
+  }
+
+  function pucePriorite(p) {
+    var classes = { critique: 'alerte', haute: 'attention', moyenne: 'info', basse: 'neutre' };
+    return '<span class="puce ' + (classes[p] || 'neutre') + '">' + E.echapper(p) + '</span>';
+  }
+
+  function puceStatutAction(s) {
+    var classes = {
+      terminee: 'ok', en_cours: 'info', bloquee: 'alerte',
+      en_retard: 'alerte', a_faire: 'neutre', annulee: 'neutre',
+    };
+    return '<span class="puce ' + (classes[s] || 'neutre') + '">'
+      + E.echapper(s.replace(/_/g, ' ')) + '</span>';
+  }
+
+  // ── Cockpit ────────────────────────────────────────────────────────────────
+
+  function vueCockpit() {
+    elContenu.innerHTML = E.squelette(6);
+
+    EnviroAPI.get('/api/dga/cockpit').then(function (d) {
+      elSousTitre.textContent = 'Coordination au ' + E.dateCourte(d.jour);
+
+      var cartes = [];
+      if (!d.objectifs.indisponible) {
+        cartes.push(d.objectifs.synthese.part_en_bonne_voie === null
+          ? { nom: 'Objectifs en bonne voie', disponible: false,
+            motif: d.objectifs.synthese.motif }
+          : { nom: 'Objectifs en bonne voie', valeur: d.objectifs.synthese.part_en_bonne_voie,
+            format: 'pourcent',
+            base: d.objectifs.synthese.en_bonne_voie + ' sur '
+              + d.objectifs.synthese.mesurables + ' mesuré(s)' });
+      }
+      if (!d.approbations.indisponible) {
+        cartes.push({ nom: 'Décisions en attente', valeur: d.approbations.ouvertes,
+          base: d.approbations.en_retard + ' en retard' });
+      }
+      if (!d.incidents_critiques.indisponible) {
+        cartes.push({ nom: 'Incidents critiques', valeur: d.incidents_critiques.synthese.ouverts,
+          definition: 'Incidents ouverts de sévérité critique.' });
+      }
+      if (!d.projets.indisponible) {
+        cartes.push({ nom: 'Projets à risque', valeur: d.projets.portefeuille.projets_a_risque });
+      }
+      if (!d.plan_action.indisponible) {
+        cartes.push({ nom: 'Actions bloquées', valeur: d.plan_action.synthese.bloquees,
+          base: d.plan_action.synthese.en_retard + ' action(s) en retard' });
+      }
+
+      var html = E.grilleKpi(cartes);
+
+      html += section('Tâches bloquées par département', d.plan_action, function (p) {
+        return E.panneau('Tâches bloquées par département',
+          departementsActionsHtml(p.par_departement))
+          + E.panneau('Responsables d’actions', responsablesHtml(p.par_responsable));
+      });
+
+      html += section('Incidents critiques escaladés', d.incidents_critiques, function (i) {
+        return E.panneau('Incidents critiques', incidentsHtml(i.incidents.slice(0, 8)));
+      });
+
+      html += section('Projets stratégiques', d.projets, function (p) {
+        return E.panneau('Projets stratégiques', projetsHtml(p.projets));
+      });
+
+      html += section('Boîte d’approbations', d.approbations, function (a) {
+        var lignes = (a.par_type || []).map(function (t) {
+          return '<tr><td>' + E.echapper(t.type) + '</td><td>'
+            + E.nombre(t.total) + '</td></tr>';
+        }).join('');
+        return E.panneau('Approbations par type',
+          E.tableau(['Type', 'En attente'], lignes, { vide: 'Aucune demande en attente.' }));
+      });
+
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  function departementsActionsHtml(deps) {
+    var lignes = (deps || []).map(function (d) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(d.departement) + '</strong></td>'
+        + '<td>' + E.nombre(d.ouvertes) + '</td>'
+        + '<td>' + (d.bloquees > 0
+          ? '<span class="puce alerte">' + d.bloquees + '</span>' : '0') + '</td>'
+        + '<td>' + (d.en_retard > 0
+          ? '<span class="puce attention">' + d.en_retard + '</span>' : '0') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Département', 'Actions ouvertes', 'Bloquées', 'En retard'], lignes,
+      { vide: 'Aucune action rattachée à un département.' });
+  }
+
+  function responsablesHtml(resp) {
+    var lignes = (resp || []).map(function (r) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(r.responsable) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(r.departement || '—')
+        + '</small></td>'
+        + '<td>' + E.nombre(r.en_cours) + '</td>'
+        + '<td>' + (r.en_retard > 0
+          ? '<span class="puce alerte">' + r.en_retard + '</span>' : '0') + '</td>'
+        + '<td>' + E.dateCourte(r.prochaine_echeance) + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Responsable', 'Actions en cours', 'En retard', 'Prochaine échéance'],
+      lignes, { vide: 'Aucune action assignée.' });
+  }
+
+  // ── Départements ───────────────────────────────────────────────────────────
+
+  function vueDepartements() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/departements').then(function (d) {
+      elSousTitre.textContent = 'Exécution et effectifs par département';
+
+      var effectifs = (d.effectifs || []).map(function (e) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(e.nom) + '</strong></td>'
+          + '<td>' + E.nombre(e.effectif_sous_contrat) + '</td>'
+          + '<td>' + E.echapper(e.responsable || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="note">' + E.echapper(d.note) + '</div>'
+        + E.panneau('Exécution par département',
+          departementsActionsHtml(d.par_departement))
+        + E.panneau('Effectifs par département',
+          E.tableau(['Département', 'Sous contrat', 'Responsable'], effectifs,
+            { vide: 'Aucun département renseigné.' }));
+    }).catch(echec);
+  }
+
+  // ── Plan d'action ──────────────────────────────────────────────────────────
+
+  function vuePlan() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/dga/plan-action?statut=ouvertes&limite=100').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total) + ' action(s)';
+
+      var lignes = d.actions.map(function (a) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(a.reference) + '</strong></td>'
+          + '<td>' + E.echapper(a.intitule)
+          + (a.objectif ? '<br><small style="color:var(--texte-faible)">'
+            + E.echapper(a.objectif_code) + ' — ' + E.echapper(a.objectif) + '</small>' : '')
+          + '</td>'
+          + '<td>' + pucePriorite(a.priorite) + '</td>'
+          + '<td>' + E.echapper(a.proprietaire || '—') + '</td>'
+          + '<td>' + E.echapper(a.departement || '—') + '</td>'
+          + '<td>' + E.dateCourte(a.echeance)
+          + (a.en_retard ? '<br><span class="puce alerte">en retard</span>'
+            : (a.jours_restants !== null && a.jours_restants !== undefined
+              ? '<br><small style="color:var(--texte-faible)">J−' + a.jours_restants
+                + '</small>' : '')) + '</td>'
+          + '<td><div class="barre" style="width:80px"><span style="width:'
+          + Math.min(a.progression || 0, 100) + '%"></span></div> '
+          + (a.progression || 0) + ' %</td>'
+          + '<td>' + E.echapper(a.blocage || '—') + '</td>'
+          + '<td>' + puceStatutAction(a.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Actions ouvertes', valeur: d.synthese.total - d.synthese.terminees },
+        { nom: 'En cours', valeur: d.synthese.en_cours },
+        { nom: 'Bloquées', valeur: d.synthese.bloquees },
+        { nom: 'En retard', valeur: d.synthese.en_retard },
+      ])
+        + E.panneau('Actions transverses',
+          E.tableau(['#', 'Action', 'Priorité', 'Propriétaire', 'Département', 'Échéance',
+            'Progression', 'Blocage', 'Statut'], lignes,
+          { vide: d.etat_vide || 'Aucune action.' }));
+    }).catch(echec);
+  }
+
+  // ── Projets ────────────────────────────────────────────────────────────────
+
+  function vueProjets() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/projets').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.projets.length) + ' projet(s)';
+
+      // Vue Kanban par phase, puis le détail en tableau.
+      var phases = ['ideation', 'planification', 'execution', 'cloture'];
+      var libelles = {
+        ideation: 'Idéation', planification: 'Planification',
+        execution: 'Exécution', cloture: 'Clôture',
+      };
+      var colonnes = phases.map(function (ph) {
+        var dedans = d.projets.filter(function (p) { return p.phase === ph; });
+        var cartes = dedans.map(function (p) {
+          return '<div class="bloc" style="margin-bottom:8px">'
+            + '<h3>' + E.echapper(p.nom) + '</h3>'
+            + '<p class="meta">' + (p.budget === null ? 'budget non renseigné'
+              : E.montant(p.budget) + ' ' + E.echapper(p.devise || ''))
+            + ' · risque ' + E.echapper(p.risque_global) + '</p>'
+            + '</div>';
+        }).join('') || '<p class="meta" style="color:var(--texte-faible)">Aucun projet.</p>';
+        return '<div style="flex:1;min-width:200px">'
+          + '<h3 style="font-size:13px;margin:0 0 8px">' + libelles[ph]
+          + ' (' + dedans.length + ')</h3>' + cartes + '</div>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Portefeuille par phase',
+          '<div style="display:flex;gap:14px;flex-wrap:wrap">' + colonnes + '</div>',
+          { sousTitre: d.portefeuille.motif
+            || (d.portefeuille.total !== null
+              ? 'Total portefeuille : ' + E.montant(d.portefeuille.total)
+                + ' ' + d.portefeuille.devise : '') })
+        + E.panneau('Détail des projets', projetsHtml(d.projets))
+        + E.panneau('Jalons', jalonsHtml(d.jalons));
+    }).catch(echec);
+  }
+
+  function projetsHtml(projets) {
+    var lignes = (projets || []).map(function (p) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(p.nom) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(p.code) + '</small></td>'
+        + '<td>' + E.echapper(p.phase) + '</td>'
+        + '<td>' + (p.budget === null ? '—'
+          : E.montant(p.budget) + ' ' + E.echapper(p.devise || '')) + '</td>'
+        + '<td><span class="puce ' + (p.risque_global === 'critique'
+          || p.risque_global === 'eleve' ? 'alerte'
+          : p.risque_global === 'moyen' ? 'attention' : 'ok') + '">'
+        + E.echapper(p.risque_global) + '</span></td>'
+        + '<td><div class="barre" style="width:90px"><span style="width:'
+        + Math.min(p.progression || 0, 100) + '%"></span></div> ' + (p.progression || 0) + ' %</td>'
+        + '<td>' + E.nombre(p.jalons_atteints) + '/' + E.nombre(p.jalons)
+        + (p.jalons_en_retard > 0
+          ? ' <span class="puce alerte">' + p.jalons_en_retard + ' en retard</span>' : '') + '</td>'
+        + '<td>' + E.dateCourte(p.date_debut) + ' → ' + E.dateCourte(p.date_fin_prevue) + '</td>'
+        + '<td>' + E.echapper(p.chef_projet || '—') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(
+      ['Projet', 'Phase', 'Budget', 'Risque', 'Avancement', 'Jalons', 'Calendrier', 'Chef de projet'],
+      lignes, { vide: 'Aucun projet stratégique enregistré.' }
+    );
+  }
+
+  function jalonsHtml(jalons) {
+    var lignes = (jalons || []).map(function (j) {
+      var puce = j.statut === 'atteint' ? 'ok'
+        : j.statut === 'manque' ? 'alerte'
+          : (j.statut === 'a_venir'
+            && new Date(j.date_prevue) < new Date() ? 'attention' : 'neutre');
+      return '<tr>'
+        + '<td>' + E.echapper(j.projet) + '</td>'
+        + '<td>' + E.echapper(j.intitule) + '</td>'
+        + '<td>' + E.dateCourte(j.date_prevue) + '</td>'
+        + '<td>' + E.dateCourte(j.date_reelle) + '</td>'
+        + '<td><span class="puce ' + puce + '">' + E.echapper(j.statut.replace(/_/g, ' '))
+        + '</span></td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Projet', 'Jalon', 'Prévu', 'Réalisé', 'Statut'], lignes,
+      { vide: 'Aucun jalon enregistré.' });
+  }
+
+  // ── Approbations ───────────────────────────────────────────────────────────
+
+  function vueApprobations() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/approbations').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total) + ' demande(s)';
+
+      var lignes = d.demandes.map(function (x) {
+        var action = x.decidable_par_moi
+          ? '<button class="action" data-decider="' + x.id + '" data-sens="approuvee">'
+            + 'Approuver</button> '
+            + '<button class="action danger" data-decider="' + x.id + '" data-sens="refusee">'
+            + 'Refuser</button>'
+          : '<small style="color:var(--texte-faible)">'
+            + E.echapper(x.motif_non_decidable || 'Hors de votre délégation.') + '</small>';
+
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.objet || (x.type + ' #' + x.id)) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.type)
+          + (x.departement ? ' · ' + E.echapper(x.departement) : '') + '</small></td>'
+          + '<td>' + (x.montant === null ? '—'
+            : E.montant(x.montant) + ' ' + E.echapper(x.devise || '(sans devise)')) + '</td>'
+          + '<td>' + E.echapper(x.demandeur || '—') + '</td>'
+          + '<td>' + E.dateCourte(x.created_at) + '</td>'
+          + '<td>' + E.echapper(x.etape_libelle || '—') + '<br>'
+          + '<small style="color:var(--texte-faible)">étape ' + x.etape_courante
+          + '/' + x.nombre_etapes + '</small></td>'
+          + '<td>' + (x.priorite === 'urgente'
+            ? '<span class="puce alerte">urgente</span>' : E.echapper(x.priorite)) + '</td>'
+          + '<td>' + action
+          + (x.delegation_utilisee
+            ? '<br><small style="color:var(--texte-faible)">via délégation '
+              + E.echapper(x.delegation_utilisee.domaine) + ' (plafond '
+              + E.montant(x.delegation_utilisee.plafond) + ' '
+              + E.echapper(x.delegation_utilisee.devise) + ')</small>' : '')
+          + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Boîte de réception unifiée',
+        E.tableau(['Demande', 'Montant', 'Demandeur', 'Reçue le', 'Étape', 'Priorité', 'Décision'],
+          lignes, { vide: d.etat_vide || 'Aucune demande en attente.' }),
+        { sousTitre: 'Les demandes hors de votre délégation restent visibles, avec leur '
+          + 'motif : c’est ce qui vous permet de les escalader.' });
+
+      brancherDecisions(vueApprobations);
+    }).catch(echec);
+  }
+
+  function brancherDecisions(rafraichir) {
+    Array.prototype.forEach.call(
+      elContenu.querySelectorAll('[data-decider]'),
+      function (bouton) {
+        bouton.addEventListener('click', function () {
+          var id = bouton.getAttribute('data-decider');
+          var sens = bouton.getAttribute('data-sens');
+          var motif = window.prompt(sens === 'refusee'
+            ? 'Motif du refus (obligatoire, 5 caractères minimum) :'
+            : 'Commentaire (facultatif) :');
+
+          if (sens === 'refusee' && (!motif || motif.trim().length < 5)) {
+            window.alert('Un refus doit être motivé : sans motif, le demandeur '
+              + 'resoumettra la même demande.');
+            return;
+          }
+
+          bouton.disabled = true;
+          EnviroAPI.post('/api/approbations/' + id + '/decision', {
+            decision: sens, motif: motif || null,
+          }).then(function (r) {
+            window.alert(r.message);
+            rafraichir();
+          }).catch(function (err) {
+            window.alert(err && err.message ? err.message : 'Décision refusée.');
+            bouton.disabled = false;
+          });
+        });
+      }
+    );
+  }
+
+  // ── Incidents critiques ────────────────────────────────────────────────────
+
+  function vueIncidents() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/incidents-critiques' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.synthese.ouverts) + ' incident(s) ouvert(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Incidents ouverts', valeur: d.synthese.ouverts },
+          { nom: 'Critiques', valeur: d.synthese.critiques },
+          { nom: 'Escaladés', valeur: d.synthese.escalades },
+          d.respect_sla.disponible
+            ? { nom: 'Respect du SLA', valeur: d.respect_sla.valeur, format: 'pourcent',
+              base: d.respect_sla.base }
+            : { nom: 'Respect du SLA', disponible: false, motif: d.respect_sla.motif },
+        ])
+        + E.panneau('Incidents', incidentsHtml(d.incidents))
+        + E.panneau('Causes racines', causesHtml(d.causes_racines));
+    }).catch(echec);
+  }
+
+  function incidentsHtml(incidents) {
+    var lignes = (incidents || []).map(function (i) {
+      var puce = i.severite === 'critique' ? 'alerte'
+        : i.severite === 'elevee' ? 'attention' : 'neutre';
+      return '<tr>'
+        + '<td><strong>' + E.echapper(i.titre) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(i.reference)
+        + ' · ' + E.echapper(i.type_incident.replace(/_/g, ' ')) + '</small></td>'
+        + '<td><span class="puce ' + puce + '">' + E.echapper(i.severite) + '</span></td>'
+        + '<td>' + E.echapper(i.zone || '—') + '</td>'
+        + '<td>' + E.dateHeure(i.signale_le) + '</td>'
+        + '<td>' + (i.age_minutes === null || i.age_minutes === undefined ? '—'
+          : Math.round(i.age_minutes / 60) + ' h') + '</td>'
+        + '<td>' + E.echapper(i.assigne_a || 'non assigné') + '</td>'
+        + '<td>' + E.echapper(i.statut) + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Incident', 'Sévérité', 'Zone', 'Signalé', 'Depuis', 'Assigné à', 'Statut'],
+      lignes, { vide: 'Aucun incident sur la période.' });
+  }
+
+  function causesHtml(causes) {
+    var lignes = (causes || []).map(function (c) {
+      return '<tr><td>' + E.echapper(c.cause_racine) + '</td><td>'
+        + E.nombre(c.total) + '</td></tr>';
+    }).join('');
+    return E.tableau(['Cause racine', 'Incidents'], lignes,
+      { vide: 'Aucune cause racine renseignée. Sans elle, les mêmes incidents se répètent.' });
+  }
+
+  // ── Réunions ───────────────────────────────────────────────────────────────
+
+  function vueReunions() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/reunions' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.reunions.length) + ' réunion(s)';
+
+      var lignes = d.reunions.map(function (r) {
+        var ordre = (r.ordre_du_jour || []).map(function (p) {
+          return E.echapper(typeof p === 'string' ? p : (p.titre || p.sujet || ''));
+        }).join(' · ');
+        return '<tr>'
+          + '<td>' + E.dateHeure(r.date_reunion) + '</td>'
+          + '<td><strong>' + E.echapper(r.titre) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">'
+          + E.echapper(r.type_reunion.replace(/_/g, ' ')) + '</small></td>'
+          + '<td>' + E.echapper(r.lieu || '—') + '</td>'
+          + '<td>' + (ordre || '<small style="color:var(--texte-faible)">non défini</small>')
+          + '</td>'
+          + '<td>' + E.nombre(r.actions) + '</td>'
+          + '<td><span class="puce ' + (r.statut === 'tenue' ? 'ok'
+            : r.statut === 'planifiee' ? 'info' : 'neutre') + '">'
+          + E.echapper(r.statut) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Agenda de coordination',
+          E.tableau(['Date', 'Réunion', 'Lieu', 'Ordre du jour', 'Actions', 'Statut'],
+            lignes, { vide: d.etat_vide || 'Aucune réunion enregistrée.' }));
+    }).catch(echec);
+  }
+
+  // ── Objectifs ──────────────────────────────────────────────────────────────
+
+  function vueObjectifs() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/objectifs').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.objectifs.length) + ' objectif(s)';
+
+      var blocs = d.objectifs.map(function (o) {
+        var krs = (o.resultats_cles || []).map(function (k) {
+          return '<tr>'
+            + '<td><strong>' + E.echapper(k.code) + '</strong> ' + E.echapper(k.intitule) + '</td>'
+            + '<td>' + E.nombre(k.valeur_actuelle) + ' / ' + E.nombre(k.valeur_cible)
+            + (k.unite ? ' ' + E.echapper(k.unite) : '') + '</td>'
+            + '<td>' + (k.progression === null
+              ? '<small style="color:var(--texte-faible)">'
+                + E.echapper(k.progression_motif) + '</small>'
+              : '<div class="barre" style="width:110px"><span style="width:'
+                + Math.min(k.progression, 100) + '%"></span></div> ' + k.progression + ' %') + '</td>'
+            + '<td>' + E.echapper(k.proprietaire || '—') + '</td>'
+            + '</tr>';
+        }).join('');
+
+        return '<div class="bloc">'
+          + '<h3>' + E.echapper(o.code) + ' — ' + E.echapper(o.intitule) + '</h3>'
+          + '<p class="meta">' + E.echapper(o.proprietaire || 'sans propriétaire')
+          + ' · ' + E.echapper(o.perimetre)
+          + ' · progression ' + (o.progression === null ? 'non mesurée' : o.progression + ' %')
+          + '</p>'
+          + E.tableau(['Résultat clé', 'Valeur / cible', 'Progression', 'Propriétaire'], krs)
+          + '</div>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Objectifs suivis', valeur: d.synthese.total },
+          { nom: 'Objectifs mesurés', valeur: d.synthese.mesurables },
+          d.synthese.part_en_bonne_voie === null
+            ? { nom: 'En bonne voie', disponible: false, motif: d.synthese.motif }
+            : { nom: 'En bonne voie', valeur: d.synthese.part_en_bonne_voie, format: 'pourcent' },
+        ])
+        + (blocs || '<div class="etat-vide">Aucun objectif saisi.</div>');
+    }).catch(echec);
+  }
+
+  // ── Rapports consolidés ────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/dga/rapports-consolides' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Consolidation transverse';
+
+      var html = '';
+      // Mêmes noms de champs que côté PDG : `indicateurs_calculables`,
+      // `indicateurs_non_mesures`, `total_declares`, `couverture_pct`.
+      var m = d.etat_de_la_mesure;
+      if (m && !m.indisponible) {
+        html += E.grilleKpi([
+          { nom: 'Indicateurs mesurés', valeur: m.indicateurs_calculables,
+            base: 'sur ' + E.nombre(m.total_declares) + ' au registre' },
+          { nom: 'Non mesurés', valeur: m.indicateurs_non_mesures },
+          { nom: 'Couverture de la mesure', valeur: m.couverture_pct, format: 'pourcent' },
+        ]);
+        if (m.lecture) html += '<div class="note">' + E.echapper(m.lecture) + '</div>';
+      }
+
+      ['operations', 'finance', 'marketing', 'ressources_humaines'].forEach(function (cle) {
+        var bloc = d.cockpit ? d.cockpit[cle] : null;
+        if (!bloc) return;
+        if (bloc.indisponible) {
+          html += E.panneau(cle.replace(/_/g, ' '),
+            '<div class="erreur">' + E.echapper(bloc.motif) + '</div>');
+          return;
+        }
+        html += E.panneau(cle.replace(/_/g, ' '),
+          (bloc.kpi ? E.grilleKpi(bloc.kpi) : '')
+          + E.avertissements(bloc.avertissements || []));
+      });
+
+      elContenu.innerHTML = html || '<div class="etat-vide">Consolidation vide.</div>';
+    }).catch(echec);
+  }
+
+  // ── Délégations ────────────────────────────────────────────────────────────
+
+  function vueDelegations() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/dga/delegations').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.delegations.length) + ' délégation(s)';
+
+      var lignes = d.delegations.map(function (x) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.delegataire) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.delegataire_role || '')
+          + '</small></td>'
+          + '<td>' + E.echapper(x.domaine) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.perimetre || '')
+          + '</small></td>'
+          + '<td>' + (x.plafond_montant === null ? 'non financière'
+            : E.montant(x.plafond_montant) + ' ' + E.echapper(x.devise)) + '</td>'
+          + '<td>' + E.dateCourte(x.date_debut) + ' → ' + E.dateCourte(x.date_fin) + '</td>'
+          + '<td>' + (x.active ? '<span class="puce ok">active</span>'
+            : x.revoquee_le ? '<span class="puce alerte">révoquée</span>'
+              : '<span class="puce neutre">inactive</span>') + '</td>'
+          + '<td>' + E.nombre(x.decisions_prises) + '</td>'
+          + '<td>' + E.echapper(x.delegant) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Délégations d’autorité',
+          E.tableau(['Délégataire', 'Domaine', 'Plafond', 'Période', 'État', 'Décisions', 'Délégant'],
+            lignes, { vide: d.etat_vide || 'Aucune délégation enregistrée.' }),
+          { sousTitre: 'Une délégation absente ne vaut pas autorisation implicite : sans '
+            + 'elle, seules vos permissions propres s’appliquent.' });
+    }).catch(echec);
+  }
+
+  // ── Journal ────────────────────────────────────────────────────────────────
+
+  function vueJournal() {
+    elContenu.innerHTML = E.squelette(4);
+
+    Promise.all([
+      EnviroAPI.get('/api/dga/journal' + periode()),
+      EnviroAPI.get('/api/dga/journal/verification').catch(function () { return null; }),
+    ]).then(function (r) {
+      var d = r[0];
+      var v = r[1];
+      elSousTitre.textContent = E.nombre(d.total) + ' décision(s)';
+
+      var lignes = d.decisions.map(function (x) {
+        return '<tr>'
+          + '<td>' + E.dateHeure(x.decide_le) + '</td>'
+          + '<td>' + E.echapper(x.decide_par || 'Système') + '</td>'
+          + '<td>' + E.echapper(x.categorie) + '</td>'
+          + '<td><strong>' + E.echapper(x.objet) + '</strong><br>'
+          + '<small>' + E.echapper(x.decision) + '</small></td>'
+          + '<td>' + (x.montant === null ? '—'
+            : E.montant(x.montant) + ' ' + E.echapper(x.devise || '')) + '</td>'
+          + '<td>' + E.echapper(x.delegation_domaine
+            ? 'délégation ' + x.delegation_domaine : 'pouvoir propre') + '</td>'
+          + '<td><code style="font-size:11px">' + E.echapper(x.empreinte_courte) + '</code></td>'
+          + '</tr>';
+      }).join('');
+
+      var etatChaine = '';
+      if (v) {
+        etatChaine = v.intacte
+          ? '<div class="note">Chaîne vérifiée : ' + E.nombre(v.lignes_verifiees)
+            + ' décision(s) contrôlée(s), aucune rupture détectée.</div>'
+          : '<div class="erreur">Rupture de chaîne détectée à la décision '
+            + E.echapper(v.rupture.reference) + ' — ' + E.echapper(v.rupture.motif) + '</div>';
+      }
+
+      elContenu.innerHTML = etatChaine
+        + '<div class="note">' + E.echapper(d.garantie) + '</div>'
+        + E.panneau('Journal des décisions',
+          E.tableau(['Date', 'Décideur', 'Catégorie', 'Décision', 'Montant', 'En vertu de',
+            'Empreinte'], lignes, { vide: d.etat_vide || 'Journal vide.' }));
+    }).catch(echec);
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    cockpit: vueCockpit,
+    departements: vueDepartements,
+    plan: vuePlan,
+    projets: vueProjets,
+    approbations: vueApprobations,
+    incidents: vueIncidents,
+    reunions: vueReunions,
+    objectifs: vueObjectifs,
+    rapports: vueRapports,
+    delegations: vueDelegations,
+    journal: vueJournal,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  EnviroAuth.proteger({ permissions: ['executive.dashboard.read'] })
+    .then(function (ctx) {
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('cockpit');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>

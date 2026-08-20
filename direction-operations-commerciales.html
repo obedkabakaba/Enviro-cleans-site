@@ -166,7 +166,16 @@
       <a href="#" data-vue="tournees">Tournées</a>
       <a href="#" data-vue="equipes">Équipes</a>
       <a href="#" data-vue="zones">Zones</a>
+      <a href="#" data-vue="carte">Carte en direct</a>
+      <a href="#" data-vue="collectes">Collectes</a>
+      <a href="#" data-vue="vehicules" data-permission="operations.vehicle.manage">Véhicules</a>
+      <a href="#" data-vue="incidents">Incidents</a>
+      <a href="#" data-vue="clients">Clients</a>
+      <a href="#" data-vue="contrats">Prospects &amp; contrats</a>
+      <a href="#" data-vue="abonnements">Abonnements</a>
+      <a href="#" data-vue="stocks" data-permission="operations.inventory.manage">Stocks</a>
       <a href="#" data-vue="qualite">Qualité de service</a>
+      <a href="#" data-vue="rapports">Rapports</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
   </nav>
@@ -192,6 +201,7 @@
 
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -222,32 +232,33 @@
     tournees: 'Tournées',
     equipes: 'Équipes',
     zones: 'Zones',
+    carte: 'Carte en direct',
+    collectes: 'Collectes',
+    vehicules: 'Véhicules',
+    incidents: 'Incidents',
+    clients: 'Clients',
+    contrats: 'Prospects & contrats',
+    abonnements: 'Abonnements',
+    stocks: 'Stocks',
     qualite: 'Qualité de service',
+    rapports: 'Rapports',
     registre: 'Registre des KPI',
   };
 
   // ── Utilitaires d'affichage ────────────────────────────────────────────────
+  //
+  // Cette page est antérieure au châssis partagé et embarquait sa propre copie de
+  // `echapper`, `nombre` et `squelette`. Trois copies de `echapper` dans le dépôt, c'est
+  // trois endroits où corriger le même défaut d'échappement et deux qu'on oubliera. Les
+  // définitions locales sont donc remplacées par des alias vers l'implémentation unique.
+  //
+  // `carteKpi`, `puceStatut` et `barreCharge` restent locaux : ils portent des règles
+  // propres à cet écran (unités masquées, classes de charge), pas de la duplication.
 
-  function echapper(v) {
-    if (v === null || v === undefined) return '';
-    return String(v).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  /** `null` doit se lire « non mesuré », jamais « 0 ». La nuance est essentielle. */
-  function nombre(v) {
-    if (v === null || v === undefined) return '—';
-    return typeof v === 'number' ? v.toLocaleString('fr-FR') : echapper(v);
-  }
-
-  function squelette(lignes) {
-    var html = '';
-    for (var i = 0; i < (lignes || 4); i += 1) {
-      html += '<div class="squelette" style="margin-bottom:9px;width:' + (100 - i * 8) + '%"></div>';
-    }
-    return html;
-  }
+  var E = window.EspaceDirection;
+  var echapper = E.echapper;
+  var nombre = E.nombre;
+  var squelette = E.squelette;
 
   function carteKpi(k) {
     if (k.disponible === false) {
@@ -362,7 +373,11 @@
         + etatVide('Aucune activité enregistrée sur cette période.') + '</div>';
     }
 
-    var max = Math.max(1, Math.apply(null, serie.map(function (j) { return j.arrets; })));
+    // `Math.apply` n'existe pas : c'est `Math.max` qui porte `.apply`. L'écriture
+    // fautive levait « Math.apply is not a function » et faisait échouer TOUT le Centre
+    // de contrôle — la vue d'accueil de cet espace — dès qu'une activité quotidienne
+    // était rendue. Le bloc rouge affiché à la place venait de là.
+    var max = Math.max(1, Math.max.apply(null, serie.map(function (j) { return j.arrets; })));
 
     var barres = serie.map(function (j) {
       var hOk = Math.round((j.effectuees / max) * 130);
@@ -618,11 +633,624 @@
     }).catch(afficherErreur);
   }
 
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Vues ajoutées par la migration 016
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // ── Carte en direct ────────────────────────────────────────────────────────
+
+  function vueCarte() {
+    elContenu.innerHTML = squelette(5);
+
+    charger('carte-en-direct').then(function (d) {
+      elSousTitre.textContent = 'Journée du ' + E.dateCourte(d.jour) + ' · '
+        + nombre(d.tournees.length) + ' tournée(s)';
+      afficherAvertissements(d.avertissements);
+
+      var tournees = d.tournees.map(function (t) {
+        var progression = t.arrets > 0
+          ? Math.round(((t.traites + t.echecs) / t.arrets) * 100) : 0;
+        return '<tr>'
+          + '<td><strong>' + echapper(t.nom || 'Tournée #' + t.id) + '</strong></td>'
+          + '<td>' + echapper(t.zone) + '</td>'
+          + '<td>' + echapper(t.collecteur) + '</td>'
+          + '<td>' + echapper(t.vehicule || 'non affecté') + '</td>'
+          + '<td>' + nombre(t.arrets) + '</td>'
+          + '<td>' + nombre(t.traites) + '</td>'
+          + '<td>' + (t.echecs > 0
+            ? '<span class="puce alerte">' + t.echecs + '</span>' : '0') + '</td>'
+          + '<td>' + barreCharge(progression) + ' ' + progression + ' %</td>'
+          + '<td>' + puceStatut(t.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var arrets = d.arrets.slice(0, 200).map(function (a) {
+        return '<tr>'
+          + '<td>' + nombre(a.ordre) + '</td>'
+          + '<td>' + echapper(a.client) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(a.numero_abonne)
+          + '</small></td>'
+          + '<td>' + echapper((a.avenue || '') + ' ' + (a.numero_parcelle || '')) + '</td>'
+          + '<td>' + echapper(a.zone) + '</td>'
+          + '<td>' + echapper(a.heure_passage || '—') + '</td>'
+          + '<td>' + echapper(a.statut) + '</td>'
+          + '<td><a class="citation" target="_blank" rel="noopener" '
+          + 'href="https://www.google.com/maps?q=' + encodeURIComponent(a.latitude + ',' + a.longitude)
+          + '">' + a.latitude.toFixed(4) + ', ' + a.longitude.toFixed(4) + '</a></td>'
+          + '</tr>';
+      }).join('');
+
+      var incidents = d.incidents.map(function (i) {
+        return '<tr>'
+          + '<td>' + echapper(i.reference) + '</td>'
+          + '<td>' + echapper(i.titre) + '</td>'
+          + '<td><span class="puce ' + (i.severite === 'critique' ? 'alerte'
+            : i.severite === 'elevee' ? 'attention' : 'neutre') + '">'
+          + echapper(i.severite) + '</span></td>'
+          + '<td>' + echapper(i.zone || '—') + '</td>'
+          + '<td>' + E.dateHeure(i.signale_le) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Tournées du jour', valeur: d.tournees.length },
+        { nom: 'Véhicules en service', valeur: d.vehicules.en_service,
+          base: 'sur ' + nombre(d.vehicules.total) + ' au parc' },
+        { nom: 'Incidents ouverts', valeur: d.incidents.length },
+        { nom: 'Arrêts sans GPS', valeur: d.arrets_sans_gps,
+          definition: 'Ces clients restent dans la tournée mais n’apparaissent pas sur '
+            + 'la carte.' },
+        { nom: 'Position des véhicules', disponible: false,
+          motif: d.positions_vehicules.motif },
+      ])
+        + E.panneau('Tournées en cours',
+          E.tableau(['Tournée', 'Zone', 'Collecteur', 'Véhicule', 'Arrêts', 'Traités',
+            'Échecs', 'Progression', 'Statut'], tournees,
+          { vide: d.etat_vide || 'Aucune tournée planifiée ce jour.' }))
+        + E.panneau('Incidents du jour',
+          E.tableau(['Réf.', 'Incident', 'Sévérité', 'Zone', 'Signalé'], incidents,
+            { vide: 'Aucun incident ouvert aujourd’hui.' }))
+        + E.panneau('Arrêts géolocalisés',
+          E.tableau(['Ordre', 'Client', 'Adresse', 'Zone', 'Passage', 'Statut', 'Position'],
+            arrets, { vide: 'Aucun arrêt géolocalisé.' }),
+          { sousTitre: 'Les coordonnées ouvrent la position dans une carte externe : '
+            + 'aucun fond cartographique payant n’est chargé dans la page.' });
+    }).catch(afficherErreur);
+  }
+
+  // ── Collectes ──────────────────────────────────────────────────────────────
+
+  function vueCollectes() {
+    elContenu.innerHTML = squelette(5);
+
+    charger('collectes').then(function (d) {
+      elSousTitre.textContent = nombre(d.synthese.total) + ' collecte(s) · du '
+        + d.periode.debut + ' au ' + d.periode.fin;
+      afficherAvertissements(d.avertissements);
+
+      var lignes = d.collectes.map(function (c) {
+        var puce = c.statut === 'effectuee' ? 'ok'
+          : c.statut === 'a_venir' ? 'neutre' : 'alerte';
+        return '<tr>'
+          + '<td>' + echapper(c.heure_collecte || '—') + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.dateCourte(c.date_collecte)
+          + '</small></td>'
+          + '<td>' + echapper(c.client) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(c.numero_abonne)
+          + '</small></td>'
+          + '<td>' + echapper((c.avenue || '') + ' ' + (c.numero_parcelle || '')) + '<br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper(c.commune || c.zone || '') + '</small></td>'
+          + '<td>' + echapper(c.type_dechet) + '</td>'
+          + '<td>' + (c.poids_kg === null
+            ? '<small style="color:var(--texte-faible)">non pesé</small>'
+            : nombre(c.poids_kg) + ' kg') + '</td>'
+          + '<td>' + (c.preuves > 0
+            ? '<span class="puce ok">' + c.preuves + '</span>' : '—') + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(c.statut) + '</span></td>'
+          + '<td>' + echapper(c.motif_echec
+            ? c.motif_echec.replace(/_/g, ' ') : '—') + '</td>'
+          + '<td>' + echapper(c.collecteur) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var motifs = d.motifs_echec.map(function (m) {
+        return '<tr><td>' + echapper(m.motif === 'non_categorise'
+          ? 'non catégorisé' : m.motif.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + nombre(m.total) + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Collectes', valeur: d.synthese.total },
+        { nom: 'Effectuées', valeur: d.synthese.effectuees },
+        { nom: 'Échecs', valeur: d.synthese.echecs },
+        d.synthese.taux_reussite === null
+          ? { nom: 'Taux de réussite', disponible: false,
+            motif: 'Aucune collecte sur la période.' }
+          : { nom: 'Taux de réussite', valeur: d.synthese.taux_reussite, format: 'pourcent' },
+        d.tonnage.disponible
+          ? { nom: 'Tonnage collecté', valeur: d.tonnage.valeur, unite: ' t',
+            base: d.tonnage.base + ' — couverture ' + d.tonnage.couverture_pct + ' %' }
+          : { nom: 'Tonnage collecté', disponible: false, motif: d.tonnage.motif },
+      ])
+        + E.panneau('Motifs d’échec',
+          E.tableau(['Motif', 'Occurrences'], motifs,
+            { vide: 'Aucun échec sur la période.' }),
+          { sousTitre: 'Un motif « non catégorisé » ne peut pas être analysé : c’est ce '
+            + 'qui empêche de traiter les causes racines.' })
+        + E.panneau('Journal des collectes',
+          E.tableau(['Heure', 'Client', 'Adresse', 'Catégorie', 'Poids', 'Preuve', 'Statut',
+            'Motif d’échec', 'Collecteur'], lignes,
+          { vide: d.etat_vide || 'Aucune collecte sur la période.' }));
+    }).catch(afficherErreur);
+  }
+
+  // ── Véhicules ──────────────────────────────────────────────────────────────
+
+  function vueVehicules() {
+    elContenu.innerHTML = squelette(4);
+
+    charger('vehicules').then(function (d) {
+      elSousTitre.textContent = nombre(d.synthese.total) + ' véhicule(s) au parc';
+      afficherAvertissements(d.avertissements);
+
+      var flotte = d.flotte.map(function (v) {
+        return '<tr>'
+          + '<td><strong>' + echapper(v.code) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper(v.immatriculation || 'sans immatriculation') + '</small></td>'
+          + '<td>' + echapper(v.type_vehicule) + '<br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper((v.marque || '') + ' ' + (v.modele || '')) + '</small></td>'
+          + '<td>' + (v.capacite_m3 === null ? '—' : v.capacite_m3 + ' m³') + '</td>'
+          + '<td>' + echapper(v.zone || '—') + '</td>'
+          + '<td>' + nombre(v.kilometrage) + '</td>'
+          + '<td>' + nombre(v.tournees_du_jour) + '</td>'
+          + '<td>' + (v.indisponible_aujourdhui
+            ? '<span class="puce alerte">indisponible ('
+              + echapper(v.motif_indisponibilite || '') + ')</span>'
+            : '<span class="puce ok">disponible</span>') + '</td>'
+          + '<td>' + echapper(v.statut.replace(/_/g, ' ')) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var maintenance = d.maintenance.map(function (m) {
+        return '<tr>'
+          + '<td>' + echapper(m.vehicule) + '</td>'
+          + '<td>' + echapper(m.type_operation.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + E.dateCourte(m.date_prevue) + '</td>'
+          + '<td>' + E.dateCourte(m.date_realisee) + '</td>'
+          + '<td>' + (m.cout === null ? '—'
+            : E.montant(m.cout) + ' ' + echapper(m.devise || '')) + '</td>'
+          + '<td><span class="puce ' + (m.criticite === 'critique' ? 'alerte'
+            : m.criticite === 'haute' ? 'attention' : 'neutre') + '">'
+          + echapper(m.criticite) + '</span></td>'
+          + '<td>' + (m.en_retard
+            ? '<span class="puce alerte">en retard</span>'
+            : echapper(m.statut.replace(/_/g, ' '))) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Parc total', valeur: d.synthese.total },
+        { nom: 'Disponibles', valeur: d.synthese.disponibles },
+        { nom: 'En maintenance', valeur: d.synthese.en_maintenance },
+        { nom: 'Indisponibles ce jour', valeur: d.synthese.indisponibles_aujourdhui },
+        { nom: 'Consommation carburant', disponible: false,
+          motif: d.consommation_carburant.motif },
+      ])
+        + E.panneau('Flotte',
+          E.tableau(['Véhicule', 'Type', 'Capacité', 'Zone', 'Kilométrage',
+            'Tournées du jour', 'Disponibilité', 'Statut'], flotte,
+          { vide: d.etat_vide || 'Aucun véhicule enregistré.' }))
+        + E.panneau('Maintenance',
+          E.tableau(['Véhicule', 'Opération', 'Prévue', 'Réalisée', 'Coût', 'Criticité',
+            'Statut'], maintenance, { vide: 'Aucune opération de maintenance planifiée.' }));
+    }).catch(afficherErreur);
+  }
+
+  // ── Incidents ──────────────────────────────────────────────────────────────
+
+  function vueIncidents() {
+    elContenu.innerHTML = squelette(5);
+
+    charger('incidents').then(function (d) {
+      elSousTitre.textContent = nombre(d.synthese.ouverts) + ' incident(s) ouvert(s)';
+      afficherAvertissements(d.avertissements);
+
+      var lignes = d.incidents.map(function (i) {
+        return '<tr>'
+          + '<td><strong>' + echapper(i.reference) + '</strong></td>'
+          + '<td>' + echapper(i.titre) + '<br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper(i.type_incident.replace(/_/g, ' ')) + '</small></td>'
+          + '<td><span class="puce ' + (i.severite === 'critique' ? 'alerte'
+            : i.severite === 'elevee' ? 'attention' : 'neutre') + '">'
+          + echapper(i.severite) + '</span></td>'
+          + '<td>' + echapper(i.zone || i.commune || '—') + '</td>'
+          + '<td>' + echapper(i.client || '—') + '</td>'
+          + '<td>' + E.dateHeure(i.signale_le) + '</td>'
+          + '<td>' + (i.age_minutes === null || i.age_minutes === undefined ? '—'
+            : (i.age_minutes < 60 ? Math.round(i.age_minutes) + ' min'
+              : Math.round(i.age_minutes / 60) + ' h')) + '</td>'
+          + '<td>' + echapper(i.assigne_a || 'non assigné') + '</td>'
+          + '<td>' + echapper(i.cause_racine || '—') + '</td>'
+          + '<td>' + echapper(i.statut.replace(/_/g, ' ')) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var types = d.par_type.map(function (t) {
+        return '<tr><td>' + echapper(t.type_incident.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + nombre(t.total) + '</td>'
+          + '<td>' + nombre(t.ouverts) + '</td></tr>';
+      }).join('');
+
+      var causes = d.causes_racines.map(function (c) {
+        return '<tr><td>' + echapper(c.cause_racine) + '</td>'
+          + '<td>' + nombre(c.total) + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Incidents', valeur: d.synthese.total },
+        { nom: 'Ouverts', valeur: d.synthese.ouverts },
+        { nom: 'Critiques', valeur: d.synthese.critiques },
+        { nom: 'Délai moyen de résolution',
+          valeur: d.synthese.delai_moyen_minutes === null ? null
+            : Math.round(d.synthese.delai_moyen_minutes),
+          unite: ' min' },
+        d.respect_sla.disponible
+          ? { nom: 'Respect du SLA', valeur: d.respect_sla.valeur, format: 'pourcent',
+            base: d.respect_sla.base }
+          : { nom: 'Respect du SLA', disponible: false, motif: d.respect_sla.motif },
+      ])
+        + E.panneau('Incidents',
+          E.tableau(['Réf.', 'Incident', 'Sévérité', 'Zone', 'Client', 'Signalé', 'Depuis',
+            'Assigné à', 'Cause racine', 'Statut'], lignes,
+          { vide: d.etat_vide || 'Aucun incident sur la période.' }))
+        + E.panneau('Par type',
+          E.tableau(['Type', 'Total', 'Ouverts'], types, { vide: 'Aucun incident.' }))
+        + E.panneau('Analyse des causes racines',
+          E.tableau(['Cause', 'Incidents'], causes,
+            { vide: 'Aucune cause racine renseignée. Sans elle, les mêmes incidents se '
+              + 'reproduisent sans être traités.' }));
+    }).catch(afficherErreur);
+  }
+
+  // ── Stocks ─────────────────────────────────────────────────────────────────
+
+  function vueStocks() {
+    elContenu.innerHTML = squelette(4);
+
+    charger('stocks').then(function (d) {
+      elSousTitre.textContent = nombre(d.articles.length) + ' article(s) suivi(s)';
+      afficherAvertissements(d.avertissements);
+
+      var articles = d.articles.map(function (a) {
+        var puce = a.etat === 'critique' ? 'alerte'
+          : a.etat === 'bas' ? 'attention'
+            : a.etat === 'sans_seuil' ? 'neutre' : 'ok';
+        var libelle = a.etat === 'sans_seuil' ? 'sans seuil' : a.etat;
+        return '<tr>'
+          + '<td><strong>' + echapper(a.libelle) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(a.code) + '</small></td>'
+          + '<td>' + echapper(a.categorie) + '</td>'
+          + '<td>' + nombre(a.stock_actuel) + ' ' + echapper(a.unite) + '</td>'
+          + '<td>' + (a.seuil_alerte === null ? '—' : nombre(a.seuil_alerte)) + '</td>'
+          + '<td>' + (a.seuil_critique === null ? '—' : nombre(a.seuil_critique)) + '</td>'
+          + '<td>' + echapper(a.fournisseur || '—') + '</td>'
+          + '<td>' + E.dateCourte(a.dernier_mouvement) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(libelle) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var mouvements = d.mouvements.map(function (m) {
+        return '<tr>'
+          + '<td>' + E.dateCourte(m.date_mouvement) + '</td>'
+          + '<td>' + echapper(m.article) + '</td>'
+          + '<td>' + (m.sens === 'entree' ? '+' : '−') + ' ' + nombre(m.quantite)
+          + ' ' + echapper(m.unite) + '</td>'
+          + '<td>' + echapper(m.motif.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + echapper(m.zone || '—') + '</td>'
+          + '<td>' + echapper(m.saisi_par || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Inventaire',
+        E.tableau(['Article', 'Catégorie', 'Stock actuel', 'Seuil alerte', 'Seuil critique',
+          'Fournisseur', 'Dernier mouvement', 'État'], articles,
+        { vide: d.etat_vide || 'Aucun article en stock déclaré.' }),
+        { sousTitre: 'Le stock est la somme des mouvements, jamais une colonne : une '
+          + 'quantité stockée se désynchronise à la première écriture concurrente.' })
+        + E.panneau('Mouvements récents',
+          E.tableau(['Date', 'Article', 'Quantité', 'Motif', 'Zone', 'Saisi par'],
+            mouvements, { vide: 'Aucun mouvement enregistré.' }));
+    }).catch(afficherErreur);
+  }
+
+  // ── Clients ────────────────────────────────────────────────────────────────
+
+  function vueClients() {
+    elContenu.innerHTML = squelette(4);
+
+    charger('clients').then(function (d) {
+      elSousTitre.textContent = nombre(d.total) + ' client(s)';
+
+      var lignes = d.clients.map(function (c) {
+        return '<tr>'
+          + '<td><strong>' + echapper((c.prenom || '') + ' ' + c.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(c.numero_abonne)
+          + '</small></td>'
+          + '<td>' + echapper(c.telephone || '—') + '</td>'
+          + '<td>' + echapper(c.commune || '—') + '<br>'
+          + '<small style="color:var(--texte-faible)">'
+          + echapper((c.avenue || '') + ' ' + (c.numero_parcelle || '')) + '</small></td>'
+          + '<td>' + echapper(c.offre || '—') + '</td>'
+          + '<td>' + (c.abonnement_statut
+            ? '<span class="puce ' + (c.abonnement_statut === 'actif' ? 'ok' : 'attention')
+              + '">' + echapper(c.abonnement_statut) + '</span>'
+            : '<span class="puce neutre">aucun abonnement couvrant</span>') + '</td>'
+          + '<td>' + E.dateCourte(c.abonnement_fin) + '</td>'
+          + '<td>' + echapper(c.source_acquisition === 'inconnue'
+            ? 'non renseignée' : c.source_acquisition) + '</td>'
+          + '<td>' + (c.latitude === null || c.latitude === undefined
+            ? '<span class="puce attention">sans GPS</span>'
+            : '<span class="puce ok">géolocalisé</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Clients',
+        E.tableau(['Client', 'Téléphone', 'Adresse', 'Offre', 'Abonnement', 'Échéance',
+          'Origine', 'GPS'], lignes,
+        { vide: d.etat_vide || 'Aucun client.' }),
+        { sousTitre: 'L’abonnement affiché est celui qui COUVRE la date du jour, pas le '
+          + 'dernier créé : un renouvellement anticipé ne fait pas disparaître la période '
+          + 'en cours.' });
+    }).catch(afficherErreur);
+  }
+
+  // ── Prospects & contrats ───────────────────────────────────────────────────
+
+  function vueContrats() {
+    elContenu.innerHTML = squelette(4);
+
+    charger('contrats').then(function (d) {
+      elSousTitre.textContent = nombre(d.contrats.length) + ' contrat(s) · '
+        + nombre(d.opportunites.length) + ' opportunité(s)';
+      afficherAvertissements(d.avertissements);
+
+      var libelles = {
+        prospection: 'Prospection', qualification: 'Qualification',
+        proposition: 'Proposition', negociation: 'Négociation', fermee: 'Fermée',
+      };
+      var pipeline = d.pipeline.map(function (c) {
+        var valeur = [];
+        if (c.valeur_usd) valeur.push(E.montant(c.valeur_usd) + ' USD');
+        if (c.valeur_cdf) valeur.push(E.montant(c.valeur_cdf) + ' CDF');
+        return '<div style="flex:1;min-width:150px">'
+          + '<h3 style="font-size:12.5px;margin:0 0 6px">' + echapper(libelles[c.etape])
+          + ' <span class="puce neutre">' + c.total + '</span></h3>'
+          + '<p class="meta">' + (valeur.join(' · ') || '—') + '</p></div>';
+      }).join('');
+
+      var contrats = d.contrats.map(function (c) {
+        return '<tr>'
+          + '<td><strong>' + echapper(c.intitule) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(c.reference)
+          + '</small></td>'
+          + '<td>' + echapper(c.client || '—') + '</td>'
+          + '<td>' + echapper(c.type_contrat) + '</td>'
+          + '<td>' + (c.montant === null ? '—'
+            : E.montant(c.montant) + ' ' + echapper(c.devise || '')) + '</td>'
+          + '<td>' + E.dateCourte(c.date_debut) + ' → ' + E.dateCourte(c.date_fin)
+          + (c.echeance_proche
+            ? '<br><span class="puce attention">échéance proche</span>' : '') + '</td>'
+          + '<td>' + (c.renouvellement_auto ? 'automatique' : 'manuel') + '</td>'
+          + '<td><span class="puce ' + (c.statut === 'actif' ? 'ok'
+            : c.statut === 'resilie' || c.statut === 'expire' ? 'alerte' : 'attention') + '">'
+          + echapper(c.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var opportunites = d.opportunites.map(function (o) {
+        return '<tr>'
+          + '<td>' + echapper(o.nom) + '</td>'
+          + '<td>' + echapper(o.segment || '—') + '</td>'
+          + '<td>' + echapper(o.commune || '—') + '</td>'
+          + '<td>' + echapper(libelles[o.etape] || o.etape) + '</td>'
+          + '<td>' + (o.montant_estime === null ? '—'
+            : E.montant(o.montant_estime) + ' ' + echapper(o.devise || '')) + '</td>'
+          + '<td>' + (o.probabilite === null ? '—' : o.probabilite + ' %') + '</td>'
+          + '<td>' + E.dateCourte(o.date_cloture_prevue) + '</td>'
+          + '<td>' + echapper(o.proprietaire || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Pipeline commercial',
+        '<div style="display:flex;gap:12px;flex-wrap:wrap">' + pipeline + '</div>')
+        + E.panneau('Contrats',
+          E.tableau(['Contrat', 'Client', 'Type', 'Montant', 'Période', 'Renouvellement',
+            'Statut'], contrats,
+          { vide: d.etat_vide || 'Aucun contrat commercial enregistré.' }))
+        + E.panneau('Opportunités ouvertes',
+          E.tableau(['Opportunité', 'Segment', 'Commune', 'Étape', 'Montant', 'Probabilité',
+            'Clôture prévue', 'Propriétaire'], opportunites,
+          { vide: 'Aucune opportunité ouverte.' }));
+    }).catch(afficherErreur);
+  }
+
+  // ── Abonnements ────────────────────────────────────────────────────────────
+
+  function vueAbonnements() {
+    elContenu.innerHTML = squelette(4);
+
+    charger('abonnements').then(function (d) {
+      elSousTitre.textContent = nombre(d.synthese.actifs) + ' abonnement(s) actif(s)';
+      afficherAvertissements(d.avertissements);
+
+      var lignes = d.expirations_proches.map(function (a) {
+        var jours = Number(a.jours_restants);
+        var puce = jours <= 3 ? 'alerte' : jours <= 10 ? 'attention' : 'neutre';
+        return '<tr>'
+          + '<td><strong>' + echapper(a.client) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(a.numero_abonne)
+          + '</small></td>'
+          + '<td>' + echapper(a.telephone || '—') + '</td>'
+          + '<td>' + echapper(a.commune || '—') + '</td>'
+          + '<td>' + echapper(a.offre) + '</td>'
+          + '<td>' + E.montant(a.montant) + ' '
+          + echapper(a.devise || '(sans devise)') + '</td>'
+          + '<td>' + E.dateCourte(a.date_fin) + '</td>'
+          + '<td><span class="puce ' + puce + '">J−' + jours + '</span></td>'
+          + '<td>' + (a.renouvellement_auto ? 'automatique' : 'manuel') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Actifs', valeur: d.synthese.actifs },
+        { nom: 'En attente de paiement', valeur: d.synthese.en_attente,
+          definition: 'Un abonnement en attente n’est PAS collecté : la règle '
+            + 'd’éligibilité exige un abonnement payé couvrant la date du service.' },
+        { nom: 'Expirés', valeur: d.synthese.expires },
+        { nom: 'Suspendus', valeur: d.synthese.suspendus },
+      ])
+        + E.panneau('Abonnements expirant sous 30 jours',
+          E.tableau(['Client', 'Téléphone', 'Commune', 'Offre', 'Montant', 'Fin',
+            'Échéance', 'Renouvellement'], lignes,
+          { vide: 'Aucun abonnement n’expire dans les 30 prochains jours.' }));
+    }).catch(afficherErreur);
+  }
+
+
+  // ── Rapports ───────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables';
+    elAvertissements.innerHTML = '';
+
+    E.vueRapports({
+      cible: elContenu,
+      catalogue: [
+        {
+          nom: 'Journal des collectes',
+          description: 'Collectes de la période, avec preuve, poids pesé et motif d’échec.',
+          chemin: '/api/direction-operations/collectes' + parametres(),
+          fichier: 'collectes',
+          extraire: function (d) {
+            return {
+              entetes: ['Date', 'Heure', 'Client', 'Numéro abonné', 'Zone', 'Catégorie',
+                'Poids (kg)', 'Preuves', 'Statut', 'Motif d’échec', 'Collecteur'],
+              vide: 'Aucune collecte sur la période.',
+              lignes: (d.collectes || []).map(function (c) {
+                return [c.date_collecte, c.heure_collecte, c.client, c.numero_abonne,
+                  c.zone || c.commune, c.type_dechet,
+                  c.poids_kg === null ? 'non pesé' : c.poids_kg,
+                  c.preuves, c.statut, c.motif_echec, c.collecteur];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Incidents et causes racines',
+          description: 'Incidents de la période, leur SLA et leur cause identifiée.',
+          chemin: '/api/direction-operations/incidents' + parametres(),
+          fichier: 'incidents',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Type', 'Sévérité', 'Titre', 'Zone', 'Signalé le',
+                'Résolu le', 'SLA (min)', 'Cause racine', 'Statut'],
+              vide: 'Aucun incident sur la période.',
+              lignes: (d.incidents || []).map(function (i) {
+                return [i.reference, i.type_incident, i.severite, i.titre,
+                  i.zone || i.commune, i.signale_le, i.resolu_le, i.sla_minutes,
+                  i.cause_racine, i.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'État de la flotte',
+          description: 'Véhicules, disponibilité du jour et maintenance planifiée.',
+          chemin: '/api/direction-operations/vehicules',
+          fichier: 'flotte',
+          extraire: function (d) {
+            return {
+              entetes: ['Code', 'Immatriculation', 'Type', 'Capacité m³', 'Zone',
+                'Kilométrage', 'Indisponible', 'Motif', 'Statut'],
+              vide: 'Aucun véhicule enregistré.',
+              lignes: (d.flotte || []).map(function (v) {
+                return [v.code, v.immatriculation, v.type_vehicule, v.capacite_m3, v.zone,
+                  v.kilometrage, v.indisponible_aujourdhui ? 'oui' : 'non',
+                  v.motif_indisponibilite, v.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Inventaire des stocks',
+          description: 'Stock calculé depuis les mouvements, avec ses seuils.',
+          chemin: '/api/direction-operations/stocks',
+          fichier: 'stocks',
+          extraire: function (d) {
+            return {
+              entetes: ['Code', 'Article', 'Catégorie', 'Stock actuel', 'Unité',
+                'Seuil alerte', 'Seuil critique', 'État', 'Dernier mouvement'],
+              vide: 'Aucun article en stock déclaré.',
+              lignes: (d.articles || []).map(function (a) {
+                return [a.code, a.libelle, a.categorie, a.stock_actuel, a.unite,
+                  a.seuil_alerte, a.seuil_critique, a.etat, a.dernier_mouvement];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Abonnements expirant sous 30 jours',
+          description: 'Ce qu’il faut relancer pour ne pas perdre le service.',
+          chemin: '/api/direction-operations/abonnements',
+          fichier: 'abonnements-a-renouveler',
+          extraire: function (d) {
+            return {
+              entetes: ['Numéro abonné', 'Client', 'Téléphone', 'Commune', 'Offre',
+                'Montant', 'Devise', 'Fin', 'Jours restants', 'Renouvellement'],
+              vide: 'Aucun abonnement n’expire dans les 30 prochains jours.',
+              lignes: (d.expirations_proches || []).map(function (a) {
+                return [a.numero_abonne, a.client, a.telephone, a.commune, a.offre,
+                  a.montant, a.devise, a.date_fin, a.jours_restants,
+                  a.renouvellement_auto ? 'automatique' : 'manuel'];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Contrats commerciaux',
+          description: 'Contrats et leur échéance, pour anticiper les renouvellements.',
+          chemin: '/api/direction-operations/contrats',
+          fichier: 'contrats',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Intitulé', 'Client', 'Type', 'Montant', 'Devise',
+                'Début', 'Fin', 'Renouvellement', 'Statut'],
+              vide: 'Aucun contrat commercial enregistré.',
+              lignes: (d.contrats || []).map(function (c) {
+                return [c.reference, c.intitule, c.client, c.type_contrat, c.montant,
+                  c.devise, c.date_debut, c.date_fin,
+                  c.renouvellement_auto ? 'automatique' : 'manuel', c.statut];
+              }),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   // ── Routage ────────────────────────────────────────────────────────────────
 
   var VUES = {
     controle: vueControle, tournees: vueTournees, equipes: vueEquipes,
     zones: vueZones, qualite: vueQualite, registre: vueRegistre,
+    carte: vueCarte, collectes: vueCollectes, vehicules: vueVehicules,
+    incidents: vueIncidents, clients: vueClients, contrats: vueContrats,
+    abonnements: vueAbonnements, stocks: vueStocks, rapports: vueRapports,
   };
 
   function allerA(vue) {

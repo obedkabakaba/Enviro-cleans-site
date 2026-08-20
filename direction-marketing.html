@@ -28,6 +28,13 @@
       <a href="#" data-vue="retention">Rétention</a>
       <a href="#" data-vue="agents">Agents</a>
       <a href="#" data-vue="canaux">Canaux</a>
+      <a href="#" data-vue="campagnes">Campagnes</a>
+      <a href="#" data-vue="prospects" data-permission="marketing.lead.manage">Prospects</a>
+      <a href="#" data-vue="offres">Offres</a>
+      <a href="#" data-vue="satisfaction">Satisfaction</a>
+      <a href="#" data-vue="contenus">Contenus</a>
+      <a href="#" data-vue="budget">Budget marketing</a>
+      <a href="#" data-vue="rapports">Rapports</a>
     </div>
   </nav>
 
@@ -85,6 +92,13 @@
     retention: 'Rétention par cohorte',
     agents: 'Agents marketing',
     canaux: 'Canaux',
+    campagnes: 'Campagnes',
+    prospects: 'Prospects',
+    offres: 'Offres',
+    satisfaction: 'Satisfaction',
+    contenus: 'Contenus',
+    budget: 'Budget marketing',
+    rapports: 'Rapports',
   };
 
   function periode() {
@@ -414,6 +428,512 @@
 
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Vues ajoutées par la migration 015
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // ── Campagnes ──────────────────────────────────────────────────────────────
+
+  function vueCampagnes() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-marketing/campagnes' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.campagnes.length) + ' campagne(s) · du '
+        + d.periode.debut + ' au ' + d.periode.fin;
+
+      var lignes = d.campagnes.map(function (c) {
+        var puce = c.statut === 'active' ? 'ok'
+          : c.statut === 'pause' ? 'attention'
+            : c.statut === 'terminee' ? 'info' : 'neutre';
+        return '<tr>'
+          + '<td><strong>' + E.echapper(c.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.dateCourte(c.date_debut)
+          + ' → ' + E.dateCourte(c.date_fin) + '</small></td>'
+          + '<td>' + E.echapper(c.canal) + '</td>'
+          + '<td>' + E.echapper(c.commune || c.zone || '—') + '</td>'
+          + '<td>' + (c.budget_prevu === null ? '—'
+            : E.montant(c.budget_prevu) + ' ' + E.echapper(c.devise || '')) + '</td>'
+          + '<td>' + E.montant(c.depense) + '</td>'
+          + '<td>' + E.nombre(c.leads) + '</td>'
+          + '<td>' + E.nombre(c.conversions) + '</td>'
+          + '<td>' + (c.taux_conversion === null ? '—' : c.taux_conversion + ' %') + '</td>'
+          + '<td>' + (c.cout_acquisition === null
+            ? '<small style="color:var(--texte-faible)">'
+              + E.echapper(c.cout_acquisition_motif || 'non mesuré') + '</small>'
+            : E.montant(c.cout_acquisition)) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + E.echapper(c.statut) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Campagnes',
+          E.tableau(['Campagne', 'Canal', 'Zone', 'Budget', 'Dépensé', 'Leads', 'Conversions',
+            'Taux', 'Coût d’acquisition', 'Statut'], lignes,
+          { vide: d.etat_vide || 'Aucune campagne sur cette période.' }),
+          { sousTitre: 'Le coût d’acquisition n’est calculé que si la DÉPENSE est saisie : '
+            + 'un budget prévu n’est pas une dépense.' });
+    }).catch(echec);
+  }
+
+  // ── Prospects (CRM) ────────────────────────────────────────────────────────
+
+  function vueProspects() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-marketing/prospects').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.prospects.length) + ' prospect(s) affiché(s)';
+
+      var libelles = {
+        identifie: 'Identifié', contacte: 'Contacté', visite_planifiee: 'Visite planifiée',
+        visite_faite: 'Visite faite', offre_envoyee: 'Offre envoyée',
+        negociation: 'Négociation', converti: 'Converti', perdu: 'Perdu',
+      };
+
+      var colonnes = d.colonnes.map(function (c) {
+        var valeur = [];
+        if (c.valeur_usd) valeur.push(E.montant(c.valeur_usd) + ' USD');
+        if (c.valeur_cdf) valeur.push(E.montant(c.valeur_cdf) + ' CDF');
+        return '<div style="flex:1;min-width:150px">'
+          + '<h3 style="font-size:12.5px;margin:0 0 6px">' + E.echapper(libelles[c.etape])
+          + ' <span class="puce neutre">' + c.total + '</span></h3>'
+          + '<p class="meta">' + (valeur.join(' · ') || '—') + '</p>'
+          + '</div>';
+      }).join('');
+
+      var lignes = d.prospects.map(function (p) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(p.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(p.reference)
+          + ' · ' + E.echapper(p.type_prospect || '—') + '</small></td>'
+          + '<td>' + E.echapper(p.telephone || p.email || '—') + '</td>'
+          + '<td>' + E.echapper(p.commune || '—') + '</td>'
+          + '<td>' + E.echapper(libelles[p.etape] || p.etape) + '</td>'
+          + '<td>' + (p.valeur_estimee === null ? '—'
+            : E.montant(p.valeur_estimee) + ' ' + E.echapper(p.devise || '')) + '</td>'
+          + '<td>' + (p.probabilite === null ? '—' : p.probabilite + ' %') + '</td>'
+          + '<td>' + E.echapper(p.proprietaire || 'non assigné') + '</td>'
+          + '<td>' + E.echapper(p.prochaine_action || '—')
+          + (p.prochaine_action_le ? '<br><small style="color:var(--texte-faible)">'
+            + E.dateCourte(p.prochaine_action_le) + '</small>' : '') + '</td>'
+          + '<td><a href="#" class="citation" data-activites="' + p.id + '">Historique</a></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Prospects au total', valeur: d.conversion.total },
+        { nom: 'Convertis', valeur: d.conversion.convertis,
+          definition: 'Chaque conversion désigne un abonné réellement créé : la base '
+            + 'interdit l’étape « converti » sans ce lien.' },
+        { nom: 'Perdus', valeur: d.conversion.perdus },
+        d.conversion.taux === null
+          ? { nom: 'Taux de conversion', disponible: false, motif: d.conversion.motif }
+          : { nom: 'Taux de conversion', valeur: d.conversion.taux, format: 'pourcent' },
+      ])
+        + E.panneau('Pipeline',
+          '<div style="display:flex;gap:12px;flex-wrap:wrap">' + colonnes + '</div>')
+        + E.panneau('Prospects',
+          E.tableau(['Prospect', 'Contact', 'Commune', 'Étape', 'Valeur', 'Probabilité',
+            'Propriétaire', 'Prochaine action', ''], lignes,
+          { vide: d.etat_vide || 'Aucun prospect enregistré.' }))
+        + '<div id="activitesProspect"></div>';
+
+      Array.prototype.forEach.call(
+        elContenu.querySelectorAll('[data-activites]'),
+        function (a) {
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            activitesProspect(a.getAttribute('data-activites'));
+          });
+        }
+      );
+    }).catch(echec);
+  }
+
+  function activitesProspect(id) {
+    var cible = document.getElementById('activitesProspect');
+    cible.innerHTML = E.squelette(2);
+
+    EnviroAPI.get('/api/direction-marketing/prospects/' + id + '/activites')
+      .then(function (d) {
+        var lignes = d.activites.map(function (a) {
+          return '<tr>'
+            + '<td>' + E.dateHeure(a.realisee_le) + '</td>'
+            + '<td>' + E.echapper(a.type_activite.replace(/_/g, ' ')) + '</td>'
+            + '<td>' + E.echapper(a.resume) + '</td>'
+            + '<td>' + (a.etape_avant
+              ? E.echapper(a.etape_avant) + ' → ' + E.echapper(a.etape_apres) : '—') + '</td>'
+            + '<td>' + E.echapper(a.auteur || '—') + '</td>'
+            + '</tr>';
+        }).join('');
+        cible.innerHTML = E.panneau('Historique des activités',
+          E.tableau(['Date', 'Type', 'Résumé', 'Étape', 'Auteur'], lignes,
+            { vide: 'Aucune activité enregistrée pour ce prospect.' }));
+      }).catch(function (err) { E.afficherErreur(cible, err); });
+  }
+
+  // ── Offres ─────────────────────────────────────────────────────────────────
+
+  function vueOffres() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/offres').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.propositions.length) + ' proposition(s) · '
+        + E.nombre(d.offres_publiees.length) + ' offre(s) publiée(s)';
+
+      var propositions = d.propositions.map(function (o) {
+        var puce = o.statut === 'publiee' ? 'ok'
+          : o.statut === 'refusee' ? 'alerte'
+            : o.statut === 'brouillon' ? 'neutre' : 'attention';
+        return '<tr>'
+          + '<td><strong>' + E.echapper(o.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(o.reference)
+          + ' · ' + E.echapper(o.segment_cible || '—') + '</small></td>'
+          + '<td>' + E.montant(o.prix) + ' ' + E.echapper(o.devise) + '</td>'
+          + '<td>' + E.echapper(o.frequence_collecte) + '</td>'
+          + '<td>' + (o.marge_estimee_pct === null
+            ? '<small style="color:var(--texte-faible)">étude Finance non faite</small>'
+            : o.marge_estimee_pct + ' %') + '</td>'
+          + '<td>' + (o.faisabilite_ok === null
+            ? '<small style="color:var(--texte-faible)">non confirmée</small>'
+            : (o.faisabilite_ok ? '<span class="puce ok">confirmée</span>'
+              : '<span class="puce alerte">refusée</span>')) + '</td>'
+          + '<td>' + (o.nombre_etapes
+            ? 'étape ' + o.etape_courante + '/' + o.nombre_etapes : '—') + '</td>'
+          + '<td><span class="puce ' + puce + '">'
+          + E.echapper(o.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var publiees = d.offres_publiees.map(function (o) {
+        return '<tr>'
+          + '<td>' + E.echapper(o.nom) + '</td>'
+          + '<td>' + E.montant(o.prix) + ' '
+          + (o.devise ? E.echapper(o.devise)
+            : '<span class="puce attention">sans devise</span>') + '</td>'
+          + '<td>' + E.nombre(o.duree_jours) + ' j</td>'
+          + '<td>' + E.echapper(o.frequence_collecte) + '</td>'
+          + '<td>' + E.nombre(o.abonnes_actifs) + '</td>'
+          + '<td>' + E.echapper(o.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Propositions en cours',
+          E.tableau(['Offre proposée', 'Prix', 'Fréquence', 'Marge estimée', 'Faisabilité',
+            'Approbation', 'Statut'], propositions,
+          { vide: 'Aucune proposition en cours.' }),
+          { sousTitre: 'Le Marketing propose ; la Finance étudie la rentabilité, les '
+            + 'Opérations confirment la faisabilité, la Direction valide le prix. Une '
+            + 'proposition n’entre au catalogue qu’à la publication.' })
+        + E.panneau('Offres publiées',
+          E.tableau(['Offre', 'Prix', 'Durée', 'Fréquence', 'Abonnés actifs', 'Statut'],
+            publiees, { vide: d.etat_vide || 'Aucune offre publiée.' }));
+    }).catch(echec);
+  }
+
+  // ── Satisfaction ───────────────────────────────────────────────────────────
+
+  function vueSatisfaction() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-marketing/satisfaction' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.nps.reponses) + ' réponse(s) sur la période';
+
+      var n = d.nps;
+      var cartes = [
+        n.disponible
+          ? { nom: 'NPS', valeur: n.valeur,
+            base: n.reponses + ' réponse(s)'
+              + (n.fiable ? '' : ' — sous le seuil de fiabilité de '
+                + n.effectif_minimum),
+            definition: 'Promoteurs (9–10) moins détracteurs (0–6), en points.',
+            note: n.fiable ? null
+              : 'Effectif insuffisant : une réponse de plus peut déplacer ce score de '
+                + 'plusieurs dizaines de points.' }
+          : { nom: 'NPS', disponible: false, motif: n.motif },
+        { nom: 'Promoteurs', valeur: n.promoteurs,
+          base: n.part_promoteurs === null ? '' : n.part_promoteurs + ' %' },
+        { nom: 'Passifs', valeur: n.passifs,
+          base: n.part_passifs === null ? '' : n.part_passifs + ' %' },
+        { nom: 'Détracteurs', valeur: n.detracteurs,
+          base: n.part_detracteurs === null ? '' : n.part_detracteurs + ' %' },
+      ];
+
+      var reclamations = d.reclamations_par_categorie.map(function (r) {
+        return '<tr><td>' + E.echapper(r.categorie || 'non catégorisée') + '</td>'
+          + '<td>' + E.nombre(r.total) + '</td></tr>';
+      }).join('');
+
+      var communes = d.par_commune.map(function (c) {
+        return '<tr><td>' + E.echapper(c.commune || '—') + '</td>'
+          + '<td>' + E.nombre(c.total) + '</td>'
+          + '<td>' + E.nombre(c.reclamations) + '</td>'
+          + '<td>' + (c.note_moyenne === null ? '—' : c.note_moyenne + ' / 10') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var verbatims = d.verbatims.map(function (v) {
+        var couleur = v.note_nps === null ? 'var(--texte-faible)'
+          : v.note_nps >= 9 ? 'var(--ok)' : v.note_nps <= 6 ? 'var(--alerte)' : 'var(--attention)';
+        return '<div class="bloc">'
+          + '<p style="border-left:3px solid ' + couleur + ';padding-left:10px;margin:0 0 6px">'
+          + E.echapper(v.commentaire) + '</p>'
+          + '<p class="meta">' + E.echapper(v.client || 'client anonyme')
+          + (v.commune ? ' · ' + E.echapper(v.commune) : '')
+          + ' · ' + E.dateCourte(v.recueilli_le)
+          + (v.note_nps === null ? '' : ' · note ' + v.note_nps + '/10') + '</p>'
+          + '</div>';
+      }).join('');
+
+      var actions = d.actions_retablissement.map(function (a) {
+        return '<tr>'
+          + '<td>' + E.echapper(a.reclamation || '—') + '</td>'
+          + '<td>' + E.echapper(a.cause || '—') + '</td>'
+          + '<td>' + E.echapper(a.action) + '</td>'
+          + '<td>' + E.echapper(a.proprietaire || '—') + '</td>'
+          + '<td>' + E.dateCourte(a.echeance) + '</td>'
+          + '<td><span class="puce ' + (a.statut === 'cloturee' ? 'ok'
+            : a.statut === 'en_cours' ? 'info' : 'attention') + '">'
+          + E.echapper(a.statut) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi(cartes)
+        + E.panneau('Réclamations par cause',
+          E.tableau(['Cause', 'Nombre'], reclamations, { vide: 'Aucune réclamation.' }))
+        + E.panneau('Par commune',
+          E.tableau(['Commune', 'Retours', 'Réclamations', 'Note moyenne'], communes,
+            { vide: 'Aucun retour localisé.' }))
+        + E.panneau('Verbatims récents',
+          verbatims || '<div class="etat-vide">Aucun commentaire client.</div>')
+        + E.panneau('Actions de rétablissement',
+          E.tableau(['Réclamation', 'Cause', 'Action', 'Propriétaire', 'Échéance', 'Statut'],
+            actions, { vide: 'Aucune action de rétablissement enregistrée.' }));
+    }).catch(echec);
+  }
+
+  // ── Contenus ───────────────────────────────────────────────────────────────
+
+  function vueContenus() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/contenus' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.calendrier.length) + ' publication(s) planifiée(s)';
+
+      var calendrier = d.calendrier.map(function (c) {
+        var puce = c.statut === 'publie' ? 'ok'
+          : c.statut === 'planifie' ? 'info'
+            : c.statut === 'approuve' ? 'ok' : 'attention';
+        return '<tr>'
+          + '<td>' + E.dateCourte(c.date_prevue)
+          + (c.heure_prevue ? ' ' + E.echapper(c.heure_prevue.slice(0, 5)) : '') + '</td>'
+          + '<td><strong>' + E.echapper(c.titre) + '</strong></td>'
+          + '<td>' + E.echapper(c.canal) + '</td>'
+          + '<td>' + E.echapper(c.type_contenu || '—') + '</td>'
+          + '<td>' + E.echapper(c.campagne || '—') + '</td>'
+          + '<td>' + E.echapper(c.responsable || '—') + '</td>'
+          + '<td><span class="puce ' + puce + '">'
+          + E.echapper(c.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var conformite = d.conformite;
+      var criteres = (conformite.par_critere || []).map(function (c) {
+        return '<tr><td>' + E.echapper(c.critere) + '</td>'
+          + '<td><div class="barre" style="width:120px"><span style="width:'
+          + c.taux + '%"></span></div></td>'
+          + '<td>' + c.taux + ' %</td>'
+          + '<td>' + c.conformes + ' / ' + c.total + '</td></tr>';
+      }).join('');
+
+      var biblio = d.bibliotheque.map(function (a) {
+        return '<tr>'
+          + '<td>' + E.echapper(a.titre) + '</td>'
+          + '<td>' + E.echapper(a.type_contenu) + '</td>'
+          + '<td>' + E.echapper(a.langue || '—') + '</td>'
+          + '<td>' + E.echapper((a.tags || []).join(', ') || '—') + '</td>'
+          + '<td>' + E.dateCourte(a.created_at) + '</td>'
+          + '<td>' + (a.fichier_url
+            ? '<a class="citation" href="' + E.echapper(a.fichier_url)
+              + '" target="_blank" rel="noopener">ouvrir</a>' : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          conformite.disponible
+            ? { nom: 'Conformité de marque', valeur: conformite.valeur, format: 'pourcent',
+              base: conformite.contenus_evalues + ' contenu(s) évalué(s) sur '
+                + conformite.contenus_total }
+            : { nom: 'Conformité de marque', disponible: false, motif: conformite.motif },
+          { nom: 'Publications planifiées', valeur: d.calendrier.length },
+          { nom: 'Actifs en bibliothèque', valeur: d.bibliotheque.length },
+        ])
+        + E.panneau('Calendrier éditorial',
+          E.tableau(['Date', 'Titre', 'Canal', 'Type', 'Campagne', 'Responsable', 'Statut'],
+            calendrier, { vide: d.etat_vide || 'Aucune publication planifiée.' }))
+        + E.panneau('Checklist de conformité',
+          E.tableau(['Critère', '', 'Taux', 'Conformes'], criteres,
+            { vide: 'Aucun contenu n’a de checklist renseignée.' }))
+        + E.panneau('Bibliothèque d’actifs',
+          E.tableau(['Titre', 'Type', 'Langue', 'Tags', 'Créé le', 'Fichier'], biblio,
+            { vide: 'Bibliothèque vide.' }));
+    }).catch(echec);
+  }
+
+  // ── Budget marketing ───────────────────────────────────────────────────────
+
+  function vueBudget() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-marketing/budget').then(function (d) {
+      elSousTitre.textContent = 'Exercice ' + d.exercice;
+
+      var lignes = d.lignes.map(function (l) {
+        return '<tr>'
+          + '<td>' + E.echapper(l.canal) + '</td>'
+          + '<td>' + E.echapper(l.campagne || l.libelle || '—') + '</td>'
+          + '<td>' + E.montant(l.budget) + ' ' + E.echapper(l.devise) + '</td>'
+          + '<td>' + E.montant(l.depense) + '</td>'
+          + '<td style="color:' + (l.ecart < 0 ? 'var(--alerte)' : 'var(--ok)') + '">'
+          + E.montant(l.ecart) + '</td>'
+          + '<td>' + (l.consommation_pct === null ? '—'
+            : '<div class="barre" style="width:100px"><span class="'
+              + (l.consommation_pct > 100 ? 'charge-critique' : '')
+              + '" style="width:' + Math.min(l.consommation_pct, 100) + '%"></span></div> '
+              + l.consommation_pct + ' %') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var canaux = d.depense_par_canal.map(function (c) {
+        return '<tr>'
+          + '<td>' + E.echapper(c.canal) + '</td>'
+          + '<td>' + E.montant(c.depense) + ' '
+          + E.echapper(c.devise || '(sans devise)') + '</td>'
+          + '<td>' + E.nombre(c.conversions) + '</td>'
+          + '<td>' + (c.conversions > 0 && c.depense
+            ? E.montant(Number(c.depense) / Number(c.conversions)) : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Budget par canal',
+          E.tableau(['Canal', 'Campagne', 'Budget', 'Dépensé', 'Écart', 'Consommation'],
+            lignes, { vide: d.etat_vide || 'Aucune ligne budgétaire.' }))
+        + E.panneau('Dépense réelle par canal',
+          E.tableau(['Canal', 'Dépense', 'Conversions', 'Coût par conversion'], canaux,
+            { vide: 'Aucune dépense mesurée.' }),
+          { sousTitre: 'Inclut les campagnes non rattachées à une ligne budgétaire : ce '
+            + 'sont précisément les dépenses hors budget qu’il faut voir.' });
+    }).catch(echec);
+  }
+
+
+  // ── Rapports ───────────────────────────────────────────────────────────────
+
+  function vueRapports() {
+    elSousTitre.textContent = 'Rapports exportables';
+
+    E.vueRapports({
+      cible: elContenu,
+      catalogue: [
+        {
+          nom: 'Performance des campagnes',
+          description: 'Budget, dépense, leads, conversions et coût d’acquisition.',
+          chemin: '/api/direction-marketing/campagnes' + periode(),
+          fichier: 'campagnes',
+          extraire: function (d) {
+            return {
+              entetes: ['Campagne', 'Canal', 'Zone', 'Début', 'Fin', 'Budget', 'Dépensé',
+                'Leads', 'Conversions', 'Taux %', 'Coût d’acquisition', 'Statut'],
+              vide: 'Aucune campagne sur la période.',
+              lignes: (d.campagnes || []).map(function (c) {
+                return [c.nom, c.canal, c.commune || c.zone, c.date_debut, c.date_fin,
+                  c.budget_prevu, c.depense, c.leads, c.conversions, c.taux_conversion,
+                  c.cout_acquisition === null ? c.cout_acquisition_motif : c.cout_acquisition,
+                  c.statut];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Pipeline de prospects',
+          description: 'Prospects ouverts, leur étape, leur valeur et leur prochaine action.',
+          chemin: '/api/direction-marketing/prospects',
+          fichier: 'prospects',
+          extraire: function (d) {
+            return {
+              entetes: ['Référence', 'Prospect', 'Type', 'Commune', 'Étape', 'Valeur',
+                'Devise', 'Probabilité %', 'Propriétaire', 'Prochaine action'],
+              vide: 'Aucun prospect enregistré.',
+              lignes: (d.prospects || []).map(function (p) {
+                return [p.reference, p.nom, p.type_prospect, p.commune, p.etape,
+                  p.valeur_estimee, p.devise, p.probabilite, p.proprietaire,
+                  p.prochaine_action];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Satisfaction par commune',
+          description: 'Retours, réclamations et note moyenne, commune par commune.',
+          chemin: '/api/direction-marketing/satisfaction' + periode(),
+          fichier: 'satisfaction',
+          extraire: function (d) {
+            return {
+              entetes: ['Commune', 'Retours', 'Réclamations', 'Note moyenne / 10'],
+              vide: 'Aucun retour client sur la période.',
+              lignes: (d.par_commune || []).map(function (c) {
+                return [c.commune, c.total, c.reclamations, c.note_moyenne];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Budget marketing par canal',
+          description: 'Budget, dépense réelle et consommation, par canal.',
+          chemin: '/api/direction-marketing/budget',
+          fichier: 'budget-marketing',
+          extraire: function (d) {
+            return {
+              entetes: ['Canal', 'Campagne', 'Budget', 'Devise', 'Dépensé', 'Écart',
+                'Consommation %'],
+              vide: 'Aucune ligne de budget marketing.',
+              lignes: (d.lignes || []).map(function (l) {
+                return [l.canal, l.campagne || l.libelle, l.budget, l.devise, l.depense,
+                  l.ecart, l.consommation_pct];
+              }),
+            };
+          },
+        },
+        {
+          nom: 'Catalogue des offres',
+          description: 'Offres publiées et propositions en cours, avec leur étape.',
+          chemin: '/api/direction-marketing/offres',
+          fichier: 'offres',
+          extraire: function (d) {
+            var publiees = (d.offres_publiees || []).map(function (o) {
+              return ['publiée', o.nom, o.prix, o.devise || 'non renseignée',
+                o.frequence_collecte, o.abonnes_actifs, o.statut];
+            });
+            var propositions = (d.propositions || []).map(function (o) {
+              return ['proposition', o.nom, o.prix, o.devise, o.frequence_collecte, '',
+                o.statut];
+            });
+            return {
+              entetes: ['Nature', 'Offre', 'Prix', 'Devise', 'Fréquence', 'Abonnés actifs',
+                'Statut'],
+              vide: 'Aucune offre publiée ni proposée.',
+              lignes: publiees.concat(propositions),
+            };
+          },
+        },
+      ],
+    });
+  }
+
   var allerA = E.router({
     tableau: vueTableau,
     acquisition: vueAcquisition,
@@ -421,6 +941,13 @@
     retention: vueRetention,
     agents: vueAgents,
     canaux: vueCanaux,
+    campagnes: vueCampagnes,
+    prospects: vueProspects,
+    offres: vueOffres,
+    satisfaction: vueSatisfaction,
+    contenus: vueContenus,
+    budget: vueBudget,
+    rapports: vueRapports,
   }, TITRES);
 
   document.getElementById('appliquer').addEventListener('click', function () {

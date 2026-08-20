@@ -221,6 +221,120 @@
       + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
   }
 
+
+  /**
+   * Export CSV.
+   *
+   * ── Pourquoi pas simplement `join(',')` ──
+   *
+   * Un nom de client contenant une virgule (« Kabila, Jean ») décalerait toutes les
+   * colonnes suivantes, et le fichier s'ouvrirait de travers sans que rien ne le signale.
+   * Chaque cellule est donc entourée de guillemets, et les guillemets internes doublés,
+   * comme le veut la convention CSV.
+   *
+   * ── Le préfixe BOM ──
+   *
+   * Excel en configuration française ouvre un CSV UTF-8 sans BOM en interprétant les
+   * octets comme du Latin-1 : « Ndjili » devient « NdjiliÂ ». Trois octets réglent le
+   * problème, et leur absence est l'une des raisons les plus fréquentes pour lesquelles
+   * un export « ne marche pas ».
+   *
+   * ── Le séparateur ──
+   *
+   * Point-virgule, et non virgule : c'est ce qu'attend Excel dans les locales où la
+   * virgule est le séparateur décimal, ce qui est le cas ici.
+   */
+  function exporterCsv(nomFichier, entetes, lignes) {
+    function cellule(v) {
+      if (v === null || v === undefined) return '""';
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }
+
+    var contenu = [entetes.map(cellule).join(';')]
+      .concat(lignes.map(function (l) { return l.map(cellule).join(';'); }))
+      .join('\r\n');
+
+    var blob = new Blob(['\ufeff' + contenu], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var lien = document.createElement('a');
+    lien.href = url;
+    lien.download = nomFichier + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(lien);
+    lien.click();
+    document.body.removeChild(lien);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Catalogue de rapports exportables.
+   *
+   * Chaque entrée nomme son endpoint et la façon d'en tirer un tableau. L'écran affiche
+   * le catalogue, laisse choisir, charge, montre un aperçu, puis exporte CE QUI EST
+   * AFFICHÉ — jamais un second appel dont le résultat pourrait différer de l'aperçu.
+   */
+  function vueRapports(options) {
+    var cible = options.cible;
+    var catalogue = options.catalogue;
+    var sousTitre = options.sousTitre;
+
+    var lignesCatalogue = catalogue.map(function (r, i) {
+      return '<tr>'
+        + '<td><strong>' + echapper(r.nom) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + echapper(r.description) + '</small></td>'
+        + '<td><code style="font-size:11px">' + echapper(r.chemin) + '</code></td>'
+        + '<td><button class="action" data-rapport="' + i + '">Générer</button></td>'
+        + '</tr>';
+    }).join('');
+
+    cible.innerHTML = panneau('Catalogue des rapports',
+      tableau(['Rapport', 'Source', ''], lignesCatalogue,
+        { vide: 'Aucun rapport déclaré pour cet espace.' }),
+      { sousTitre: sousTitre || 'Chaque rapport est construit à partir des données '
+        + 'réellement servies par l’API. L’export reprend l’aperçu affiché, à l’identique.' })
+      + '<div id="apercuRapport"></div>';
+
+    Array.prototype.forEach.call(cible.querySelectorAll('[data-rapport]'), function (b) {
+      b.addEventListener('click', function () {
+        genererRapport(catalogue[Number(b.getAttribute('data-rapport'))]);
+      });
+    });
+  }
+
+  function genererRapport(rapport) {
+    var apercu = document.getElementById('apercuRapport');
+    apercu.innerHTML = squelette(3);
+
+    window.EnviroAPI.get(rapport.chemin).then(function (d) {
+      var table = rapport.extraire(d);
+
+      if (!table || !table.lignes || table.lignes.length === 0) {
+        apercu.innerHTML = panneau(rapport.nom,
+          '<div class="etat-vide">' + echapper(table && table.vide
+            ? table.vide
+            : 'Aucune donnée à exporter pour ce rapport.') + '</div>');
+        return;
+      }
+
+      var corps = table.lignes.slice(0, 50).map(function (l) {
+        return '<tr>' + l.map(function (c) {
+          return '<td>' + echapper(c === null || c === undefined ? '—' : c) + '</td>';
+        }).join('') + '</tr>';
+      }).join('');
+
+      apercu.innerHTML = panneau(rapport.nom,
+        tableau(table.entetes, corps)
+        + '<p class="meta" style="margin-top:12px">'
+        + nombre(table.lignes.length) + ' ligne(s)'
+        + (table.lignes.length > 50 ? ' — aperçu limité aux 50 premières, l’export les contient toutes' : '')
+        + '</p>'
+        + '<button class="action" id="telechargerCsv">Télécharger en CSV</button>');
+
+      document.getElementById('telechargerCsv').addEventListener('click', function () {
+        exporterCsv(rapport.fichier || 'rapport', table.entetes, table.lignes);
+      });
+    }).catch(function (err) { afficherErreur(apercu, err); });
+  }
+
   global.EspaceDirection = {
     echapper: echapper,
     nombre: nombre,
@@ -237,5 +351,7 @@
     tableau: tableau,
     router: router,
     afficherErreur: afficherErreur,
+    exporterCsv: exporterCsv,
+    vueRapports: vueRapports,
   };
 }(typeof window !== 'undefined' ? window : this));
