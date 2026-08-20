@@ -599,13 +599,17 @@
       elSousTitre.textContent = 'Consolidation transverse';
 
       var html = '';
+      // Mêmes noms de champs que côté PDG : `indicateurs_calculables`,
+      // `indicateurs_non_mesures`, `total_declares`, `couverture_pct`.
       var m = d.etat_de_la_mesure;
-      if (m) {
+      if (m && !m.indisponible) {
         html += E.grilleKpi([
-          { nom: 'Indicateurs mesurés', valeur: m.mesures,
-            base: 'sur ' + E.nombre(m.total) + ' au registre' },
-          { nom: 'Non mesurés', valeur: m.non_mesures },
+          { nom: 'Indicateurs mesurés', valeur: m.indicateurs_calculables,
+            base: 'sur ' + E.nombre(m.total_declares) + ' au registre' },
+          { nom: 'Non mesurés', valeur: m.indicateurs_non_mesures },
+          { nom: 'Couverture de la mesure', valeur: m.couverture_pct, format: 'pourcent' },
         ]);
+        if (m.lecture) html += '<div class="note">' + E.echapper(m.lecture) + '</div>';
       }
 
       ['operations', 'finance', 'marketing', 'ressources_humaines'].forEach(function (cle) {

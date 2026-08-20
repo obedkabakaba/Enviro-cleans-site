@@ -174,16 +174,19 @@
         + E.echapper(s.note_couverture) + '</div>';
     }
 
+    // Un signal N'EST PAS une erreur de chargement, et ne doit donc pas porter la
+    // classe `.erreur`. L'écran fonctionne ; il rapporte un constat. Les afficher à
+    // l'identique faisait lire « deux traitements automatiques ne tournent plus » —
+    // un constat juste et utile — comme une page cassée.
     var blocs = s.signaux.map(function (sig) {
-      var classe = sig.gravite === 'elevee' ? 'erreur' : 'avertissement';
+      var classe = sig.gravite === 'elevee' ? 'signal grave' : 'signal moyen';
       return '<div class="' + classe + '">'
-        + '<strong>' + E.echapper(sig.constat) + '</strong>'
-        + ' <span class="puce neutre">' + E.echapper(sig.domaine) + '</span><br>'
-        + '<span style="font-size:15px;font-weight:700">' + E.echapper(sig.chiffre) + '</span>'
-        + '<p style="margin:8px 0 0;font-size:12.5px">'
-        + '<em>Pourquoi personne ne le voit :</em> ' + E.echapper(sig.pourquoi_invisible) + '</p>'
-        + '<div style="font-size:11.5px;opacity:.75;margin-top:6px">Source : '
-        + E.echapper(sig.source) + '</div>'
+        + '<div class="entete">' + E.echapper(sig.constat)
+        + ' <span class="puce neutre">' + E.echapper(sig.domaine) + '</span></div>'
+        + '<span class="chiffre">' + E.echapper(sig.chiffre) + '</span>'
+        + '<p class="explication"><em>Pourquoi personne ne le voit :</em> '
+        + E.echapper(sig.pourquoi_invisible) + '</p>'
+        + '<div class="source">Source : ' + E.echapper(sig.source) + '</div>'
         + '</div>';
     }).join('');
 

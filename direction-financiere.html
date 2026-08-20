@@ -23,6 +23,14 @@
       <a href="#" data-vue="abonnements">Abonnements</a>
       <a href="#" data-vue="recouvrement">Recouvrement</a>
       <a href="#" data-vue="facturation">Facturation</a>
+      <a href="#" data-vue="depenses">Dépenses</a>
+      <a href="#" data-vue="tresorerie">Trésorerie</a>
+      <a href="#" data-vue="budgets">Budgets</a>
+      <a href="#" data-vue="rentabilite">Rentabilité</a>
+      <a href="#" data-vue="rapprochement" data-permission="finance.reconciliation.manage">Rapprochement</a>
+      <a href="#" data-vue="approbations">Approbations</a>
+      <a href="#" data-vue="fournisseurs">Fournisseurs</a>
+      <a href="#" data-vue="audit">Audit financier</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
   </nav>
@@ -82,6 +90,14 @@
     abonnements: 'Abonnements',
     recouvrement: 'Recouvrement',
     facturation: 'Facturation',
+    depenses: 'Dépenses',
+    tresorerie: 'Trésorerie',
+    budgets: 'Budgets',
+    rentabilite: 'Rentabilité',
+    rapprochement: 'Rapprochement',
+    approbations: 'Approbations',
+    fournisseurs: 'Fournisseurs',
+    audit: 'Audit financier',
     registre: 'Registre des KPI',
   };
 
@@ -458,6 +474,499 @@
 
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Vues ajoutées par la migration 014
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Affiche des totaux PAR DEVISE.
+   *
+   * Le backend ne renvoie jamais un total unique quand plusieurs devises sont en jeu.
+   * Cette fonction rend la liste telle quelle, et signale les lignes sans devise : elles
+   * existent dans l'historique et les ignorer donnerait un total crédible et incomplet.
+   */
+  function totauxHtml(t) {
+    if (!t) return '';
+    var parties = (t.par_devise || []).map(function (d) {
+      return '<strong>' + E.montant(d.montant) + ' ' + E.echapper(d.devise) + '</strong>';
+    });
+    var html = parties.length ? parties.join(' &nbsp;·&nbsp; ') : '—';
+    if (t.lignes_sans_devise > 0) {
+      html += ' <span class="puce attention">' + t.lignes_sans_devise
+        + ' ligne(s) sans devise : ' + E.montant(t.montant_sans_devise)
+        + ', non sommable</span>';
+    }
+    return '<p class="meta">' + html + '</p>';
+  }
+
+  // ── Dépenses ───────────────────────────────────────────────────────────────
+
+  function vueDepenses() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-financiere/depenses' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total) + ' dépense(s) · du '
+        + d.periode.debut + ' au ' + d.periode.fin;
+
+      var lignes = d.depenses.map(function (x) {
+        var puceStatut = x.statut === 'payee' ? 'ok'
+          : x.statut === 'approuvee' ? 'info'
+            : x.statut === 'refusee' ? 'alerte' : 'attention';
+        var puceRisque = x.risque === 'eleve' ? 'alerte'
+          : x.risque === 'moyen' ? 'attention' : 'ok';
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.reference) + '</strong></td>'
+          + '<td>' + E.dateCourte(x.date_demande) + '</td>'
+          + '<td>' + E.echapper(x.objet) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.categorie)
+          + '</small></td>'
+          + '<td>' + E.echapper(x.departement || '—') + '</td>'
+          + '<td>' + E.echapper(x.fournisseur || '—') + '</td>'
+          + '<td>' + E.montant(x.montant) + ' ' + E.echapper(x.devise) + '</td>'
+          + '<td>' + (x.pieces_jointes > 0
+            ? '<span class="puce ok">' + x.pieces_jointes + '</span>'
+            : '<span class="puce alerte">aucune</span>') + '</td>'
+          + '<td><span class="puce ' + puceRisque + '">' + E.echapper(x.risque) + '</span></td>'
+          + '<td>' + (x.nombre_etapes
+            ? 'étape ' + x.etape_courante + '/' + x.nombre_etapes : '—') + '</td>'
+          + '<td><span class="puce ' + puceStatut + '">'
+          + E.echapper(x.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var parStatut = d.par_statut.map(function (x) {
+        return '<tr><td>' + E.echapper(x.statut.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + E.nombre(x.nombre) + '</td>'
+          + '<td>' + E.montant(x.montant) + ' '
+          + E.echapper(x.devise || '(sans devise)') + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Total des dépenses de la période', totauxHtml(d.totaux))
+        + E.panneau('Demandes de dépense',
+          E.tableau(['Réf.', 'Date', 'Objet', 'Département', 'Fournisseur', 'Montant',
+            'Pièce', 'Risque', 'Approbation', 'Statut'], lignes,
+          { vide: d.etat_vide || 'Aucune dépense sur la période.' }))
+        + E.panneau('Répartition par statut',
+          E.tableau(['Statut', 'Nombre', 'Montant'], parStatut,
+            { vide: 'Aucune dépense.' }));
+    }).catch(echec);
+  }
+
+  // ── Trésorerie ─────────────────────────────────────────────────────────────
+
+  function vueTresorerie() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-financiere/tresorerie?horizon=90').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.comptes.length) + ' compte(s) · horizon '
+        + d.horizon_jours + ' jours';
+
+      var comptes = d.comptes.map(function (c) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(c.libelle) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">'
+          + E.echapper(c.institution || c.type_compte)
+          + (c.numero_masque ? ' · ' + E.echapper(c.numero_masque) : '') + '</small></td>'
+          + '<td>' + E.echapper(c.type_compte) + '</td>'
+          + '<td><strong>' + E.montant(c.solde) + ' ' + E.echapper(c.devise)
+          + '</strong></td>'
+          + '<td>' + E.montant(c.entrees) + '</td>'
+          + '<td>' + E.montant(c.sorties) + '</td>'
+          + '<td>' + E.nombre(c.mouvements) + '</td>'
+          + '<td>' + (c.seuil_securite === null ? '—' : E.montant(c.seuil_securite)) + '</td>'
+          + '<td>' + (c.sous_seuil
+            ? '<span class="puce alerte">sous le seuil</span>'
+            : '<span class="puce ok">ok</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var natures = d.synthese_par_nature.map(function (n) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(n.nature) + '</strong></td>'
+          + '<td>' + E.nombre(n.nombre) + '</td>'
+          + '<td>' + ((n.entrees.par_devise || []).map(function (x) {
+            return E.montant(x.montant) + ' ' + x.devise;
+          }).join(' · ') || '—') + '</td>'
+          + '<td>' + ((n.sorties.par_devise || []).map(function (x) {
+            return E.montant(x.montant) + ' ' + x.devise;
+          }).join(' · ') || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var flux = d.flux.map(function (f) {
+        return '<tr>'
+          + '<td>' + E.dateCourte(f.date_prevue) + '</td>'
+          + '<td>' + E.echapper(f.libelle) + '</td>'
+          + '<td><span class="puce ' + (f.nature === 'realise' ? 'ok'
+            : f.nature === 'engage' ? 'info' : 'neutre') + '">'
+          + E.echapper(f.nature) + '</span></td>'
+          + '<td>' + (f.sens === 'entree' ? '+' : '−') + ' ' + E.montant(f.montant)
+          + ' ' + E.echapper(f.devise) + '</td>'
+          + '<td>' + (f.probabilite === null ? '—' : f.probabilite + ' %') + '</td>'
+          + '<td>' + E.echapper(f.compte || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Soldes des comptes',
+          E.tableau(['Compte', 'Type', 'Solde calculé', 'Entrées', 'Sorties', 'Mouvements',
+            'Seuil', 'État'], comptes,
+          { vide: d.etat_vide || 'Aucun compte financier déclaré.' }),
+          { sousTitre: 'Le solde est recalculé depuis les mouvements — jamais lu dans une '
+            + 'colonne, qui se désynchroniserait dès la première écriture concurrente.' })
+        + E.panneau('Prévision par nature',
+          E.tableau(['Nature', 'Éléments', 'Entrées', 'Sorties'], natures,
+            { vide: 'Aucun flux prévisionnel saisi.' }),
+          { sousTitre: 'Réalisé, engagé et prévu ne sont jamais additionnés : ce sont '
+            + 'trois degrés de certitude différents.' })
+        + E.panneau('Calendrier des flux',
+          E.tableau(['Date', 'Libellé', 'Nature', 'Montant', 'Probabilité', 'Compte'],
+            flux, { vide: 'Aucun flux prévu sur l’horizon.' }));
+    }).catch(echec);
+  }
+
+  // ── Budgets ────────────────────────────────────────────────────────────────
+
+  function vueBudgets() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/budgets').then(function (d) {
+      elSousTitre.textContent = 'Exercice ' + d.exercice
+        + (d.budget_courant ? ' · scénario ' + d.budget_courant.scenario : '');
+
+      var comparaison = d.comparaison.map(function (b) {
+        return '<tr>'
+          + '<td>' + E.echapper(b.departement || '—') + '</td>'
+          + '<td>' + E.echapper(b.categorie)
+          + (b.libelle ? '<br><small style="color:var(--texte-faible)">'
+            + E.echapper(b.libelle) + '</small>' : '') + '</td>'
+          + '<td>' + E.montant(b.budget) + ' ' + E.echapper(b.devise) + '</td>'
+          + '<td>' + E.montant(b.realise) + '</td>'
+          + '<td style="color:' + (b.ecart > 0 ? 'var(--alerte)' : 'var(--ok)') + '">'
+          + E.montant(b.ecart) + '</td>'
+          + '<td>' + (b.ecart_pct === null
+            ? '<small style="color:var(--texte-faible)">budget nul</small>'
+            : b.ecart_pct + ' %') + '</td>'
+          + '<td>' + (b.alerte ? '<span class="puce alerte">dépassé</span>'
+            : '<span class="puce ok">dans l’enveloppe</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var budgets = d.budgets.map(function (b) {
+        return '<tr>'
+          + '<td>' + E.echapper(b.libelle) + '</td>'
+          + '<td>' + E.echapper(b.scenario) + '</td>'
+          + '<td>v' + b.version + '</td>'
+          + '<td>' + E.montant(b.total_budget) + ' ' + E.echapper(b.devise) + '</td>'
+          + '<td>' + E.nombre(b.lignes) + '</td>'
+          + '<td>' + E.echapper(b.cree_par || '—') + '</td>'
+          + '<td><span class="puce ' + (b.statut === 'valide' ? 'ok' : 'attention') + '">'
+          + E.echapper(b.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Budget contre réalisé',
+          E.tableau(['Département', 'Catégorie', 'Budget', 'Réalisé', 'Écart', '%', 'Alerte'],
+            comparaison, { vide: d.etat_vide || 'Aucune ligne budgétaire.' }),
+          { sousTitre: 'Le réalisé compte les dépenses PAYÉES. Une demande refusée n’a '
+            + 'jamais consommé de budget.' })
+        + E.panneau('Budgets et scénarios',
+          E.tableau(['Budget', 'Scénario', 'Version', 'Total', 'Lignes', 'Créé par', 'Statut'],
+            budgets, { vide: 'Aucun budget pour cet exercice.' }));
+    }).catch(echec);
+  }
+
+  // ── Rentabilité ────────────────────────────────────────────────────────────
+
+  function vueRentabilite() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/rentabilite' + periode()).then(function (d) {
+      elSousTitre.textContent = 'du ' + d.periode.debut + ' au ' + d.periode.fin;
+
+      var offres = d.revenu_par_offre.filter(function (o) { return o.revenu; })
+        .map(function (o) {
+          return '<tr>'
+            + '<td>' + E.echapper(o.offre) + '</td>'
+            + '<td>' + E.nombre(o.clients) + '</td>'
+            + '<td>' + E.nombre(o.paiements) + '</td>'
+            + '<td>' + E.montant(o.revenu) + ' '
+            + E.echapper(o.devise || '(devise inconnue)') + '</td>'
+            + '</tr>';
+        }).join('');
+
+      var communes = d.revenu_par_commune.filter(function (c) { return c.revenu; })
+        .map(function (c) {
+          return '<tr>'
+            + '<td>' + E.echapper(c.commune) + '</td>'
+            + '<td>' + E.nombre(c.abonnes) + '</td>'
+            + '<td>' + E.montant(c.revenu) + ' '
+            + E.echapper(c.devise || '(devise inconnue)') + '</td>'
+            + '</tr>';
+        }).join('');
+
+      var couts = d.couts_payes.map(function (c) {
+        return '<tr>'
+          + '<td>' + E.echapper(c.departement || '—') + '</td>'
+          + '<td>' + E.echapper(c.zone || 'toutes zones') + '</td>'
+          + '<td>' + E.echapper(c.categorie) + '</td>'
+          + '<td>' + E.nombre(c.nombre) + '</td>'
+          + '<td>' + E.montant(c.montant) + ' ' + E.echapper(c.devise) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.grilleKpi([
+        { nom: 'Marge par offre', disponible: false, motif: d.marge_par_offre.motif },
+        { nom: 'Coût par collecte', disponible: false, motif: d.cout_par_collecte.motif },
+      ])
+        + E.panneau('Revenu encaissé par offre',
+          E.tableau(['Offre', 'Clients', 'Paiements', 'Revenu'], offres,
+            { vide: 'Aucun encaissement rattaché à une offre sur la période.' })
+          + totauxHtml(d.totaux_revenus))
+        + E.panneau('Revenu encaissé par commune',
+          E.tableau(['Commune', 'Abonnés', 'Revenu'], communes,
+            { vide: 'Aucun encaissement rattaché à une commune.' }))
+        + E.panneau('Coûts réellement payés',
+          E.tableau(['Département', 'Zone', 'Catégorie', 'Dépenses', 'Montant'], couts,
+            { vide: 'Aucune dépense payée sur la période.' })
+          + totauxHtml(d.totaux_couts),
+          { sousTitre: 'Ces coûts sont réels, mais ils ne sont pas imputés à une offre ni '
+            + 'à une tournée : c’est ce qui manque pour calculer une marge.' });
+    }).catch(echec);
+  }
+
+  // ── Rapprochement ──────────────────────────────────────────────────────────
+
+  function vueRapprochement() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-financiere/rapprochement' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.synthese.total) + ' transaction(s)';
+
+      var lignes = d.transactions.map(function (t) {
+        var puce = t.statut_comptable === 'rapproche' ? 'ok'
+          : t.statut_comptable === 'doublon' ? 'alerte'
+            : t.statut_comptable === 'ecarte' ? 'neutre' : 'attention';
+        return '<tr>'
+          + '<td>' + E.dateCourte(t.date_operation) + '</td>'
+          + '<td>' + E.echapper(t.reference || '—') + '</td>'
+          + '<td>' + E.echapper(t.contrepartie || t.libelle || '—') + '</td>'
+          + '<td>' + E.echapper(t.compte) + '</td>'
+          + '<td>' + (t.sens === 'entree' ? '+' : '−') + ' ' + E.montant(t.montant)
+          + ' ' + E.echapper(t.devise) + '</td>'
+          + '<td>' + E.dateCourte(t.date_valeur) + '</td>'
+          + '<td>' + E.nombre(t.age_jours) + ' j</td>'
+          + '<td><span class="puce ' + puce + '">'
+          + E.echapper(t.statut_comptable.replace(/_/g, ' ')) + '</span></td>'
+          + '<td>' + (t.statut_comptable === 'non_rapproche'
+            ? '<a href="#" class="citation" data-suggestions="' + t.id + '">Rapprocher</a>'
+            : (t.ecart ? 'écart ' + E.montant(t.ecart) : '—')) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var doublons = d.doublons_potentiels.map(function (x) {
+        return '<tr>'
+          + '<td>' + E.echapper(x.compte) + '</td>'
+          + '<td>' + E.dateCourte(x.date_operation) + '</td>'
+          + '<td>' + E.montant(x.montant) + ' ' + E.echapper(x.devise) + '</td>'
+          + '<td>' + E.echapper(x.contrepartie || '—') + '</td>'
+          + '<td><span class="puce alerte">' + x.occurrences + ' occurrences</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Transactions', valeur: d.synthese.total },
+          { nom: 'Rapprochées', valeur: d.synthese.rapprochees },
+          { nom: 'Non rapprochées', valeur: d.synthese.non_rapprochees },
+          d.taux_rapprochement.disponible
+            ? { nom: 'Taux de rapprochement', valeur: d.taux_rapprochement.valeur,
+              format: 'pourcent' }
+            : { nom: 'Taux de rapprochement', disponible: false,
+              motif: d.taux_rapprochement.motif },
+        ])
+        + E.panneau('Doublons probables',
+          E.tableau(['Compte', 'Date', 'Montant', 'Contrepartie', 'Occurrences'], doublons,
+            { vide: 'Aucun doublon détecté.' }),
+          { sousTitre: 'Détectés sur compte + montant + date + contrepartie, et non sur la '
+            + 'seule référence : un double encaissement Mobile Money porte souvent deux '
+            + 'références distinctes.' })
+        + E.panneau('Transactions',
+          E.tableau(['Date', 'Référence', 'Contrepartie', 'Compte', 'Montant', 'Valeur',
+            'Âge', 'Statut', 'Action'], lignes,
+          { vide: d.etat_vide || 'Aucune transaction sur la période.' }))
+        + '<div id="suggestions"></div>';
+
+      Array.prototype.forEach.call(
+        elContenu.querySelectorAll('[data-suggestions]'),
+        function (a) {
+          a.addEventListener('click', function (e) {
+            e.preventDefault();
+            suggestionsRapprochement(a.getAttribute('data-suggestions'));
+          });
+        }
+      );
+    }).catch(echec);
+  }
+
+  function suggestionsRapprochement(id) {
+    var cible = document.getElementById('suggestions');
+    cible.innerHTML = E.squelette(2);
+
+    EnviroAPI.get('/api/direction-financiere/rapprochement/transactions/' + id + '/suggestions')
+      .then(function (d) {
+        var lignes = d.suggestions.map(function (s) {
+          return '<tr>'
+            + '<td>' + E.echapper(s.client) + '<br>'
+            + '<small style="color:var(--texte-faible)">' + E.echapper(s.numero_abonne)
+            + '</small></td>'
+            + '<td>' + E.montant(s.montant) + ' ' + E.echapper(s.devise || '') + '</td>'
+            + '<td>' + E.dateCourte(s.date_paiement) + '</td>'
+            + '<td>' + E.echapper(s.reference_transaction || '—') + '</td>'
+            + '<td>' + E.echapper(s.methode_paiement) + '</td>'
+            + '<td><strong>' + s.score + '</strong> / 100</td>'
+            + '</tr>';
+        }).join('');
+
+        cible.innerHTML = E.panneau('Paiements candidats',
+          E.tableau(['Client', 'Montant', 'Date', 'Référence', 'Méthode', 'Score'],
+            lignes, { vide: 'Aucun paiement candidat trouvé.' }),
+          { sousTitre: 'Barème : montant identique ' + d.bareme.montant_identique
+            + ', date proche ' + d.bareme.date_proche + ', référence identique '
+            + d.bareme.reference_identique + '. ' + d.bareme.note });
+      }).catch(function (err) { E.afficherErreur(cible, err); });
+  }
+
+  // ── Approbations ───────────────────────────────────────────────────────────
+
+  function vueApprobations() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/approbations').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.demandes.length) + ' demande(s) financière(s)';
+
+      var lignes = d.demandes.map(function (x) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.objet || (x.type + ' #' + x.id)) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.type) + '</small></td>'
+          + '<td>' + (x.montant === null ? '—'
+            : E.montant(x.montant) + ' ' + E.echapper(x.devise || '(sans devise)')) + '</td>'
+          + '<td>' + E.echapper(x.demandeur || '—') + '</td>'
+          + '<td>' + E.echapper(x.departement || '—') + '</td>'
+          + '<td>' + E.dateCourte(x.echeance)
+          + (x.en_retard ? ' <span class="puce alerte">en retard</span>' : '') + '</td>'
+          + '<td>' + E.echapper(x.etape_libelle || '—') + '</td>'
+          + '<td>' + '<button class="action" data-decider="' + x.id
+          + '" data-sens="approuvee">Approuver</button> '
+          + '<button class="action danger" data-decider="' + x.id
+          + '" data-sens="refusee">Refuser</button>' + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('File d’approbation financière',
+        E.tableau(['Demande', 'Montant', 'Demandeur', 'Département', 'Échéance', 'Étape',
+          'Décision'], lignes, { vide: d.etat_vide || 'Aucune demande en attente.' }),
+        { sousTitre: 'Le montant est confronté à votre délégation au moment de décider : '
+          + 'un dépassement produit un refus motivé qui nomme le plafond.' });
+
+      Array.prototype.forEach.call(
+        elContenu.querySelectorAll('[data-decider]'),
+        function (bouton) {
+          bouton.addEventListener('click', function () {
+            var id = bouton.getAttribute('data-decider');
+            var sens = bouton.getAttribute('data-sens');
+            var motif = window.prompt(sens === 'refusee'
+              ? 'Motif du refus (obligatoire, 5 caractères minimum) :'
+              : 'Commentaire (facultatif) :');
+            if (sens === 'refusee' && (!motif || motif.trim().length < 5)) {
+              window.alert('Un refus doit être motivé.');
+              return;
+            }
+            bouton.disabled = true;
+            EnviroAPI.post('/api/approbations/' + id + '/decision', {
+              decision: sens, motif: motif || null,
+            }).then(function (r) {
+              window.alert(r.message);
+              vueApprobations();
+            }).catch(function (err) {
+              window.alert(err && err.message ? err.message : 'Décision refusée.');
+              bouton.disabled = false;
+            });
+          });
+        }
+      );
+    }).catch(echec);
+  }
+
+  // ── Fournisseurs ───────────────────────────────────────────────────────────
+
+  function vueFournisseurs() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/fournisseurs').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.fournisseurs.length) + ' fournisseur(s)';
+
+      var lignes = d.fournisseurs.map(function (f) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(f.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(f.code) + '</small></td>'
+          + '<td>' + E.echapper(f.categorie || '—') + '</td>'
+          + '<td>' + E.echapper(f.telephone || f.email || '—') + '</td>'
+          + '<td>' + E.echapper(f.rccm || '—') + '</td>'
+          + '<td>' + E.nombre(f.depenses) + '</td>'
+          + '<td>' + (f.total_paye === null ? '—'
+            : E.montant(f.total_paye) + ' ' + E.echapper(f.devise_habituelle || '')) + '</td>'
+          + '<td>' + E.dateCourte(f.dernier_paiement) + '</td>'
+          + '<td>' + (f.actif ? '<span class="puce ok">actif</span>'
+            : '<span class="puce neutre">inactif</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Fournisseurs',
+        E.tableau(['Fournisseur', 'Catégorie', 'Contact', 'RCCM', 'Dépenses', 'Total payé',
+          'Dernier paiement', 'État'], lignes,
+        { vide: d.etat_vide || 'Aucun fournisseur enregistré.' }));
+    }).catch(echec);
+  }
+
+  // ── Audit financier ────────────────────────────────────────────────────────
+
+  function vueAudit() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-financiere/audit' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.evenements.length) + ' mouvement(s) tracé(s)';
+
+      var lignes = d.evenements.map(function (e) {
+        return '<tr>'
+          + '<td>' + E.dateHeure(e.date_evenement) + '</td>'
+          + '<td>' + E.echapper(e.utilisateur || 'Système')
+          + (e.role ? '<br><small style="color:var(--texte-faible)">'
+            + E.echapper(e.role) + '</small>' : '') + '</td>'
+          + '<td>' + E.echapper(e.source) + '</td>'
+          + '<td>' + E.echapper(e.objet || '—') + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(e.objet_type)
+          + '</small></td>'
+          + '<td>' + (e.montant === null ? '—'
+            : E.montant(e.montant) + ' ' + E.echapper(e.devise || '')) + '</td>'
+          + '<td>' + E.echapper(e.action) + '</td>'
+          + '<td>' + E.echapper(e.motif || '—') + '</td>'
+          + '<td>' + E.echapper(e.ip_address || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Piste d’audit financière',
+        E.tableau(['Date', 'Utilisateur', 'Source', 'Objet', 'Montant', 'Action', 'Motif',
+          'IP'], lignes, { vide: d.etat_vide || 'Aucun mouvement tracé sur la période.' }),
+        { sousTitre: 'Agrège les décisions d’approbation et les rapprochements — deux '
+          + 'journaux qui existent déjà, plutôt qu’un troisième que personne ne lirait. '
+          + 'Sources : ' + E.echapper(d.sources.join(', ')) + '.' });
+    }).catch(echec);
+  }
+
   var allerA = E.router({
     tableau: vueTableau,
     encaissements: vueEncaissements,
@@ -465,6 +974,14 @@
     abonnements: vueAbonnements,
     recouvrement: vueRecouvrement,
     facturation: vueFacturation,
+    depenses: vueDepenses,
+    tresorerie: vueTresorerie,
+    budgets: vueBudgets,
+    rentabilite: vueRentabilite,
+    rapprochement: vueRapprochement,
+    approbations: vueApprobations,
+    fournisseurs: vueFournisseurs,
+    audit: vueAudit,
     registre: vueRegistre,
   }, TITRES);
 

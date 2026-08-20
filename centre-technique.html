@@ -145,6 +145,12 @@
       <a href="#" data-vue="integrations">Intégrations</a>
       <a href="#" data-vue="jobs">Jobs &amp; cron</a>
       <a href="#" data-vue="securite">Sécurité &amp; sessions</a>
+      <a href="#" data-vue="evenements">Erreurs &amp; journaux</a>
+      <a href="#" data-vue="historique">Historique des sondes</a>
+      <a href="#" data-vue="registre">Registre des intégrations</a>
+      <a href="#" data-vue="flags" data-permission="technical.config.manage">Feature flags</a>
+      <a href="#" data-vue="sauvegardes">Sauvegardes</a>
+      <a href="#" data-vue="incidents" data-permission="technical.incident.manage">Incidents techniques</a>
       <a href="#" data-vue="audit">Audit technique</a>
     </div>
   </nav>
@@ -167,6 +173,7 @@
 
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -202,8 +209,19 @@
     integrations: 'Intégrations',
     jobs: 'Jobs & cron',
     securite: 'Sécurité & sessions',
+    evenements: 'Erreurs & journaux',
+    historique: 'Historique des sondes',
+    registre: 'Registre des intégrations',
+    flags: 'Drapeaux de fonctionnalité',
+    sauvegardes: 'Sauvegardes',
+    incidents: 'Incidents techniques',
     audit: 'Audit technique',
   };
+
+  // Le châssis partagé fournit tableaux, panneaux et formats de date. Cette page garde
+  // ses propres `ligneSonde`, `panneauSondes` et `blocLegende` : ils portent la
+  // sémantique des quatre états du Centre technique, propre à cet écran.
+  var E = window.EspaceDirection;
 
   var LIBELLES_ETAT = {
     ok: 'OK', configure: 'Configuré', non_configure: 'Non configuré',
@@ -433,9 +451,279 @@
 
   // ── Routage ────────────────────────────────────────────────────────────────
 
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Vues ajoutées par la migration 018
+  // ══════════════════════════════════════════════════════════════════════════
+
+  function echecTech(err) {
+    elContenu.innerHTML = '<div class="erreur">'
+      + echapper(err && err.message ? err.message : 'Erreur inattendue.') + '</div>';
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  // ── Erreurs & journaux ─────────────────────────────────────────────────────
+
+  function vueEvenements() {
+    elContenu.innerHTML = squelette(5);
+
+    EnviroAPI.get('/api/tech/evenements?jours=7&limite=200').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.evenements.length) + ' événement(s) sur '
+        + d.fenetre_jours + ' jours';
+
+      var lignes = d.evenements.map(function (e) {
+        var puce = e.niveau === 'critique' || e.niveau === 'erreur' ? 'alerte'
+          : e.niveau === 'avertissement' ? 'attention' : 'neutre';
+        return '<tr>'
+          + '<td>' + E.dateHeure(e.created_at) + '</td>'
+          + '<td><span class="puce ' + puce + '">' + echapper(e.niveau) + '</span></td>'
+          + '<td>' + echapper(e.categorie) + '</td>'
+          + '<td>' + echapper(e.message) + '</td>'
+          + '<td>' + echapper(e.route || '—')
+          + (e.statut_http ? '<br><small style="color:var(--texte-faible)">'
+            + e.methode + ' ' + e.statut_http + '</small>' : '') + '</td>'
+          + '<td>' + echapper(e.utilisateur || '—') + '</td>'
+          + '<td>' + (e.duree_ms === null || e.duree_ms === undefined
+            ? '—' : e.duree_ms + ' ms') + '</td>'
+          + '<td>' + (e.correlation_id
+            ? '<code style="font-size:11px">' + echapper(e.correlation_id) + '</code>'
+            : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var niveaux = d.par_niveau.map(function (n) {
+        return '<tr><td>' + echapper(n.niveau) + '</td><td>'
+          + E.nombre(n.total) + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Répartition par niveau',
+          E.tableau(['Niveau', 'Événements'], niveaux, { vide: 'Aucun événement.' }))
+        + E.panneau('Journal structuré',
+          E.tableau(['Date', 'Niveau', 'Catégorie', 'Message', 'Route', 'Utilisateur',
+            'Durée', 'Corrélation'], lignes,
+          { vide: 'Aucun événement sur la fenêtre.' }),
+          { sousTitre: 'Deux lignes d’une même requête partagent leur identifiant de '
+            + 'corrélation : c’est ce qui permet de relire une trace complète.' });
+    }).catch(echecTech);
+  }
+
+  // ── Historique des sondes ──────────────────────────────────────────────────
+
+  function vueHistorique() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/historique?jours=7').then(function (d) {
+      elSousTitre.textContent = 'Fenêtre de ' + d.fenetre_jours + ' jours · rétention '
+        + d.retention_jours + ' jours';
+
+      var lignes = d.par_sonde.map(function (s) {
+        return '<tr>'
+          + '<td>' + echapper(s.composant) + '</td>'
+          + '<td><strong>' + echapper(s.sonde) + '</strong></td>'
+          + '<td>' + E.nombre(s.mesures) + '</td>'
+          + '<td>' + E.nombre(s.ok) + '</td>'
+          + '<td>' + (s.echecs > 0
+            ? '<span class="puce alerte">' + s.echecs + '</span>' : '0') + '</td>'
+          + '<td>' + (s.disponibilite_pct === null
+            ? '<small style="color:var(--texte-faible)">'
+              + echapper(s.disponibilite_motif) + '</small>'
+            : '<div class="barre" style="width:110px"><span style="width:'
+              + s.disponibilite_pct + '%"></span></div> ' + s.disponibilite_pct + ' %') + '</td>'
+          + '<td>' + (s.latence_moyenne_ms === null ? '—' : s.latence_moyenne_ms + ' ms') + '</td>'
+          + '<td>' + E.dateHeure(s.derniere_mesure) + '</td>'
+          + '<td>' + (s.dernier_echec ? E.dateHeure(s.dernier_echec) : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Disponibilité par sonde',
+          E.tableau(['Composant', 'Sonde', 'Mesures', 'OK', 'Échecs', 'Disponibilité',
+            'Latence moyenne', 'Dernière mesure', 'Dernier échec'], lignes,
+          { vide: 'Aucune mesure historisée. L’historique se remplit à chaque '
+            + 'consultation du cockpit.' }),
+          { sousTitre: 'La disponibilité ne compte que les mesures qui portent un '
+            + 'jugement : une sonde « non configurée » ne dit rien du service.' });
+    }).catch(echecTech);
+  }
+
+  // ── Registre des intégrations ──────────────────────────────────────────────
+
+  function vueRegistreIntegrations() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/integrations/registre').then(function (d) {
+      elSousTitre.textContent = d.synthese.ok + ' opérationnelle(s), '
+        + d.synthese.non_configurees + ' non configurée(s), '
+        + d.synthese.en_echec + ' en échec';
+
+      var lignes = d.integrations.map(function (i) {
+        var puce = i.etat_effectif === 'ok' ? 'ok'
+          : i.etat_effectif === 'echec' ? 'alerte'
+            : i.etat_effectif === 'non_configure' ? 'neutre' : 'attention';
+        return '<tr>'
+          + '<td><strong>' + echapper(i.libelle) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(i.categorie.replace(/_/g, ' '))
+          + '</small></td>'
+          + '<td><span class="puce ' + puce + '">'
+          + echapper(LIBELLES_ETAT[i.etat_effectif] || i.etat_effectif) + '</span></td>'
+          + '<td>' + (i.variables_manquantes.length
+            ? '<span class="puce attention">' + echapper(i.variables_manquantes.join(', '))
+              + '</span>'
+            : echapper((i.variables_requises || []).join(', ') || '—')) + '</td>'
+          + '<td>' + (i.testable ? 'oui' : 'non') + '</td>'
+          + '<td>' + E.dateHeure(i.dernier_succes_at) + '</td>'
+          + '<td>' + (i.dernier_echec_at ? E.dateHeure(i.dernier_echec_at) : '—') + '</td>'
+          + '<td>' + (i.echecs_consecutifs > 0
+            ? '<span class="puce alerte">' + i.echecs_consecutifs + '</span>' : '0') + '</td>'
+          + '<td>' + echapper(i.dernier_message || i.note || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.panneau('Registre des connecteurs',
+        E.tableau(['Intégration', 'État', 'Variables', 'Test non destructif',
+          'Dernier succès', 'Dernier échec', 'Échecs consécutifs', 'Message'], lignes,
+        { vide: 'Aucune intégration déclarée.' }))
+        + blocLegende(d.legende);
+    }).catch(echecTech);
+  }
+
+  // ── Drapeaux de fonctionnalité ─────────────────────────────────────────────
+
+  function vueFlags() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/feature-flags').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.flags.length) + ' drapeau(x)';
+
+      var lignes = d.flags.map(function (f) {
+        return '<tr>'
+          + '<td><strong>' + echapper(f.code) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + echapper(f.libelle) + '</small></td>'
+          + '<td>' + (f.actif ? '<span class="puce ok">actif</span>'
+            : '<span class="puce neutre">inactif</span>') + '</td>'
+          + '<td>' + echapper((f.roles_cibles || []).join(', ') || 'tous') + '</td>'
+          + '<td>' + echapper(f.motif) + '</td>'
+          + '<td>' + echapper(f.proprietaire || '—') + '</td>'
+          + '<td>' + E.dateCourte(f.retrait_prevu_le)
+          + (f.retrait_depasse
+            ? ' <span class="puce alerte">dépassée</span>' : '') + '</td>'
+          + '<td>' + E.dateHeure(f.modifie_le) + '</td>'
+          + '<td><button class="action ' + (f.actif ? 'danger' : '')
+          + '" data-flag="' + echapper(f.code) + '" data-actif="' + (!f.actif) + '">'
+          + (f.actif ? 'Désactiver' : 'Activer') + '</button></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Drapeaux',
+          E.tableau(['Drapeau', 'État', 'Rôles ciblés', 'Motif', 'Propriétaire',
+            'Retrait prévu', 'Modifié le', 'Action'], lignes,
+          { vide: 'Aucun drapeau déclaré.' }),
+          { sousTitre: 'Toute bascule exige un motif écrit et laisse une trace avec '
+            + 'l’état avant/après et l’adresse IP.' });
+
+      Array.prototype.forEach.call(
+        elContenu.querySelectorAll('[data-flag]'),
+        function (bouton) {
+          bouton.addEventListener('click', function () {
+            var code = bouton.getAttribute('data-flag');
+            var actif = bouton.getAttribute('data-actif') === 'true';
+            var motif = window.prompt('Motif du changement (obligatoire, 5 caractères '
+              + 'minimum) — il sera conservé dans la piste d’audit :');
+            if (!motif || motif.trim().length < 5) {
+              window.alert('Un changement de drapeau doit être motivé.');
+              return;
+            }
+            bouton.disabled = true;
+            EnviroAPI.post('/api/tech/feature-flags/' + encodeURIComponent(code),
+              { actif: actif, motif: motif.trim() })
+              .then(function (r) { window.alert(r.message); vueFlags(); })
+              .catch(function (err) {
+                window.alert(err && err.message ? err.message : 'Changement refusé.');
+                bouton.disabled = false;
+              });
+          });
+        }
+      );
+    }).catch(echecTech);
+  }
+
+  // ── Sauvegardes ────────────────────────────────────────────────────────────
+
+  function vueSauvegardes() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/sauvegardes').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.sauvegardes.length) + ' sauvegarde(s) consignée(s)';
+
+      var lignes = d.sauvegardes.map(function (b) {
+        return '<tr>'
+          + '<td>' + E.dateHeure(b.demarree_le) + '</td>'
+          + '<td>' + echapper(b.type_sauvegarde.replace(/_/g, ' ')) + '</td>'
+          + '<td>' + echapper(b.portee) + '</td>'
+          + '<td>' + (b.taille_octets
+            ? E.nombre(Math.round(b.taille_octets / 1048576)) + ' Mo' : '—') + '</td>'
+          + '<td><span class="puce ' + (b.statut === 'reussie' ? 'ok'
+            : b.statut === 'echouee' ? 'alerte' : 'attention') + '">'
+          + echapper(b.statut) + '</span></td>'
+          + '<td>' + (b.restauration_testee_le
+            ? '<span class="puce ok">' + E.dateCourte(b.restauration_testee_le) + '</span>'
+            : '<span class="puce attention">jamais testée</span>') + '</td>'
+          + '<td>' + echapper(b.enregistree_par || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + '<div class="note">' + echapper(d.restauration.motif) + '</div>'
+        + E.panneau('Registre des sauvegardes',
+          E.tableau(['Démarrée le', 'Type', 'Portée', 'Taille', 'Statut',
+            'Restauration testée', 'Consignée par'], lignes,
+          { vide: 'Aucune sauvegarde consignée.' }),
+          { sousTitre: 'Une sauvegarde dont la restauration n’a jamais été vérifiée n’est '
+            + 'pas une sauvegarde : c’est un fichier.' });
+    }).catch(echecTech);
+  }
+
+  // ── Incidents techniques ───────────────────────────────────────────────────
+
+  function vueIncidentsTechniques() {
+    elContenu.innerHTML = squelette(4);
+
+    EnviroAPI.get('/api/tech/incidents').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.ouverts) + ' incident(s) ouvert(s)';
+
+      var lignes = d.incidents.map(function (i) {
+        return '<tr>'
+          + '<td><strong>' + echapper(i.reference) + '</strong></td>'
+          + '<td>' + echapper(i.titre) + '</td>'
+          + '<td>' + echapper(i.composant || '—') + '</td>'
+          + '<td><span class="puce ' + (i.severite === 'critique' ? 'alerte'
+            : i.severite === 'majeur' ? 'attention' : 'neutre') + '">'
+          + echapper(i.severite) + '</span></td>'
+          + '<td>' + E.dateHeure(i.detecte_le) + '</td>'
+          + '<td>' + (i.duree_heures === null || i.duree_heures === undefined
+            ? '—' : Math.round(i.duree_heures) + ' h') + '</td>'
+          + '<td>' + echapper(i.cause_racine || '—') + '</td>'
+          + '<td>' + echapper(i.assigne_a || 'non assigné') + '</td>'
+          + '<td>' + echapper(i.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Incidents techniques',
+          E.tableau(['Réf.', 'Incident', 'Composant', 'Sévérité', 'Détecté le', 'Durée',
+            'Cause racine', 'Assigné à', 'Statut'], lignes,
+          { vide: 'Aucun incident technique enregistré.' }));
+    }).catch(echecTech);
+  }
+
   var VUES = {
     cockpit: vueCockpit, integrations: vueIntegrations,
     jobs: vueJobs, securite: vueSecurite, audit: vueAudit,
+    evenements: vueEvenements, historique: vueHistorique,
+    registre: vueRegistreIntegrations, flags: vueFlags,
+    sauvegardes: vueSauvegardes, incidents: vueIncidentsTechniques,
   };
 
   function allerA(vue) {

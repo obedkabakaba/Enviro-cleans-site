@@ -23,6 +23,12 @@
       <a href="#" data-vue="conges">Congés</a>
       <a href="#" data-vue="presence">Présence</a>
       <a href="#" data-vue="disponibilite">Disponibilité</a>
+      <a href="#" data-vue="recrutement" data-permission="hr.recruitment.manage">Recrutement</a>
+      <a href="#" data-vue="paie" data-permission="hr.payroll.prepare">Paie</a>
+      <a href="#" data-vue="performance">Performance</a>
+      <a href="#" data-vue="formations">Formations</a>
+      <a href="#" data-vue="discipline" data-permission="hr.discipline.restricted">Discipline &amp; sécurité</a>
+      <a href="#" data-vue="organigramme">Organigramme</a>
     </div>
   </nav>
 
@@ -83,6 +89,12 @@
     conges: 'Congés',
     presence: 'Présence',
     disponibilite: 'Disponibilité opérationnelle',
+    recrutement: 'Recrutement',
+    paie: 'Paie',
+    performance: 'Performance',
+    formations: 'Formations',
+    discipline: 'Discipline & sécurité',
+    organigramme: 'Organigramme & rapports RH',
   };
 
   function periode() {
@@ -375,16 +387,424 @@
             definition: 'Plafond de sécurité appliqué par le moteur de planification.' },
           { nom: 'Capacité théorique max', valeur: d.capacite_theorique_max,
             unite: ' clients/j',
-            note: 'THÉORIQUE : ignore la disponibilité des véhicules, dont la table '
-              + 'n’existe pas. Une équipe complète sans camion collecte zéro client.' },
+            note: 'THÉORIQUE tant que la flotte n’est pas saisie : une équipe complète '
+              + 'sans camion collecte zéro client. La table existe désormais ; c’est la '
+              + 'saisie qui manque.' },
           { nom: 'Disponibilité véhicules', disponible: false,
-            motif: 'Les tables `vehicles` et `vehicle_availability` n’existent pas. C’est '
-              + 'le seul critère de capacité que le moteur de planification ne peut pas '
-              + 'vérifier.' },
+            motif: 'Les tables `vehicles` et `vehicle_availability` existent depuis la '
+              + 'migration 016, mais la flotte n’y est pas encore saisie. Tant qu’elle '
+              + 'est vide, le moteur traite ce critère comme non renseigné et ne bloque '
+              + 'aucune affectation. Voir l’espace Opérations → Véhicules.' },
         ])
         + E.panneau('Disponibilité déclarée par jour de la semaine', semaineHtml(d),
           { sousTitre: 'Un jour « non déclaré » signifie qu’aucune disponibilité n’a été '
             + 'saisie — le moteur retombe alors sur le plafond par défaut.' });
+    }).catch(echec);
+  }
+
+
+  // ── Recrutement ────────────────────────────────────────────────────────────
+
+  function vueRecrutement() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/direction-rh/recrutement' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.postes.length) + ' poste(s) · '
+        + E.nombre(d.entonnoir.candidatures) + ' candidature(s) sur la période';
+
+      var etapes = [
+        ['Candidatures', d.entonnoir.candidatures],
+        ['Présélection', d.entonnoir.preselection],
+        ['Entretiens', d.entonnoir.entretiens],
+        ['Évaluations', d.entonnoir.evaluations],
+        ['Offres', d.entonnoir.offres],
+        ['Embauches', d.entonnoir.embauches],
+      ];
+      var maxi = Math.max.apply(null, etapes.map(function (e) { return e[1]; }).concat([1]));
+      var entonnoir = etapes.map(function (e) {
+        return '<tr><td>' + E.echapper(e[0]) + '</td>'
+          + '<td><div class="barre" style="width:180px"><span style="width:'
+          + Math.round((e[1] / maxi) * 100) + '%"></span></div></td>'
+          + '<td><strong>' + E.nombre(e[1]) + '</strong></td></tr>';
+      }).join('');
+
+      var postes = d.postes.map(function (o) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(o.intitule) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(o.reference) + '</small></td>'
+          + '<td>' + E.echapper(o.departement || '—') + '</td>'
+          + '<td>' + E.echapper(o.zone || '—') + '</td>'
+          + '<td>' + E.nombre(o.nombre_postes) + '</td>'
+          + '<td>' + E.nombre(o.candidatures) + '</td>'
+          + '<td>' + E.nombre(o.en_entretien) + '</td>'
+          + '<td>' + E.dateCourte(o.date_ouverture) + '</td>'
+          + '<td><span class="puce ' + (o.statut === 'actif' ? 'ok'
+            : o.statut === 'pourvu' ? 'info' : 'neutre') + '">'
+          + E.echapper(o.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var entretiens = d.entretiens_a_venir.map(function (a) {
+        return '<tr>'
+          + '<td>' + E.dateHeure(a.planifiee_le) + '</td>'
+          + '<td>' + E.echapper((a.prenom || '') + ' ' + a.nom) + '</td>'
+          + '<td>' + E.echapper(a.poste) + '</td>'
+          + '<td>' + E.echapper(a.lieu || '—') + '</td>'
+          + '<td>' + E.echapper(a.evaluateur || '—') + '</td>'
+          + '<td>' + (a.score === null ? '—' : a.score + ' / 5') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Postes ouverts', valeur: d.postes.filter(function (o) {
+            return o.statut === 'actif';
+          }).length },
+          { nom: 'Candidatures', valeur: d.entonnoir.candidatures },
+          { nom: 'Entretiens', valeur: d.entonnoir.entretiens },
+          d.taux_conversion.disponible
+            ? { nom: 'Taux de conversion', valeur: d.taux_conversion.valeur, format: 'pourcent',
+              base: 'sur ' + E.nombre(d.taux_conversion.base) + ' candidature(s)' }
+            : { nom: 'Taux de conversion', disponible: false, motif: d.taux_conversion.motif },
+        ])
+        + E.panneau('Entonnoir de recrutement',
+          E.tableau(['Étape', '', 'Candidats'], entonnoir),
+          { sousTitre: 'Compte les candidats PARVENUS à chaque étape, pas ceux qui y '
+            + 'stationnent : un candidat aujourd’hui en « offre » est bien passé par '
+            + 'l’entretien.' })
+        + E.panneau('Postes',
+          E.tableau(['Poste', 'Département', 'Zone', 'Postes', 'Candidatures', 'En entretien',
+            'Ouvert le', 'Statut'], postes, { vide: d.etat_vide || 'Aucun poste ouvert.' }))
+        + E.panneau('Entretiens à venir',
+          E.tableau(['Date', 'Candidat', 'Poste', 'Lieu', 'Évaluateur', 'Score'],
+            entretiens, { vide: 'Aucun entretien planifié.' }));
+    }).catch(echec);
+  }
+
+  // ── Paie ───────────────────────────────────────────────────────────────────
+
+  function vuePaie() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/paie').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.periodes.length) + ' période(s) de paie';
+
+      var lignes = d.periodes.map(function (p) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(p.code) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.dateCourte(p.date_debut)
+          + ' → ' + E.dateCourte(p.date_fin) + '</small></td>'
+          + '<td>' + E.nombre(p.effectif) + '</td>'
+          + '<td>' + (p.total_brut === null ? '—'
+            : E.montant(p.total_brut) + ' ' + E.echapper(p.devise)) + '</td>'
+          + '<td>' + (p.total_net === null ? '—' : E.montant(p.total_net)) + '</td>'
+          + '<td>' + (p.lignes_en_anomalie > 0
+            ? '<span class="puce alerte">' + p.lignes_en_anomalie + '</span>' : '0') + '</td>'
+          + '<td>' + E.echapper(p.preparee_par || '—') + '</td>'
+          + '<td>' + E.echapper(p.approuvee_par || '—') + '</td>'
+          + '<td><span class="puce ' + (p.statut === 'payee' ? 'ok'
+            : p.statut === 'approuvee' ? 'info'
+              : p.statut === 'ouverte' ? 'neutre' : 'attention') + '">'
+          + E.echapper(p.statut.replace(/_/g, ' ')) + '</span></td>'
+          + '<td><a href="#" class="citation" data-paie="' + p.id + '">Détail</a></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Périodes de paie',
+          E.tableau(['Période', 'Effectif', 'Brut', 'Net', 'Anomalies', 'Préparée par',
+            'Approuvée par', 'Statut', ''], lignes,
+          { vide: d.etat_vide || 'Aucune période de paie enregistrée.' }),
+          { sousTitre: 'Les RH préparent, la Finance approuve. La base refuse qu’un même '
+            + 'compte fasse les deux.' })
+        + '<div id="detailPaie"></div>';
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-paie]'), function (a) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          detailPaie(a.getAttribute('data-paie'));
+        });
+      });
+    }).catch(echec);
+  }
+
+  /** Détail nominatif — servi uniquement à `hr.payroll.prepare`. */
+  function detailPaie(id) {
+    var cible = document.getElementById('detailPaie');
+    cible.innerHTML = E.squelette(3);
+
+    EnviroAPI.get('/api/direction-rh/paie/' + id).then(function (d) {
+      var lignes = d.lignes.map(function (l) {
+        return '<tr>'
+          + '<td>' + E.echapper(l.matricule) + '</td>'
+          + '<td>' + E.echapper(l.employe) + '</td>'
+          + '<td>' + E.echapper(l.poste || '—') + '</td>'
+          + '<td>' + E.montant(l.salaire_base) + '</td>'
+          + '<td>' + E.montant(l.primes) + '</td>'
+          + '<td>' + E.montant(l.retenues) + '</td>'
+          + '<td><strong>' + E.montant(l.net) + '</strong></td>'
+          + '<td>' + (l.statut === 'anomalie'
+            ? '<span class="puce alerte">' + E.echapper(l.anomalie || 'anomalie') + '</span>'
+            : '<span class="puce ok">' + E.echapper(l.statut) + '</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      cible.innerHTML = E.panneau('Détail de la période ' + d.periode.code,
+        E.tableau(['Matricule', 'Employé', 'Poste', 'Base', 'Primes', 'Retenues', 'Net',
+          'Statut'], lignes, { vide: 'Aucune ligne de paie.' }),
+        { sousTitre: 'Données nominatives — diffusion restreinte.' });
+    }).catch(function (err) { E.afficherErreur(cible, err); });
+  }
+
+  // ── Performance ────────────────────────────────────────────────────────────
+
+  function vuePerformance() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/performance').then(function (d) {
+      elSousTitre.textContent = d.cycle_courant
+        ? 'Cycle ' + d.cycle_courant.libelle
+        : 'Aucun cycle ouvert';
+
+      var r = d.repartition_scores;
+      var evaluations = d.evaluations.map(function (e) {
+        return '<tr>'
+          + '<td>' + E.echapper(e.matricule) + '</td>'
+          + '<td>' + E.echapper(e.employe) + '</td>'
+          + '<td>' + E.echapper(e.poste || '—') + '</td>'
+          + '<td>' + E.echapper(e.departement || '—') + '</td>'
+          + '<td>' + (e.score === null ? '—' : e.score + ' / 5') + '</td>'
+          + '<td>' + E.echapper(e.evaluateur || '—') + '</td>'
+          + '<td><span class="puce ' + (e.statut === 'validee' ? 'ok'
+            : e.statut === 'contestee' ? 'alerte' : 'attention') + '">'
+          + E.echapper(e.statut) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      var cycles = d.cycles.map(function (c) {
+        return '<tr>'
+          + '<td>' + E.echapper(c.libelle) + '</td>'
+          + '<td>' + E.dateCourte(c.date_debut) + ' → ' + E.dateCourte(c.date_fin) + '</td>'
+          + '<td>' + E.nombre(c.evaluations) + '</td>'
+          + '<td>' + E.nombre(c.validees) + '</td>'
+          + '<td>' + (c.score_moyen === null ? '—' : c.score_moyen + ' / 5') + '</td>'
+          + '<td>' + E.echapper(c.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          d.taux_completion.disponible
+            ? { nom: 'Taux de complétion', valeur: d.taux_completion.valeur, format: 'pourcent',
+              base: d.taux_completion.base + ' contrat(s) actif(s) visé(s)' }
+            : { nom: 'Taux de complétion', disponible: false, motif: d.taux_completion.motif },
+          { nom: 'Excellentes (4–5)', valeur: r.excellente },
+          { nom: 'Bonnes (3–4)', valeur: r.bonne },
+          { nom: 'Faibles (< 2)', valeur: r.faible },
+          { nom: 'Non notées', valeur: r.non_notee,
+            definition: 'Évaluations créées mais sans score : elles ne comptent dans '
+              + 'aucune moyenne.' },
+        ])
+        + E.panneau('Scorecards du cycle',
+          E.tableau(['Matricule', 'Employé', 'Poste', 'Département', 'Score', 'Évaluateur',
+            'Statut'], evaluations, { vide: 'Aucune évaluation dans ce cycle.' }))
+        + E.panneau('Cycles d’évaluation',
+          E.tableau(['Cycle', 'Période', 'Évaluations', 'Validées', 'Score moyen', 'Statut'],
+            cycles, { vide: d.etat_vide || 'Aucun cycle créé.' }));
+    }).catch(echec);
+  }
+
+  // ── Formations ─────────────────────────────────────────────────────────────
+
+  function vueFormations() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/formations').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.catalogue.length) + ' formation(s) au catalogue';
+
+      var catalogue = d.catalogue.map(function (c) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(c.intitule) + '</strong>'
+          + (c.obligatoire ? ' <span class="puce attention">obligatoire</span>' : '') + '</td>'
+          + '<td>' + E.echapper(c.categorie || '—') + '</td>'
+          + '<td>' + (c.duree_heures === null ? '—' : c.duree_heures + ' h') + '</td>'
+          + '<td>' + E.echapper(c.mode || '—') + '</td>'
+          + '<td>' + E.echapper(c.langue || '—') + '</td>'
+          + '<td>' + E.nombre(c.inscrits) + '</td>'
+          + '<td>' + E.nombre(c.reussis) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var conformite = d.conformite_obligatoire.map(function (c) {
+        return '<tr>'
+          + '<td>' + E.echapper(c.intitule) + '</td>'
+          + '<td>' + E.nombre(c.effectif_cible) + '</td>'
+          + '<td>' + E.nombre(c.conformes) + '</td>'
+          + '<td>' + (c.non_conformes > 0
+            ? '<span class="puce alerte">' + c.non_conformes + '</span>' : '0') + '</td>'
+          + '<td>' + (c.expires > 0
+            ? '<span class="puce attention">' + c.expires + '</span>' : '0') + '</td>'
+          + '<td>' + (c.taux.disponible
+            ? '<div class="barre" style="width:110px"><span style="width:'
+              + c.taux.valeur + '%"></span></div> ' + c.taux.valeur + ' %'
+            : '<small style="color:var(--texte-faible)">' + E.echapper(c.taux.motif)
+              + '</small>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var certificats = d.certificats_recents.map(function (c) {
+        return '<tr>'
+          + '<td>' + E.echapper(c.employe) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(c.matricule)
+          + '</small></td>'
+          + '<td>' + E.echapper(c.formation) + '</td>'
+          + '<td>' + E.dateCourte(c.date_obtention) + '</td>'
+          + '<td>' + E.dateCourte(c.date_expiration) + '</td>'
+          + '<td>' + (c.certificat_url
+            ? '<a class="citation" href="' + E.echapper(c.certificat_url)
+              + '" target="_blank" rel="noopener">voir</a>' : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Conformité aux formations obligatoires',
+          E.tableau(['Formation', 'Effectif visé', 'Conformes', 'Non conformes', 'Expirés',
+            'Taux'], conformite,
+          { vide: 'Aucune formation obligatoire déclarée.' }),
+          { sousTitre: 'Un certificat périmé ne vaut pas conformité : il est compté à '
+            + 'part, pas parmi les conformes.' })
+        + E.panneau('Catalogue',
+          E.tableau(['Formation', 'Catégorie', 'Durée', 'Mode', 'Langue', 'Inscrits', 'Réussis'],
+            catalogue, { vide: d.etat_vide || 'Catalogue vide.' }))
+        + E.panneau('Certificats récents',
+          E.tableau(['Employé', 'Formation', 'Obtenu le', 'Expire le', 'Certificat'],
+            certificats, { vide: 'Aucun certificat enregistré.' }));
+    }).catch(echec);
+  }
+
+  // ── Discipline & sécurité ──────────────────────────────────────────────────
+
+  function vueDiscipline() {
+    elContenu.innerHTML = E.squelette(4);
+
+    Promise.all([
+      EnviroAPI.get('/api/direction-rh/discipline'),
+      EnviroAPI.get('/api/direction-rh/securite' + periode()),
+    ]).then(function (r) {
+      var d = r[0];
+      var s = r[1];
+      elSousTitre.textContent = E.nombre(d.compteurs.ouverts) + ' dossier(s) ouvert(s) · '
+        + E.nombre(s.compteurs.declares) + ' incident(s) de sécurité';
+
+      var dossiers = d.dossiers.map(function (x) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.reference) + '</strong></td>'
+          + '<td>' + E.echapper(x.employe) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.matricule)
+          + ' · ' + E.echapper(x.departement || '—') + '</small></td>'
+          + '<td>' + E.echapper(x.type_dossier) + '</td>'
+          + '<td><span class="puce ' + (x.severite === 'grave' || x.severite === 'elevee'
+            ? 'alerte' : x.severite === 'moyenne' ? 'attention' : 'neutre') + '">'
+          + E.echapper(x.severite) + '</span></td>'
+          + '<td>' + E.dateCourte(x.ouvert_le) + '</td>'
+          + '<td>' + E.echapper(x.prochaine_etape || '—') + '</td>'
+          + '<td>' + E.nombre(x.pieces) + '</td>'
+          + '<td>' + E.echapper(x.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var incidents = s.incidents.map(function (i) {
+        return '<tr>'
+          + '<td>' + E.echapper(i.reference) + '</td>'
+          + '<td>' + E.echapper(i.type_incident) + '</td>'
+          + '<td><span class="puce ' + (i.gravite === 'critique' || i.gravite === 'grave'
+            ? 'alerte' : i.gravite === 'modere' ? 'attention' : 'neutre') + '">'
+          + E.echapper(i.gravite) + '</span></td>'
+          + '<td>' + (i.avec_arret
+            ? '<span class="puce alerte">' + E.nombre(i.jours_arret) + ' j</span>' : 'non') + '</td>'
+          + '<td>' + E.echapper(i.employe || '—') + '</td>'
+          + '<td>' + E.echapper(i.zone || '—') + '</td>'
+          + '<td>' + E.dateCourte(i.date_incident) + '</td>'
+          + '<td>' + E.echapper(i.statut) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="avertissement">'
+        + E.echapper(d.confidentialite) + '</div>'
+        + E.grilleKpi([
+          { nom: 'Dossiers ouverts', valeur: d.compteurs.ouverts },
+          { nom: 'Dossiers graves', valeur: d.compteurs.graves },
+          { nom: 'Incidents déclarés', valeur: s.compteurs.declares },
+          { nom: 'Accidents avec arrêt', valeur: s.compteurs.avec_arret,
+            base: E.nombre(s.compteurs.jours_arret_total) + ' jour(s) d’arrêt cumulés' },
+          { nom: 'LTIFR', disponible: false, motif: s.ltifr.motif },
+        ])
+        + E.panneau('Registre des dossiers disciplinaires',
+          E.tableau(['Réf.', 'Employé', 'Type', 'Sévérité', 'Ouvert le', 'Prochaine étape',
+            'Pièces', 'Statut'], dossiers,
+          { vide: d.etat_vide || 'Aucun dossier disciplinaire.' }))
+        + E.panneau('Incidents de sécurité au travail',
+          E.tableau(['Réf.', 'Type', 'Gravité', 'Arrêt', 'Employé', 'Zone', 'Date', 'Statut'],
+            incidents, { vide: s.etat_vide || 'Aucun incident déclaré sur la période.' }),
+          { sousTitre: 'Un accident du travail n’est pas un dossier disciplinaire : les '
+            + 'deux registres sont distincts et n’ont pas les mêmes lecteurs.' });
+    }).catch(echec);
+  }
+
+  // ── Organigramme ───────────────────────────────────────────────────────────
+
+  function vueOrganigramme() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/direction-rh/organigramme').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.departements.length) + ' département(s)';
+
+      var departements = d.departements.map(function (x) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(x.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.code) + '</small></td>'
+          + '<td>' + E.echapper(x.responsable || 'non désigné') + '</td>'
+          + '<td>' + E.nombre(x.effectif_sous_contrat) + '</td>'
+          + '<td>' + E.nombre(x.profils_rattaches) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var postes = d.postes.map(function (p) {
+        return '<tr>'
+          + '<td>' + E.echapper(p.intitule) + '</td>'
+          + '<td>' + E.echapper(p.departement) + '</td>'
+          + '<td>' + E.nombre(p.pourvus) + '</td>'
+          + '<td>' + (p.capacite_journaliere_defaut === null ? '—'
+            : E.nombre(p.capacite_journaliere_defaut) + ' clients/j') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var plan = d.plan_effectifs.map(function (x) {
+        var ecart = x.cible - x.effectif_actuel;
+        return '<tr>'
+          + '<td>' + E.echapper(x.departement) + '</td>'
+          + '<td>' + E.nombre(x.effectif_actuel) + '</td>'
+          + '<td>' + E.nombre(x.postes_a_pourvoir) + '</td>'
+          + '<td>' + E.nombre(x.cible) + '</td>'
+          + '<td style="color:' + (ecart > 0 ? 'var(--attention)' : 'var(--texte-doux)') + '">'
+          + (ecart > 0 ? '−' + ecart : '0') + '</td>'
+          + '<td>' + (x.profils_sans_contrat > 0
+            ? '<span class="puce attention">' + x.profils_sans_contrat + '</span>' : '0') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Départements',
+          E.tableau(['Département', 'Responsable', 'Sous contrat', 'Profils rattachés'],
+            departements, { vide: 'Aucun département.' }),
+          { sousTitre: 'L’effectif est compté sur les CONTRATS actifs. Un profil sans '
+            + 'contrat existe en base mais n’est pas un effectif.' })
+        + E.panneau('Plan d’effectifs',
+          E.tableau(['Département', 'Effectif actuel', 'À pourvoir', 'Cible', 'Écart',
+            'Sans contrat'], plan, { vide: 'Aucun plan d’effectifs.' }))
+        + E.panneau('Postes',
+          E.tableau(['Poste', 'Département', 'Pourvus', 'Capacité par défaut'],
+            postes, { vide: 'Aucun poste déclaré.' }));
     }).catch(echec);
   }
 
@@ -397,6 +817,12 @@
     conges: vueConges,
     presence: vuePresence,
     disponibilite: vueDisponibilite,
+    recrutement: vueRecrutement,
+    paie: vuePaie,
+    performance: vuePerformance,
+    formations: vueFormations,
+    discipline: vueDiscipline,
+    organigramme: vueOrganigramme,
   }, TITRES);
 
   document.getElementById('appliquer').addEventListener('click', function () {

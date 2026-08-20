@@ -142,21 +142,27 @@
       // L'état de la mesure d'abord : il dit quelle proportion des indicateurs est
       // réellement mesurée. Le placer en tête est délibéré — lire un cockpit sans savoir
       // ce qu'il ne mesure pas est la façon la plus rapide de se tromper.
+      // `etatDeLaMesure` renvoie `indicateurs_calculables`, `indicateurs_non_mesures`,
+      // `total_declares`, `couverture_pct` et la LISTE `non_mesures`. Les noms comptent :
+      // passer la liste à une carte de KPI affichait « [object Object] » là où le lecteur
+      // attendait un compte.
       html += section('État de la mesure', d.etat_de_la_mesure, function (m) {
-        var cartes = [
-          { nom: 'Indicateurs mesurés', valeur: m.mesures,
-            base: 'sur ' + E.nombre(m.total) + ' au registre',
-            definition: 'Un indicateur « non mesuré » n’a pas de source de données, pas '
-              + 'une valeur nulle.' },
-          { nom: 'Non mesurés', valeur: m.non_mesures,
-            base: m.total ? Math.round((m.non_mesures / m.total) * 100) + ' % du registre' : '' },
-        ];
-        return E.grilleKpi(cartes)
-          + (m.motifs && m.motifs.length
-            ? E.panneau('Pourquoi ils ne sont pas mesurés',
-              E.listeOuVide(m.motifs.map(function (x) {
-                return (x.nom || x.code) + ' — ' + (x.motif || x.motif_indisponible || '');
-              }), 'Aucun motif déclaré.'))
+        var motifs = (m.non_mesures || []).map(function (x) {
+          return (x.nom || x.code) + ' — ' + (x.motif || x.motif_indisponible || '');
+        });
+        return E.grilleKpi([
+          { nom: 'Indicateurs mesurés', valeur: m.indicateurs_calculables,
+            base: 'sur ' + E.nombre(m.total_declares) + ' au registre',
+            definition: 'Un indicateur « non mesuré » n’a pas de donnée saisie ; ce n’est '
+              + 'pas une valeur nulle.' },
+          { nom: 'Non mesurés', valeur: m.indicateurs_non_mesures },
+          { nom: 'Couverture de la mesure', valeur: m.couverture_pct, format: 'pourcent',
+            base: 'part du registre réellement calculable' },
+        ])
+          + (m.lecture ? '<div class="note">' + E.echapper(m.lecture) + '</div>' : '')
+          + (motifs.length
+            ? E.panneau('Ce que nous ne mesurons pas, et pourquoi',
+              E.listeOuVide(motifs, 'Aucun motif déclaré.'))
             : '');
       });
 
