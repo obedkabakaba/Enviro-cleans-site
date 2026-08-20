@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Espace PDG - Enviro Cleans</title>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="marque">
+      <strong>Enviro Cleans</strong>
+      <span>Président-directeur général</span>
+    </div>
+    <div class="menu">
+      <a href="#" class="actif" data-vue="executive">Vue exécutive</a>
+      <a href="#" data-vue="performance">Performance globale</a>
+      <a href="#" data-vue="strategie">Stratégie &amp; objectifs</a>
+      <a href="#" data-vue="finances">Finances</a>
+      <a href="#" data-vue="operations">Opérations</a>
+      <a href="#" data-vue="croissance">Clients &amp; croissance</a>
+      <a href="#" data-vue="capital">Capital humain</a>
+      <a href="#" data-vue="risques">Risques &amp; conformité</a>
+      <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
+      <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
+      <a href="#" data-vue="approbations">Approbations</a>
+      <a href="#" data-vue="journal">Journal de direction</a>
+      <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
+    </div>
+  </nav>
+
+  <main class="principal">
+    <div class="topbar">
+      <div>
+        <h1 id="titreVue">Vue exécutive</h1>
+        <div class="sous-titre" id="sousTitre">Chargement…</div>
+      </div>
+      <div class="filtres">
+        <input type="date" id="dateDebut" aria-label="Date de début"/>
+        <input type="date" id="dateFin" aria-label="Date de fin"/>
+        <button class="action" id="appliquer">Appliquer</button>
+        <button class="action secondaire" id="deconnexion">Déconnexion</button>
+      </div>
+    </div>
+
+    <div id="contenu"></div>
+  </main>
+</div>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/enviro-auth.js"></script>
+<script src="assets/js/espace-direction.js"></script>
+<script>
+/**
+ * ════════════════════════════════════════
+ * ESPACE PDG
+ * ════════════════════════════════════════
+ *
+ * Treize vues, servies par /api/pdg/*. Aucun chiffre n'est calculé ici : chaque bloc
+ * vient du service de la direction qui en est la source. Un second calcul côté PDG
+ * finirait par diverger du premier, et deux chiffres d'affaires valent moins qu'un seul.
+ *
+ * ── Ce que cet écran n'affiche jamais ──
+ *
+ * Les dossiers disciplinaires. `hr.discipline.restricted` n'est pas accordée au rôle
+ * `pdg`, et aucune route de /api/pdg n'y touche. C'est une décision de conception : un
+ * dossier disciplinaire se lit par nécessité fonctionnelle, pas par rang hiérarchique.
+ *
+ * ── Les sections indisponibles ──
+ *
+ * Le backend renvoie chaque section séparément et tolère qu'une seule échoue. Une
+ * section absente s'affiche avec son motif, à SA place dans la page — le reste de la vue
+ * exécutive reste lisible. C'est exactement le cas où on la consulte.
+ */
+(function () {
+  'use strict';
+
+  var E = window.EspaceDirection;
+  var etat = { debut: null, fin: null, role: null };
+  var elContenu = document.getElementById('contenu');
+  var elSousTitre = document.getElementById('sousTitre');
+
+  var TITRES = {
+    executive: 'Vue exécutive',
+    performance: 'Performance globale',
+    strategie: 'Stratégie & objectifs',
+    finances: 'Finances',
+    operations: 'Opérations',
+    croissance: 'Clients & croissance',
+    capital: 'Capital humain',
+    risques: 'Risques & conformité',
+    investissements: 'Investissements',
+    conseil: 'Conseil de direction',
+    approbations: 'Approbations',
+    journal: 'Journal de direction',
+    administration: 'Administration métier',
+  };
+
+  function periode() {
+    var p = [];
+    if (etat.debut) p.push('debut=' + encodeURIComponent(etat.debut));
+    if (etat.fin) p.push('fin=' + encodeURIComponent(etat.fin));
+    return p.length ? '?' + p.join('&') : '';
+  }
+
+  function echec(err) {
+    E.afficherErreur(elContenu, err);
+    elSousTitre.textContent = 'Échec du chargement';
+  }
+
+  /** Une section que le backend a déclarée indisponible garde sa place et son motif. */
+  function section(titre, donnees, rendu) {
+    if (!donnees) return '';
+    if (donnees.indisponible) {
+      return E.panneau(titre, '<div class="erreur">' + E.echapper(donnees.motif) + '</div>');
+    }
+    return rendu(donnees);
+  }
+
+  function puceNiveau(niveau) {
+    var classes = {
+      critique: 'alerte', eleve: 'alerte', modere: 'attention', faible: 'ok',
+    };
+    return '<span class="puce ' + (classes[niveau] || 'neutre') + '">'
+      + E.echapper(niveau) + '</span>';
+  }
+
+  // ── Vue exécutive ──────────────────────────────────────────────────────────
+
+  function vueExecutive() {
+    elContenu.innerHTML = E.squelette(6);
+
+    EnviroAPI.get('/api/pdg/vue-executive' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Situation au ' + E.dateCourte(d.jour);
+
+      var html = '';
+
+      // L'état de la mesure d'abord : il dit quelle proportion des indicateurs est
+      // réellement mesurée. Le placer en tête est délibéré — lire un cockpit sans savoir
+      // ce qu'il ne mesure pas est la façon la plus rapide de se tromper.
+      html += section('État de la mesure', d.etat_de_la_mesure, function (m) {
+        var cartes = [
+          { nom: 'Indicateurs mesurés', valeur: m.mesures,
+            base: 'sur ' + E.nombre(m.total) + ' au registre',
+            definition: 'Un indicateur « non mesuré » n’a pas de source de données, pas '
+              + 'une valeur nulle.' },
+          { nom: 'Non mesurés', valeur: m.non_mesures,
+            base: m.total ? Math.round((m.non_mesures / m.total) * 100) + ' % du registre' : '' },
+        ];
+        return E.grilleKpi(cartes)
+          + (m.motifs && m.motifs.length
+            ? E.panneau('Pourquoi ils ne sont pas mesurés',
+              E.listeOuVide(m.motifs.map(function (x) {
+                return (x.nom || x.code) + ' — ' + (x.motif || x.motif_indisponible || '');
+              }), 'Aucun motif déclaré.'))
+            : '');
+      });
+
+      html += section('Approbations en attente', d.approbations, function (a) {
+        return E.grilleKpi([
+          { nom: 'Demandes ouvertes', valeur: a.ouvertes },
+          { nom: 'En retard', valeur: a.en_retard,
+            definition: 'Échéance dépassée, demande toujours ouverte.' },
+          { nom: 'Urgentes', valeur: a.urgentes },
+        ]) + E.panneau('Par type', typesApprobationHtml(a.par_type));
+      });
+
+      html += section('Risques', d.risques, function (r) {
+        return E.panneau('Risques ouverts', risquesHtml(r.risques.slice(0, 8)),
+          { sousTitre: (r.synthese.critiques || 0) + ' critique(s), '
+            + (r.synthese.eleves || 0) + ' élevé(s)' })
+          + E.avertissements(r.avertissements);
+      });
+
+      html += section('Objectifs', d.objectifs, function (o) {
+        return E.panneau('Objectifs d’entreprise', objectifsHtml(o.objectifs),
+          { sousTitre: o.synthese.part_en_bonne_voie === null
+            ? 'Aucun objectif mesuré'
+            : o.synthese.part_en_bonne_voie + ' % en bonne voie' });
+      });
+
+      html += section('Cockpit consolidé', d.cockpit, function (c) {
+        return cockpitHtml(c);
+      });
+
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  function cockpitHtml(c) {
+    var blocs = '';
+    ['operations', 'finance', 'marketing', 'ressources_humaines'].forEach(function (cle) {
+      var d = c[cle];
+      if (!d) return;
+      if (d.indisponible) {
+        blocs += E.panneau(cle, '<div class="erreur">' + E.echapper(d.motif) + '</div>');
+        return;
+      }
+      if (d.kpi) blocs += E.panneau(cle.replace(/_/g, ' '), E.grilleKpi(d.kpi));
+    });
+    return blocs || '<div class="etat-vide">Cockpit vide.</div>';
+  }
+
+  function typesApprobationHtml(types) {
+    var lignes = (types || []).map(function (t) {
+      return '<tr><td>' + E.echapper(t.type) + '</td><td>' + E.nombre(t.total) + '</td></tr>';
+    }).join('');
+    return E.tableau(['Type', 'En attente'], lignes, { vide: 'Aucune demande en attente.' });
+  }
+
+  // ── Performance globale ────────────────────────────────────────────────────
+
+  function vuePerformance() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/pdg/performance' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Les quatre domaines, à leur source';
+
+      var html = '<div class="note">' + E.echapper(d.note) + '</div>';
+      [['operations', 'Opérations'], ['finance', 'Finance'],
+        ['marketing', 'Marketing'], ['ressources_humaines', 'Ressources humaines']]
+        .forEach(function (paire) {
+          var bloc = d[paire[0]];
+          if (!bloc) return;
+          if (bloc.indisponible) {
+            html += E.panneau(paire[1], '<div class="erreur">' + E.echapper(bloc.motif) + '</div>');
+            return;
+          }
+          html += E.panneau(paire[1],
+            (bloc.kpi ? E.grilleKpi(bloc.kpi) : '')
+            + E.avertissements(bloc.avertissements || []));
+        });
+
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  // ── Stratégie & objectifs ──────────────────────────────────────────────────
+
+  function vueStrategie() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/strategie').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.objectifs.length) + ' objectif(s) · '
+        + E.nombre((d.projets || []).length) + ' projet(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Objectifs suivis', valeur: d.synthese.total },
+          { nom: 'Objectifs mesurés', valeur: d.synthese.mesurables,
+            base: 'les autres n’ont aucun résultat clé chiffré' },
+          d.synthese.part_en_bonne_voie === null
+            ? { nom: 'En bonne voie', disponible: false, motif: d.synthese.motif }
+            : { nom: 'En bonne voie', valeur: d.synthese.part_en_bonne_voie, format: 'pourcent',
+              base: d.synthese.en_bonne_voie + ' sur ' + d.synthese.mesurables + ' mesuré(s)' },
+          { nom: 'Projets à risque', valeur: d.portefeuille.projets_a_risque },
+        ])
+        + E.panneau('Arbre des objectifs', objectifsHtml(d.objectifs, true))
+        + E.panneau('Portefeuille de projets', projetsHtml(d.projets),
+          { sousTitre: d.portefeuille.motif || (d.portefeuille.total !== null
+            ? 'Total : ' + E.montant(d.portefeuille.total) + ' ' + d.portefeuille.devise : '') });
+    }).catch(echec);
+  }
+
+  function objectifsHtml(objectifs, detaille) {
+    if (!objectifs || objectifs.length === 0) {
+      return '<div class="etat-vide">Aucun objectif stratégique saisi.</div>';
+    }
+    return objectifs.map(function (o) {
+      var krs = (o.resultats_cles || []).map(function (k) {
+        var barre = k.progression === null
+          ? '<span style="color:var(--texte-faible);font-size:12px">non mesuré</span>'
+          : '<div class="barre" style="width:120px"><span style="width:'
+            + Math.min(k.progression, 100) + '%"></span></div>';
+        return '<tr>'
+          + '<td><strong>' + E.echapper(k.code) + '</strong> ' + E.echapper(k.intitule) + '</td>'
+          + '<td>' + E.nombre(k.valeur_actuelle) + ' / ' + E.nombre(k.valeur_cible)
+          + (k.unite ? ' ' + E.echapper(k.unite) : '') + '</td>'
+          + '<td>' + barre + '</td>'
+          + '<td>' + (k.progression === null ? '—' : k.progression + ' %') + '</td>'
+          + '<td><span class="puce ' + (k.confiance === 'elevee' ? 'ok'
+            : k.confiance === 'moyenne' ? 'attention' : 'neutre') + '">'
+          + E.echapper(k.confiance) + '</span></td>'
+          + '<td><small style="color:var(--texte-faible)">'
+          + (k.origine_mesure === 'kpi' ? 'calculé (' + E.echapper(k.kpi_code) + ')' : 'saisi')
+          + '</small></td>'
+          + '</tr>';
+      }).join('');
+
+      return '<div class="bloc">'
+        + '<h3>' + E.echapper(o.code) + ' — ' + E.echapper(o.intitule) + '</h3>'
+        + '<p class="meta">' + E.echapper(o.proprietaire || 'sans propriétaire')
+        + ' · ' + E.echapper(o.perimetre)
+        + (o.departement ? ' · ' + E.echapper(o.departement) : '')
+        + ' · ' + E.dateCourte(o.periode_debut) + ' → ' + E.dateCourte(o.periode_fin)
+        + ' · progression ' + (o.progression === null ? 'non mesurée' : o.progression + ' %')
+        + ' (' + o.resultats_mesures + '/' + o.resultats_total + ' résultat(s) mesuré(s))</p>'
+        + (detaille && krs
+          ? E.tableau(['Résultat clé', 'Valeur / cible', '', '%', 'Confiance', 'Origine'], krs)
+          : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function projetsHtml(projets) {
+    var lignes = (projets || []).map(function (p) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(p.nom) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(p.code) + '</small></td>'
+        + '<td>' + E.echapper(p.phase) + '</td>'
+        + '<td>' + (p.budget === null ? '—'
+          : E.montant(p.budget) + ' ' + E.echapper(p.devise || '')) + '</td>'
+        + '<td>' + puceNiveau(p.risque_global) + '</td>'
+        + '<td><div class="barre" style="width:90px"><span style="width:'
+        + Math.min(p.progression || 0, 100) + '%"></span></div> ' + (p.progression || 0) + ' %</td>'
+        + '<td>' + E.nombre(p.jalons_atteints) + '/' + E.nombre(p.jalons)
+        + (p.jalons_en_retard > 0
+          ? ' <span class="puce alerte">' + p.jalons_en_retard + ' en retard</span>' : '')
+        + '</td>'
+        + '<td>' + E.echapper(p.chef_projet || '—') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Projet', 'Phase', 'Budget', 'Risque', 'Avancement', 'Jalons', 'Chef de projet'],
+      lignes, { vide: 'Aucun projet stratégique enregistré.' });
+  }
+
+  // ── Finances ───────────────────────────────────────────────────────────────
+
+  function vueFinances() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/pdg/finances' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Vue financière exécutive';
+
+      var html = '';
+      html += section('Tableau de bord financier', d.tableau_de_bord, function (t) {
+        return (t.kpi ? E.grilleKpi(t.kpi) : '') + E.avertissements(t.avertissements || []);
+      });
+      html += section('Trésorerie', d.tresorerie, function (t) {
+        return E.panneau('Soldes des comptes', comptesHtml(t.comptes))
+          + E.avertissements(t.avertissements);
+      });
+      html += section('Budgets', d.budgets, function (b) {
+        return E.panneau('Budget contre réalisé', budgetHtml(b.comparaison),
+          { sousTitre: 'Exercice ' + b.exercice })
+          + E.avertissements(b.avertissements);
+      });
+      html += section('Rentabilité', d.rentabilite, function (r) {
+        return E.grilleKpi([
+          { nom: 'Marge par offre', disponible: false, motif: r.marge_par_offre.motif },
+          { nom: 'Coût par collecte', disponible: false, motif: r.cout_par_collecte.motif },
+        ]) + E.panneau('Revenu encaissé par offre', revenuHtml(r.revenu_par_offre));
+      });
+
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  function comptesHtml(comptes) {
+    var lignes = (comptes || []).map(function (c) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(c.libelle) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(c.institution || c.type_compte)
+        + '</small></td>'
+        + '<td>' + E.montant(c.solde) + ' ' + E.echapper(c.devise) + '</td>'
+        + '<td>' + E.nombre(c.mouvements) + '</td>'
+        + '<td>' + E.dateCourte(c.derniere_operation) + '</td>'
+        + '<td>' + (c.sous_seuil
+          ? '<span class="puce alerte">sous le seuil</span>' : '<span class="puce ok">ok</span>')
+        + '</td></tr>';
+    }).join('');
+    return E.tableau(['Compte', 'Solde calculé', 'Mouvements', 'Dernière opération', 'Seuil'],
+      lignes, { vide: 'Aucun compte financier déclaré.' });
+  }
+
+  function budgetHtml(lignesBudget) {
+    var lignes = (lignesBudget || []).map(function (b) {
+      return '<tr>'
+        + '<td>' + E.echapper(b.departement || '—') + '</td>'
+        + '<td>' + E.echapper(b.categorie) + '</td>'
+        + '<td>' + E.montant(b.budget) + ' ' + E.echapper(b.devise) + '</td>'
+        + '<td>' + E.montant(b.realise) + '</td>'
+        + '<td style="color:' + (b.ecart > 0 ? 'var(--alerte)' : 'var(--ok)') + '">'
+        + E.montant(b.ecart) + '</td>'
+        + '<td>' + (b.ecart_pct === null ? '—' : b.ecart_pct + ' %') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Département', 'Catégorie', 'Budget', 'Réalisé', 'Écart', '%'],
+      lignes, { vide: 'Aucune ligne budgétaire.' });
+  }
+
+  function revenuHtml(offres) {
+    var lignes = (offres || []).filter(function (o) { return o.revenu; }).map(function (o) {
+      return '<tr>'
+        + '<td>' + E.echapper(o.offre) + '</td>'
+        + '<td>' + E.nombre(o.clients) + '</td>'
+        + '<td>' + E.nombre(o.paiements) + '</td>'
+        + '<td>' + E.montant(o.revenu) + ' ' + E.echapper(o.devise || '(devise inconnue)') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Offre', 'Clients', 'Paiements', 'Revenu encaissé'], lignes,
+      { vide: 'Aucun encaissement rattaché à une offre sur la période.' });
+  }
+
+  // ── Opérations ─────────────────────────────────────────────────────────────
+
+  function vueOperations() {
+    elContenu.innerHTML = E.squelette(4);
+    EnviroAPI.get('/api/pdg/operations' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Vue exécutive des opérations';
+      elContenu.innerHTML = E.avertissements(d.avertissements || [])
+        + (d.kpi ? E.grilleKpi(d.kpi) : '')
+        + (d.zones ? E.panneau('Couverture par zone', zonesHtml(d.zones)) : '');
+    }).catch(echec);
+  }
+
+  function zonesHtml(zones) {
+    var liste = zones.zones || zones;
+    var lignes = (liste || []).map(function (z) {
+      return '<tr>'
+        + '<td>' + E.echapper(z.zone || z.nom) + '</td>'
+        + '<td>' + E.nombre(z.abonnes_actifs != null ? z.abonnes_actifs : z.clients) + '</td>'
+        + '<td>' + E.nombre(z.tournees) + '</td>'
+        + '<td>' + (z.taux_realisation === null || z.taux_realisation === undefined
+          ? '—' : z.taux_realisation + ' %') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Zone', 'Abonnés', 'Tournées', 'Réalisation'], lignes,
+      { vide: 'Aucune zone couverte sur la période.' });
+  }
+
+  // ── Clients & croissance ───────────────────────────────────────────────────
+
+  function vueCroissance() {
+    elContenu.innerHTML = E.squelette(4);
+    EnviroAPI.get('/api/pdg/clients-croissance' + periode()).then(function (d) {
+      elSousTitre.textContent = 'Acquisition, rétention et territoire';
+
+      var html = '';
+      html += section('Marketing', d.tableau_de_bord, function (t) {
+        return (t.kpi ? E.grilleKpi(t.kpi) : '') + E.avertissements(t.avertissements || []);
+      });
+      html += section('Rétention', d.retention, function (r) {
+        return E.panneau('Cohortes', cohortesHtml(r));
+      });
+      html += section('Territoire', d.territoire, function (t) {
+        return E.panneau('Par commune', territoireHtml(t));
+      });
+      elContenu.innerHTML = html;
+    }).catch(echec);
+  }
+
+  function cohortesHtml(r) {
+    var liste = r.cohortes || r.lignes || [];
+    var lignes = liste.map(function (c) {
+      return '<tr><td>' + E.echapper(c.cohorte || c.mois) + '</td>'
+        + '<td>' + E.nombre(c.effectif || c.total) + '</td>'
+        + '<td>' + (c.retention === null || c.retention === undefined
+          ? '—' : c.retention + ' %') + '</td></tr>';
+    }).join('');
+    return E.tableau(['Cohorte', 'Effectif', 'Rétention'], lignes,
+      { vide: 'Aucune cohorte exploitable.' });
+  }
+
+  function territoireHtml(t) {
+    var liste = t.communes || t.territoires || t.lignes || [];
+    var lignes = liste.map(function (c) {
+      return '<tr><td>' + E.echapper(c.commune || c.nom) + '</td>'
+        + '<td>' + E.nombre(c.abonnes || c.total) + '</td>'
+        + '<td>' + E.nombre(c.nouveaux) + '</td></tr>';
+    }).join('');
+    return E.tableau(['Commune', 'Abonnés', 'Nouveaux'], lignes,
+      { vide: 'Aucune donnée territoriale.' });
+  }
+
+  // ── Capital humain ─────────────────────────────────────────────────────────
+
+  function vueCapital() {
+    elContenu.innerHTML = E.squelette(4);
+    EnviroAPI.get('/api/pdg/capital-humain' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.effectifs.total_actifs) + ' personne(s) active(s)';
+      elContenu.innerHTML = E.avertissements(d.avertissements || [])
+        + E.grilleKpi([
+          { nom: 'Personnel actif', valeur: d.effectifs.total_actifs },
+          { nom: 'Contrats actifs', valeur: d.contrats.synthese.actifs },
+          { nom: 'Expirant sous 60 j', valeur: d.contrats.synthese.expirant_sous_60j },
+          { nom: 'Collecteurs actifs', valeur: d.disponibilite.collecteurs_actifs },
+        ])
+        + E.panneau('Effectifs par département', departementsHtml(d.effectifs.par_departement))
+        + '<div class="note">Cette vue ne porte ni rémunération individuelle, ni dossier '
+        + 'disciplinaire : ces informations se lisent par nécessité fonctionnelle, dans '
+        + 'l’espace RH, par les personnes habilitées.</div>';
+    }).catch(echec);
+  }
+
+  function departementsHtml(deps) {
+    var lignes = (deps || []).map(function (d) {
+      return '<tr><td>' + E.echapper(d.nom) + '</td>'
+        + '<td>' + E.nombre(d.effectif_sous_contrat) + '</td>'
+        + '<td>' + E.echapper(d.responsable || '—') + '</td></tr>';
+    }).join('');
+    return E.tableau(['Département', 'Sous contrat', 'Responsable'], lignes,
+      { vide: 'Aucun département renseigné.' });
+  }
+
+  // ── Risques & conformité ───────────────────────────────────────────────────
+
+  function vueRisques() {
+    elContenu.innerHTML = E.squelette(5);
+
+    EnviroAPI.get('/api/pdg/risques').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.synthese.total) + ' risque(s) ouvert(s)';
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.grilleKpi([
+          { nom: 'Risques critiques', valeur: d.synthese.critiques },
+          { nom: 'Risques élevés', valeur: d.synthese.eleves },
+          { nom: 'Escaladés au Conseil', valeur: d.synthese.escalades_conseil },
+          d.conformite.taux_conformite.disponible
+            ? { nom: 'Conformité', valeur: d.conformite.taux_conformite.valeur,
+              format: 'pourcent', base: d.conformite.taux_conformite.base }
+            : { nom: 'Conformité', disponible: false, motif: d.conformite.taux_conformite.motif },
+        ])
+        + E.panneau('Matrice probabilité / impact', matriceHtml(d.matrice),
+          { sousTitre: 'Nombre de risques ENREGISTRÉS par case. Une case vide ne signifie '
+            + 'pas absence de risque, mais absence de recensement.' })
+        + E.panneau('Registre des risques', risquesHtml(d.risques))
+        + E.panneau('Exigences de conformité', conformiteHtml(d.conformite.exigences))
+        + E.avertissements(d.conformite.avertissements);
+    }).catch(echec);
+  }
+
+  function matriceHtml(matrice) {
+    if (!matrice || matrice.length === 0) return '<div class="etat-vide">Aucun risque.</div>';
+    var html = '<div class="table-wrap"><table style="min-width:420px">'
+      + '<thead><tr><th>Probabilité \\ Impact</th>'
+      + [1, 2, 3, 4, 5].map(function (i) { return '<th>' + i + '</th>'; }).join('')
+      + '</tr></thead><tbody>';
+
+    matrice.forEach(function (ligne) {
+      html += '<tr><th>' + ligne.probabilite + '</th>';
+      ligne.cases.forEach(function (c) {
+        var fond = c.score >= 16 ? 'rgba(217,83,79,.22)'
+          : c.score >= 10 ? 'rgba(224,138,30,.20)'
+            : c.score >= 5 ? 'rgba(224,138,30,.10)' : 'rgba(58,181,74,.12)';
+        html += '<td style="text-align:center;background:' + fond + '" title="'
+          + E.echapper(c.references.join(', ')) + '">'
+          + '<strong>' + c.nombre + '</strong></td>';
+      });
+      html += '</tr>';
+    });
+    return html + '</tbody></table></div>';
+  }
+
+  function risquesHtml(risques) {
+    var lignes = (risques || []).map(function (r) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(r.intitule) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(r.reference) + '</small></td>'
+        + '<td>' + E.echapper(r.categorie) + '</td>'
+        + '<td>' + r.probabilite + ' × ' + r.impact + ' = ' + r.score + '</td>'
+        + '<td>' + puceNiveau(r.niveau) + '</td>'
+        + '<td>' + E.echapper(r.proprietaire || '—') + '</td>'
+        + '<td>' + E.echapper(r.strategie) + '</td>'
+        + '<td>' + E.dateCourte(r.echeance_traitement)
+        + (r.traitement_en_retard ? ' <span class="puce alerte">en retard</span>' : '') + '</td>'
+        + '<td>' + E.echapper(r.statut) + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(
+      ['Risque', 'Catégorie', 'P × I', 'Niveau', 'Propriétaire', 'Stratégie', 'Échéance', 'Statut'],
+      lignes, { vide: 'Registre des risques vide.' }
+    );
+  }
+
+  function conformiteHtml(exigences) {
+    var puces = {
+      conforme: 'ok', partiellement_conforme: 'attention',
+      non_conforme: 'alerte', non_evalue: 'neutre', non_applicable: 'neutre',
+    };
+    var lignes = (exigences || []).map(function (e) {
+      return '<tr>'
+        + '<td><strong>' + E.echapper(e.intitule) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(e.reference) + '</small></td>'
+        + '<td>' + E.echapper(e.domaine) + '</td>'
+        + '<td>' + E.echapper(e.autorite || '—') + '</td>'
+        + '<td><span class="puce ' + (puces[e.statut] || 'neutre') + '">'
+        + E.echapper(e.statut.replace(/_/g, ' ')) + '</span></td>'
+        + '<td>' + E.dateCourte(e.echeance)
+        + (e.echeance_depassee ? ' <span class="puce alerte">dépassée</span>' : '') + '</td>'
+        + '<td>' + E.echapper(e.proprietaire || '—') + '</td>'
+        + '</tr>';
+    }).join('');
+    return E.tableau(['Exigence', 'Domaine', 'Autorité', 'Statut', 'Échéance', 'Propriétaire'],
+      lignes, { vide: 'Aucune exigence de conformité recensée.' });
+  }
+
+  // ── Investissements ────────────────────────────────────────────────────────
+
+  function vueInvestissements() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/investissements').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.scenarios.length) + ' scénario(s)';
+
+      var lignes = d.scenarios.map(function (s) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(s.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(s.code) + '</small></td>'
+          + '<td>' + E.montant(s.capex) + ' ' + E.echapper(s.devise) + '</td>'
+          + '<td>' + (s.van === null ? '—' : E.montant(s.van)) + '</td>'
+          + '<td>' + (s.tri_pct === null ? '—' : s.tri_pct + ' %') + '</td>'
+          + '<td>' + (s.payback_annees === null ? '—' : s.payback_annees + ' ans') + '</td>'
+          + '<td>' + (s.hypotheses
+            ? '<span class="puce ok">documentées</span>'
+            : '<span class="puce alerte">absentes</span>') + '</td>'
+          + '<td>' + E.echapper(s.statut) + '</td>'
+          + '<td>' + (s.recommande ? '<span class="puce ok">recommandé</span>' : '—') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Scénarios d’investissement',
+          E.tableau(['Scénario', 'Capex', 'VAN', 'TRI', 'Retour', 'Hypothèses', 'Statut', ''],
+            lignes, { vide: 'Aucun scénario enregistré.' }),
+          { sousTitre: 'VAN, TRI et délai de récupération sont SAISIS avec leurs '
+            + 'hypothèses, jamais recalculés : ce sont des choix financiers, pas des '
+            + 'formules universelles.' });
+    }).catch(echec);
+  }
+
+  // ── Conseil de direction ───────────────────────────────────────────────────
+
+  function vueConseil() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/conseil' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.packs.length) + ' dossier(s) · '
+        + E.nombre(d.decisions.length) + ' décision(s)';
+
+      var packs = d.packs.map(function (p) {
+        var pieces = (p.pieces || []).map(function (x) {
+          return '<li>' + E.echapper(x.nom || x.titre || '(pièce)')
+            + (x.url ? ' — <a class="citation" href="' + E.echapper(x.url)
+              + '" target="_blank" rel="noopener">ouvrir</a>' : '') + '</li>';
+        }).join('');
+        return '<div class="bloc"><h3>' + E.echapper(p.titre) + '</h3>'
+          + '<p class="meta">Séance du ' + E.dateCourte(p.date_seance)
+          + ' · ' + E.echapper(p.statut)
+          + (p.prepare_par ? ' · préparé par ' + E.echapper(p.prepare_par) : '') + '</p>'
+          + (pieces ? '<ul class="compact">' + pieces + '</ul>'
+            : '<p class="meta">Aucune pièce jointe.</p>')
+          + '</div>';
+      }).join('');
+
+      var decisions = d.decisions.map(function (x) {
+        return '<tr>'
+          + '<td>' + E.dateCourte(x.date_seance) + '</td>'
+          + '<td>' + E.echapper(x.sujet) + '</td>'
+          + '<td>' + E.echapper(x.resolution) + '</td>'
+          + '<td>' + x.votes_pour + ' / ' + x.votes_contre + ' / ' + x.abstentions + '</td>'
+          + '<td><span class="puce ' + (x.resultat === 'approuvee' ? 'ok'
+            : x.resultat === 'rejetee' ? 'alerte' : 'neutre') + '">'
+          + E.echapper(x.resultat) + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Dossiers du conseil', packs || '<div class="etat-vide">Aucun dossier.</div>')
+        + E.panneau('Historique des décisions et votes',
+          E.tableau(['Séance', 'Sujet', 'Résolution', 'Pour / Contre / Abst.', 'Résultat'],
+            decisions, { vide: 'Aucune décision enregistrée.' }));
+    }).catch(echec);
+  }
+
+  // ── Approbations ───────────────────────────────────────────────────────────
+
+  function vueApprobations() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/approbations').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total) + ' demande(s)';
+      elContenu.innerHTML = approbationsHtml(d, true);
+      brancherDecisions();
+    }).catch(echec);
+  }
+
+  function approbationsHtml(d, avecActions) {
+    var lignes = d.demandes.map(function (x) {
+      var actions = '';
+      if (avecActions && x.statut !== 'approuvee' && x.statut !== 'refusee') {
+        actions = '<button class="action" data-decider="' + x.id + '" data-sens="approuvee">'
+          + 'Approuver</button> '
+          + '<button class="action danger" data-decider="' + x.id + '" data-sens="refusee">'
+          + 'Refuser</button>';
+      }
+      return '<tr>'
+        + '<td><strong>' + E.echapper(x.objet || (x.type + ' #' + x.id)) + '</strong><br>'
+        + '<small style="color:var(--texte-faible)">' + E.echapper(x.type)
+        + (x.departement ? ' · ' + E.echapper(x.departement) : '') + '</small></td>'
+        + '<td>' + (x.montant === null ? '—'
+          : E.montant(x.montant) + ' ' + E.echapper(x.devise || '(sans devise)')) + '</td>'
+        + '<td>' + E.echapper(x.demandeur || '—') + '</td>'
+        + '<td>' + E.echapper(x.etape_libelle || '—') + '<br>'
+        + '<small style="color:var(--texte-faible)">étape ' + x.etape_courante
+        + '/' + x.nombre_etapes + '</small></td>'
+        + '<td>' + E.dateCourte(x.echeance)
+        + (x.en_retard ? ' <span class="puce alerte">en retard</span>' : '') + '</td>'
+        + '<td><span class="puce ' + (x.statut === 'approuvee' ? 'ok'
+          : x.statut === 'refusee' ? 'alerte' : 'attention') + '">'
+        + E.echapper(x.statut) + '</span></td>'
+        + '<td>' + actions
+        + (x.decidable_par_moi === false && x.motif_non_decidable
+          ? '<small style="color:var(--texte-faible)">'
+            + E.echapper(x.motif_non_decidable) + '</small>' : '')
+        + '</td>'
+        + '</tr>';
+    }).join('');
+
+    return E.tableau(
+      ['Demande', 'Montant', 'Demandeur', 'Étape', 'Échéance', 'Statut', 'Action'],
+      lignes, { vide: d.etat_vide || 'Aucune demande.' }
+    );
+  }
+
+  /**
+   * Branche les boutons de décision.
+   *
+   * Un refus exige un motif : le `prompt` est volontairement bloquant. Sans motif, le
+   * demandeur resoumettrait la même chose sans savoir ce qui n'allait pas — et le
+   * backend refuse de toute façon.
+   */
+  function brancherDecisions() {
+    Array.prototype.forEach.call(
+      elContenu.querySelectorAll('[data-decider]'),
+      function (bouton) {
+        bouton.addEventListener('click', function () {
+          var id = bouton.getAttribute('data-decider');
+          var sens = bouton.getAttribute('data-sens');
+          var motif = window.prompt(sens === 'refusee'
+            ? 'Motif du refus (obligatoire, 5 caractères minimum) :'
+            : 'Commentaire (facultatif) :');
+
+          if (sens === 'refusee' && (!motif || motif.trim().length < 5)) {
+            window.alert('Un refus doit être motivé.');
+            return;
+          }
+
+          bouton.disabled = true;
+          EnviroAPI.post('/api/approbations/' + id + '/decision', {
+            decision: sens, motif: motif || null,
+          }).then(function (r) {
+            window.alert(r.message);
+            vueApprobations();
+          }).catch(function (err) {
+            window.alert(err && err.message ? err.message : 'Décision refusée.');
+            bouton.disabled = false;
+          });
+        });
+      }
+    );
+  }
+
+  // ── Journal de direction ───────────────────────────────────────────────────
+
+  function vueJournal() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/journal' + periode()).then(function (d) {
+      elSousTitre.textContent = E.nombre(d.total) + ' décision(s) au journal';
+
+      var lignes = d.decisions.map(function (x) {
+        return '<tr>'
+          + '<td>' + E.dateHeure(x.decide_le) + '</td>'
+          + '<td>' + E.echapper(x.decide_par || 'Système')
+          + (x.decide_par_role ? '<br><small style="color:var(--texte-faible)">'
+            + E.echapper(x.decide_par_role) + '</small>' : '') + '</td>'
+          + '<td>' + E.echapper(x.categorie) + '</td>'
+          + '<td><strong>' + E.echapper(x.objet) + '</strong><br>'
+          + '<small>' + E.echapper(x.decision) + '</small></td>'
+          + '<td>' + (x.montant === null ? '—'
+            : E.montant(x.montant) + ' ' + E.echapper(x.devise || '')) + '</td>'
+          + '<td>' + E.echapper(x.delegation_domaine
+            ? 'délégation ' + x.delegation_domaine : 'pouvoir propre') + '</td>'
+          + '<td><code style="font-size:11px">' + E.echapper(x.empreinte_courte) + '</code></td>'
+          + '</tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="note">' + E.echapper(d.garantie) + '</div>'
+        + E.panneau('Journal des décisions',
+          E.tableau(['Date', 'Décideur', 'Catégorie', 'Décision', 'Montant', 'En vertu de', 'Empreinte'],
+            lignes, { vide: 'Journal vide.' }));
+    }).catch(echec);
+  }
+
+  // ── Administration métier ──────────────────────────────────────────────────
+
+  function vueAdministration() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/administration').then(function (d) {
+      elSousTitre.textContent = 'Délégations et seuils d’approbation';
+
+      var delegations = d.delegations.map(function (x) {
+        return '<tr>'
+          + '<td>' + E.echapper(x.delegataire) + '<br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(x.delegataire_role || '')
+          + '</small></td>'
+          + '<td>' + E.echapper(x.domaine) + '</td>'
+          + '<td>' + (x.plafond_montant === null ? 'non financière'
+            : E.montant(x.plafond_montant) + ' ' + E.echapper(x.devise)) + '</td>'
+          + '<td>' + E.dateCourte(x.date_debut) + ' → ' + E.dateCourte(x.date_fin) + '</td>'
+          + '<td>' + (x.active ? '<span class="puce ok">active</span>'
+            : '<span class="puce neutre">inactive</span>') + '</td>'
+          + '<td>' + E.nombre(x.decisions_prises) + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var seuils = d.seuils.map(function (s) {
+        return '<tr><td>' + E.echapper(s.type) + '</td>'
+          + '<td>' + E.echapper(s.seuil.niveau_requis) + '</td>'
+          + '<td>' + E.echapper((s.seuil.roles_decideurs || []).join(', ') || '—') + '</td>'
+          + '<td><small style="color:var(--texte-faible)">'
+          + E.echapper(s.seuil.source) + '</small></td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="note">' + E.echapper(d.note) + '</div>'
+        + E.panneau('Délégations d’autorité',
+          E.tableau(['Délégataire', 'Domaine', 'Plafond', 'Période', 'État', 'Décisions'],
+            delegations, { vide: 'Aucune délégation enregistrée.' }))
+        + E.panneau('Seuils d’approbation',
+          E.tableau(['Type de demande', 'Niveau requis', 'Rôles décideurs', 'Source'],
+            seuils, { vide: 'Aucun seuil déclaré.' }),
+          { sousTitre: 'Ces seuils sont des DONNÉES, modifiables sans redéploiement.' });
+    }).catch(echec);
+  }
+
+  // ── Démarrage ──────────────────────────────────────────────────────────────
+
+  var allerA = E.router({
+    executive: vueExecutive,
+    performance: vuePerformance,
+    strategie: vueStrategie,
+    finances: vueFinances,
+    operations: vueOperations,
+    croissance: vueCroissance,
+    capital: vueCapital,
+    risques: vueRisques,
+    investissements: vueInvestissements,
+    conseil: vueConseil,
+    approbations: vueApprobations,
+    journal: vueJournal,
+    administration: vueAdministration,
+  }, TITRES);
+
+  document.getElementById('appliquer').addEventListener('click', function () {
+    etat.debut = document.getElementById('dateDebut').value || null;
+    etat.fin = document.getElementById('dateFin').value || null;
+    allerA(document.querySelector('.menu a.actif').getAttribute('data-vue'));
+  });
+
+  document.getElementById('deconnexion').addEventListener('click', function () {
+    EnviroAPI.deconnecter();
+  });
+
+  EnviroAuth.proteger({ permissions: ['executive.dashboard.read'] })
+    .then(function (ctx) {
+      etat.role = ctx.role;
+      EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
+      allerA('executive');
+    });
+}());
+</script>
+<script src="assets/js/theme.js" defer></script>
+</body>
+</html>
