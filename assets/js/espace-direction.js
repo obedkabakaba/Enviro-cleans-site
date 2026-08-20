@@ -135,12 +135,44 @@
     return '<div class="grille-kpi">' + cartes.map(carteKpi).join('') + '</div>';
   }
 
-  /** Bandeau d'avertissements. Vide s'il n'y en a pas — pas de cadre décoratif. */
-  function avertissements(liste) {
+  /**
+   * Bandeau d'avertissements.
+   *
+   * ── Pourquoi ils sont repliés au-delà de deux ──
+   *
+   * Ces avertissements disent ce qu'il ne faut PAS conclure de la donnée, et chacun est
+   * utile. Mais sur une base encore peu remplie, le tableau de bord RH en produit seize.
+   * Empilés en pleine largeur, ils repoussent les indicateurs sous la ligne de flottaison
+   * et donnent à un écran parfaitement sain l'aspect d'une plateforme en panne — c'est
+   * d'ailleurs ainsi qu'ils ont été rapportés : « des messages d'erreur partout ».
+   *
+   * Un avertissement qu'on ne lit plus ne sert à rien, et un mur qui fait peur est pire
+   * qu'un mur ignoré. Au-delà de deux, ils sont donc regroupés dans un bloc dépliable :
+   * le compte reste visible en permanence, le détail est à un clic. Rien n'est masqué,
+   * rien n'est perdu — c'est l'ordre de lecture qui change.
+   *
+   * En dessous de trois, ils restent affichés tels quels : deux lignes ne noient rien.
+   */
+  function avertissements(liste, options) {
     if (!liste || liste.length === 0) return '';
-    return liste.map(function (a) {
-      return '<div class="avertissement">' + echapper(a) + '</div>';
-    }).join('');
+    options = options || {};
+
+    var uniques = liste.filter(function (a, i) { return liste.indexOf(a) === i; });
+    var seuil = options.seuil || 3;
+
+    if (uniques.length < seuil) {
+      return uniques.map(function (a) {
+        return '<div class="avertissement">' + echapper(a) + '</div>';
+      }).join('');
+    }
+
+    return '<details class="avertissement replie">'
+      + '<summary><strong>' + uniques.length + ' remarque(s) sur la qualité des données'
+      + '</strong> — ce que ces chiffres ne disent pas</summary>'
+      + '<ul>' + uniques.map(function (a) {
+        return '<li>' + echapper(a) + '</li>';
+      }).join('') + '</ul>'
+      + '</details>';
   }
 
   /** Liste, avec état vide explicite plutôt qu'une section qui disparaît. */

@@ -239,6 +239,21 @@ a.citation{ color:var(--info-texte); word-break:break-word; }
   background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30);
   color:var(--attention-texte);
 }
+/* Avertissements repliés : le compte reste visible, le détail est à un clic. */
+.avertissement.replie{ padding:0; }
+.avertissement.replie summary{
+  padding:11px 14px; cursor:pointer; list-style:none; user-select:none;
+}
+.avertissement.replie summary::-webkit-details-marker{ display:none; }
+.avertissement.replie summary::after{
+  content:' ▾'; opacity:.7; font-size:11px;
+}
+.avertissement.replie[open] summary::after{ content:' ▴'; }
+.avertissement.replie[open] summary{ border-bottom:1px solid rgba(224,138,30,.26); }
+.avertissement.replie ul{ margin:0; padding:10px 16px 12px 32px; }
+.avertissement.replie li{ margin-bottom:7px; }
+.avertissement.replie li:last-child{ margin-bottom:0; }
+
 .note{
   padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
   background:rgba(63,111,216,.08); border:1px solid rgba(63,111,216,.26); color:var(--texte-doux);

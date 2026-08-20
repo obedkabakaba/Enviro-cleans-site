@@ -336,11 +336,10 @@
       + '</div>';
   }
 
+  // Même rendu que partout ailleurs : au-delà de deux, les avertissements sont repliés
+  // derrière leur compte. Cette page avait sa propre implémentation, qui les empilait.
   function afficherAvertissements(liste) {
-    if (!liste || liste.length === 0) { elAvertissements.innerHTML = ''; return; }
-    elAvertissements.innerHTML = liste.map(function (a) {
-      return '<div class="avertissement">' + echapper(a) + '</div>';
-    }).join('');
+    elAvertissements.innerHTML = E.avertissements(liste);
   }
 
   // ── Vue : centre de contrôle ───────────────────────────────────────────────
