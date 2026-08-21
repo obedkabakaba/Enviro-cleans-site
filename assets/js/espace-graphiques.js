@@ -809,11 +809,11 @@ window.G = (function () {
         })
       ),
     })
-    + '<div class="note" style="margin-top:10px">Carte sans fond de plan. Les positions '
+    + (options.sansNote ? '' : '<div class="note" style="margin-top:10px">Carte sans fond de plan. Les positions '
       + 'et les distances sont exactes ; les rues, le fleuve et les limites de communes '
       + 'ne sont pas représentés. Les afficher demande un fournisseur de tuiles '
       + 'cartographiques et le tracé GeoJSON des communes de Kinshasa — deux éléments '
-      + 'externes à la plateforme.</div>';
+      + 'externes à la plateforme.</div>');
   };
 
   /**

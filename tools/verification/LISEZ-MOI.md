@@ -39,3 +39,21 @@ Vérifie aussi qu'aucun élément ne déborde horizontalement (en ignorant ce qu
 légitimement dans son propre conteneur), et que **le bouton de bascule du thème a un
 effet réel** — il n'en avait aucun sur ces pages avant août 2026, et rien ne le
 signalait.
+
+## `carte-repli.js`
+
+Vérifie que la carte **ne casse jamais** quand le fond de plan manque. Il simule un
+fichier `.pmtiles` absent (404) et contrôle que :
+
+- le contrôle préalable détecte l'absence **avant** de télécharger 1,2 Mo de modules ;
+- la carte SVG s'affiche à la place, avec ses points et ses tournées ;
+- la note dit la vraie cause — « fichier introuvable », pas « erreur de chargement ».
+
+C'est le scénario le plus probable en exploitation : quelqu'un renomme le fichier,
+le compartiment repasse en privé, ou l'URL change. La vue doit continuer de servir.
+
+## `carte-style.js`
+
+Contrôle que l'API de style de Protomaps est utilisée correctement — `namedFlavor` en
+clair et en sombre, `layers()` produisant des couches toutes rattachées à la bonne
+source. Un style invalide échouerait silencieusement par un fond gris.

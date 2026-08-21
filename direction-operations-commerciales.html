@@ -73,6 +73,8 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/carte-config.js"></script>
+<script src="assets/js/carte-maplibre.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -574,36 +576,7 @@
         { nom: 'Position des véhicules', disponible: false,
           motif: d.positions_vehicules.motif },
       ])
-        + E.panneau('Carte du jour',
-          G.carte(
-            d.arrets.map(function (a) {
-              return {
-                latitude: a.latitude, longitude: a.longitude,
-                libelle: a.client + ' — ' + (a.numero_abonne || ''),
-                etat: a.statut,
-                detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
-              };
-            }).concat(d.incidents.filter(function (i) {
-              return i.latitude !== null && i.longitude !== null;
-            }).map(function (i) {
-              return {
-                latitude: i.latitude, longitude: i.longitude,
-                libelle: i.titre, etat: 'incident', type: 'incident',
-                detail: i.severite + ' · ' + (i.zone || ''),
-              };
-            })),
-            {
-              titre: null,
-              tournees: d.tournees.map(function (t) {
-                return {
-                  nom: t.nom || ('Tournée ' + t.id),
-                  arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
-                };
-              }),
-              motifVide: 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
-                + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
-            }
-          ))
+        + E.panneau('Carte du jour', '<div id="carteDuJour"></div>')
         + E.panneau('Tournées en cours',
           E.tableau(['Tournée', 'Zone', 'Collecteur', 'Véhicule', 'Arrêts', 'Traités',
             'Échecs', 'Progression', 'Statut'], tournees,
@@ -616,6 +589,40 @@
             arrets, { vide: 'Aucun arrêt géolocalisé.' }),
           { sousTitre: 'Les coordonnées ouvrent la position dans une carte externe : '
             + 'aucun fond cartographique payant n’est chargé dans la page.' });
+
+      // Le conteneur vient d'être injecté : la carte se monte maintenant. Elle décide
+      // seule entre fond de plan et repli SVG, selon ce qui est configuré et joignable.
+      var pointsCarte = d.arrets.map(function (a) {
+        return {
+          latitude: a.latitude,
+          longitude: a.longitude,
+          libelle: a.client + ' — ' + (a.numero_abonne || ''),
+          etat: a.statut,
+          detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
+        };
+      }).concat(d.incidents.filter(function (i) {
+        return i.latitude !== null && i.longitude !== null;
+      }).map(function (i) {
+        return {
+          latitude: i.latitude,
+          longitude: i.longitude,
+          libelle: i.titre,
+          etat: 'incident',
+          type: 'incident',
+          detail: i.severite + ' · ' + (i.zone || ''),
+        };
+      }));
+
+      CarteInteractive.afficher('carteDuJour', pointsCarte, {
+        tournees: d.tournees.map(function (t) {
+          return {
+            nom: t.nom || ('Tournée ' + t.id),
+            arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
+          };
+        }),
+        motifVide: 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
+          + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
+      });
     }).catch(afficherErreur);
   }
 
