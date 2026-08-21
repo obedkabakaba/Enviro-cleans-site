@@ -142,13 +142,53 @@
 
       var html = '';
 
-      // L'état de la mesure d'abord : il dit quelle proportion des indicateurs est
-      // réellement mesurée. Le placer en tête est délibéré — lire un cockpit sans savoir
-      // ce qu'il ne mesure pas est la façon la plus rapide de se tromper.
-      // `etatDeLaMesure` renvoie `indicateurs_calculables`, `indicateurs_non_mesures`,
-      // `total_declares`, `couverture_pct` et la LISTE `non_mesures`. Les noms comptent :
-      // passer la liste à une carte de KPI affichait « [object Object] » là où le lecteur
-      // attendait un compte.
+      // ── L'ORDRE DE CETTE PAGE EST UNE DÉCISION, PAS UN HASARD ──
+      //
+      // Elle commençait par « l'état de la mesure » et ses onze lignes de ce que la
+      // plateforme ne mesure pas. L'intention était bonne — on ne lit pas un cockpit sans
+      // savoir ce qu'il ignore — mais le résultat ne l'était pas : le PDG ouvrait son
+      // espace sur une page entière de limitations, et devait faire défiler quatre
+      // sections avant d'atteindre son chiffre d'affaires.
+      //
+      // Un avertissement placé avant l'information qu'il qualifie ne qualifie plus rien :
+      // il la remplace. L'ordre est donc inversé. Les chiffres d'abord, ce qui appelle une
+      // décision ensuite, les réserves à la fin — replié, mais toujours là, et toujours
+      // rappelé en une ligne sous les indicateurs concernés.
+
+      // 1. Le métier. C'est ce pour quoi on ouvre cette page.
+      html += section('Cockpit consolidé', d.cockpit, function (c) {
+        return cockpitHtml(c);
+      });
+
+      // 2. Ce qui attend une décision du PDG.
+      html += section('Approbations en attente', d.approbations, function (a) {
+        return E.grilleKpi([
+          { nom: 'Demandes ouvertes', valeur: a.ouvertes },
+          { nom: 'En retard', valeur: a.en_retard,
+            definition: 'Échéance dépassée, demande toujours ouverte.' },
+          { nom: 'Urgentes', valeur: a.urgentes },
+        ]) + E.panneau('Par type', typesApprobationHtml(a.par_type));
+      });
+
+      html += section('Objectifs', d.objectifs, function (o) {
+        return E.panneau('Objectifs d’entreprise', objectifsHtml(o.objectifs),
+          { sousTitre: o.synthese.part_en_bonne_voie === null
+            ? 'Aucun objectif mesuré'
+            : o.synthese.part_en_bonne_voie + ' % en bonne voie' });
+      });
+
+      html += section('Risques', d.risques, function (r) {
+        return E.panneau('Risques ouverts', risquesHtml(r.risques.slice(0, 8)),
+          { sousTitre: (r.synthese.critiques || 0) + ' critique(s), '
+            + (r.synthese.eleves || 0) + ' élevé(s)' })
+          + E.avertissements(r.avertissements);
+      });
+
+      // 3. Les réserves, en fin de page et repliées.
+      //
+      // Elles passent par `E.avertissements`, qui replie au-delà de deux entrées : le
+      // compte reste visible en permanence — « 11 remarques » —, le détail est à un clic.
+      // Rien n'est masqué ; ce qui change, c'est que la page ne s'ouvre plus dessus.
       html += section('État de la mesure', d.etat_de_la_mesure, function (m) {
         var motifs = (m.non_mesures || []).map(function (x) {
           return (x.nom || x.code) + ' — ' + (x.motif || x.motif_indisponible || '');
@@ -163,54 +203,182 @@
             base: 'part du registre réellement calculable' },
         ])
           + (m.lecture ? '<div class="note">' + E.echapper(m.lecture) + '</div>' : '')
-          + (motifs.length
-            ? E.panneau('Ce que nous ne mesurons pas, et pourquoi',
-              E.listeOuVide(motifs, 'Aucun motif déclaré.'))
-            : '');
-      });
-
-      html += section('Approbations en attente', d.approbations, function (a) {
-        return E.grilleKpi([
-          { nom: 'Demandes ouvertes', valeur: a.ouvertes },
-          { nom: 'En retard', valeur: a.en_retard,
-            definition: 'Échéance dépassée, demande toujours ouverte.' },
-          { nom: 'Urgentes', valeur: a.urgentes },
-        ]) + E.panneau('Par type', typesApprobationHtml(a.par_type));
-      });
-
-      html += section('Risques', d.risques, function (r) {
-        return E.panneau('Risques ouverts', risquesHtml(r.risques.slice(0, 8)),
-          { sousTitre: (r.synthese.critiques || 0) + ' critique(s), '
-            + (r.synthese.eleves || 0) + ' élevé(s)' })
-          + E.avertissements(r.avertissements);
-      });
-
-      html += section('Objectifs', d.objectifs, function (o) {
-        return E.panneau('Objectifs d’entreprise', objectifsHtml(o.objectifs),
-          { sousTitre: o.synthese.part_en_bonne_voie === null
-            ? 'Aucun objectif mesuré'
-            : o.synthese.part_en_bonne_voie + ' % en bonne voie' });
-      });
-
-      html += section('Cockpit consolidé', d.cockpit, function (c) {
-        return cockpitHtml(c);
+          + E.avertissements(motifs);
       });
 
       elContenu.innerHTML = html;
     }).catch(echec);
   }
 
+  // ── Le cockpit consolidé ──
+  //
+  // Il cherchait quatre clés — operations, finance, marketing, ressources_humaines — dont
+  // DEUX n'existent pas dans la réponse : le service renvoie `effectifs`, `disponibilite`
+  // et `signaux_transversaux`. Seul le bloc « operations » s'affichait donc, et le PDG
+  // voyait un cockpit d'un seul domaine sans que rien n'indique que trois autres avaient
+  // été calculés et jetés.
+  //
+  // Les titres sont écrits, pas dérivés de la clé : `cle.replace(/_/g,' ')` affichait
+  // « operations » en minuscules dans l'espace du président.
+
+  function carte(nom, valeur, options) {
+    var c = { nom: nom, valeur: valeur };
+    Object.keys(options || {}).forEach(function (k) { c[k] = options[k]; });
+    return c;
+  }
+
+  // ── Composeurs par domaine ──
+  //
+  // Chaque service métier renvoie SA forme : `operations` porte des cartes toutes
+  // prêtes, `finance` des agrégats, `marketing` des séries, `ressources_humaines` des
+  // synthèses. Le cockpit et la vue Performance affichaient donc `bloc.kpi` et rien
+  // d'autre — soit trois panneaux vides sur quatre, sans que rien n'indique que les
+  // données avaient bien été calculées.
+  //
+  // Ces fonctions traduisent chaque forme en cartes. Elles servent aux deux vues : un
+  // second jeu de règles finirait par diverger du premier.
+
+  function carte(nom, valeur, options) {
+    var c = { nom: nom, valeur: valeur };
+    Object.keys(options || {}).forEach(function (k) { c[k] = options[k]; });
+    return c;
+  }
+
+  function cartesFinance(f) {
+    var enc = f.encaissements || {};
+    var rec = f.recouvrement || {};
+    var abo = (f.abonnements && f.abonnements.etat) || {};
+    var sansAbo = rec.service_rendu_sans_abonnement || {};
+    return [
+      carte('Encaissé sur la période', enc.encaisse, {
+        base: E.nombre(enc.reussies) + ' paiement(s) réussi(s)',
+        definition: 'Somme des paiements au statut « réussi ». Les devises ne sont PAS '
+          + 'additionnées : voir Finances → Encaissements pour le détail par devise.' }),
+      carte('Ticket moyen', enc.ticket_moyen, {
+        base: E.nombre(enc.payeurs_distincts) + ' payeur(s) distinct(s)' }),
+      enc.taux_echec_pct === null
+        ? carte('Taux d’échec de paiement', null, { disponible: false,
+          motif: 'Aucune transaction sur la période : le taux n’a pas de base.' })
+        : carte('Taux d’échec de paiement', enc.taux_echec_pct, { format: 'pourcent',
+          base: 'sur ' + E.nombre(enc.base_taux_echec) + ' transaction(s)' }),
+      carte('Abonnements actifs', abo.actifs_couvrant_aujourdhui, {
+        definition: 'Abonnements dont la période couvre RÉELLEMENT aujourd’hui, et non '
+          + 'ceux qui portent le statut « actif ».' }),
+      carte('Service rendu sans abonnement', sansAbo.clients, {
+        base: E.nombre(sansAbo.collectes) + ' collecte(s) · ' + (sansAbo.fenetre || ''),
+        definition: 'Clients collectés alors qu’aucun abonnement payé ne couvrait la date '
+          + 'du service. C’est une fuite de revenu, pas une erreur d’affichage.' }),
+    ];
+  }
+
+  function cartesMarketing(m) {
+    var acq = m.acquisition || {};
+    var attr = m.attribution || {};
+    var wa = (m.canal_whatsapp && m.canal_whatsapp.conversations) || {};
+    return [
+      carte('Dossiers créés', acq.total_dossiers, {
+        base: 'sur la période' }),
+      carte('Dossiers ayant payé', acq.total_ayant_paye, {
+        definition: 'Un dossier créé n’est pas un client : seul le paiement le rend actif.' }),
+      acq.total_dossiers
+        ? carte('Taux de conversion', Math.round(((acq.total_ayant_paye || 0) / acq.total_dossiers) * 1000) / 10,
+          { format: 'pourcent', base: E.nombre(acq.total_ayant_paye) + ' sur ' + E.nombre(acq.total_dossiers) })
+        : carte('Taux de conversion', null, { disponible: false,
+          motif: 'Aucun dossier créé sur la période.' }),
+      carte('Dossiers sans source', attr.dossiers_sans_source, {
+        definition: 'Sans canal d’acquisition renseigné, l’attribution reste inexploitable.' }),
+      carte('Conversations WhatsApp', wa.conversations, {
+        base: E.nombre(wa.actives_7j) + ' active(s) sur 7 jours' }),
+    ];
+  }
+
+  function cartesRh(rh) {
+    var eff = rh.effectifs || {};
+    var ctr = (rh.contrats && rh.contrats.synthese) || {};
+    var prs = rh.presence || {};
+    var taux = prs.taux_presence || {};
+    return [
+      carte('Personnel actif', eff.total_actifs, {
+        base: 'sur ' + E.nombre(eff.total_personnel) + ' compte(s)' }),
+      carte('Contrats actifs', ctr.actifs, {
+        base: E.nombre(ctr.expirant_sous_60j) + ' expirant sous 60 jours' }),
+      taux.disponible
+        ? carte('Taux de présence', taux.valeur, { format: 'pourcent',
+          base: E.nombre((prs.brut || {}).jours_saisis) + ' jour(s) saisi(s)' })
+        : carte('Taux de présence', null, { disponible: false,
+          motif: taux.motif || 'Aucune présence saisie sur la période.' }),
+      carte('Sans fiche RH', eff.personnel_sans_profil_rh, {
+        definition: 'Comptes de personnel sans dossier RH : absents des contrats, des '
+          + 'présences et de la disponibilité.' }),
+    ];
+  }
+
+  function cartesCapitalHumain(eff, dispo) {
+    return [
+      carte('Personnel actif', eff.total_actifs, {
+        base: 'sur ' + E.nombre(eff.total_personnel) + ' compte(s) au total' }),
+      carte('Sans fiche RH', eff.personnel_sans_profil_rh, {
+        definition: 'Comptes de personnel sans dossier RH : ils n’apparaissent ni dans les '
+          + 'contrats, ni dans les présences, ni dans la disponibilité.' }),
+      carte('Collecteurs actifs', dispo.collecteurs_actifs),
+      carte('Capacité théorique', dispo.capacite_theorique_max, {
+        base: E.nombre(dispo.plafond_absolu_par_collecteur) + ' clients/jour et par collecteur',
+        definition: 'THÉORIQUE : le critère « véhicule disponible » ne s’exerce pas tant '
+          + 'que la flotte n’est pas saisie.' }),
+    ];
+  }
+
+  function signauxHtml(st) {
+    if (st.aucun_signal || !st.signaux || st.signaux.length === 0) {
+      return '<div class="etat-vide">Aucun signal transversal détecté sur la période.</div>';
+    }
+    return st.signaux.map(function (sig) {
+      var grave = (sig.gravite === 'grave' || sig.niveau === 'grave') ? ' grave' : '';
+      return '<div class="signal' + grave + '">'
+        + '<div class="entete">' + E.echapper(sig.titre || sig.nom || 'Signal') + '</div>'
+        + (sig.constat ? '<div>' + E.echapper(sig.constat) + '</div>' : '')
+        + (sig.explication ? '<p class="explication">' + E.echapper(sig.explication) + '</p>' : '')
+        + (sig.source ? '<div class="source">' + E.echapper(sig.source) + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  function sectionIndisponible(titre, motif) {
+    return E.panneau(titre,
+      '<div class="signal"><div class="entete">Section indisponible</div>'
+      + E.echapper(motif) + '</div>');
+  }
+
   function cockpitHtml(c) {
     var blocs = '';
-    ['operations', 'finance', 'marketing', 'ressources_humaines'].forEach(function (cle) {
-      var d = c[cle];
-      if (!d) return;
-      if (d.indisponible) {
-        blocs += E.panneau(cle, '<div class="erreur">' + E.echapper(d.motif) + '</div>');
-        return;
-      }
-      if (d.kpi) blocs += E.panneau(cle.replace(/_/g, ' '), E.grilleKpi(d.kpi));
-    });
+
+    if (c.operations && !c.operations.indisponible && c.operations.kpi) {
+      blocs += E.panneau('Opérations et collecte', E.grilleKpi(c.operations.kpi));
+    }
+    if (c.finance && !c.finance.indisponible) {
+      blocs += E.panneau('Finance', E.grilleKpi(cartesFinance(c.finance)));
+    }
+
+    var effOk = c.effectifs && !c.effectifs.indisponible;
+    var dispoOk = c.disponibilite && !c.disponibilite.indisponible;
+    if (effOk || dispoOk) {
+      blocs += E.panneau('Capital humain',
+        E.grilleKpi(cartesCapitalHumain(effOk ? c.effectifs : {}, dispoOk ? c.disponibilite : {})));
+    }
+
+    // Ce qu'aucune direction ne voit seule — probablement le bloc le plus utile de la
+    // page, et il n'était pas affiché du tout.
+    if (c.signaux_transversaux && !c.signaux_transversaux.indisponible) {
+      blocs += E.panneau('Signaux transversaux', signauxHtml(c.signaux_transversaux),
+        { sousTitre: c.signaux_transversaux.note_couverture || null });
+    }
+
+    ['operations', 'finance', 'effectifs', 'disponibilite', 'signaux_transversaux']
+      .forEach(function (cle) {
+        var d = c[cle];
+        if (d && d.indisponible) blocs += sectionIndisponible(cle.replace(/_/g, ' '), d.motif);
+      });
+
     return blocs || '<div class="etat-vide">Cockpit vide.</div>';
   }
 
@@ -230,19 +398,27 @@
       elSousTitre.textContent = 'Les quatre domaines, à leur source';
 
       var html = '<div class="note">' + E.echapper(d.note) + '</div>';
-      [['operations', 'Opérations'], ['finance', 'Finance'],
-        ['marketing', 'Marketing'], ['ressources_humaines', 'Ressources humaines']]
-        .forEach(function (paire) {
-          var bloc = d[paire[0]];
-          if (!bloc) return;
-          if (bloc.indisponible) {
-            html += E.panneau(paire[1], '<div class="erreur">' + E.echapper(bloc.motif) + '</div>');
-            return;
-          }
-          html += E.panneau(paire[1],
-            (bloc.kpi ? E.grilleKpi(bloc.kpi) : '')
-            + E.avertissements(bloc.avertissements || []));
-        });
+
+      // Chaque domaine a sa forme : on la traduit en cartes plutôt que de chercher un
+      // `kpi` que trois domaines sur quatre n'ont pas.
+      var DOMAINES = [
+        ['operations', 'Opérations', function (b) { return b.kpi || []; }],
+        ['finance', 'Finance', cartesFinance],
+        ['marketing', 'Marketing et croissance', cartesMarketing],
+        ['ressources_humaines', 'Ressources humaines', cartesRh],
+      ];
+
+      DOMAINES.forEach(function (dom) {
+        var bloc = d[dom[0]];
+        if (!bloc) return;
+        if (bloc.indisponible) {
+          html += sectionIndisponible(dom[1], bloc.motif);
+          return;
+        }
+        html += E.panneau(dom[1],
+          E.grilleKpi(dom[2](bloc))
+          + E.avertissements(bloc.avertissements || []));
+      });
 
       elContenu.innerHTML = html;
     }).catch(echec);

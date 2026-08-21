@@ -57,3 +57,16 @@ le compartiment repasse en privé, ou l'URL change. La vue doit continuer de ser
 Contrôle que l'API de style de Protomaps est utilisée correctement — `namedFlavor` en
 clair et en sombre, `layers()` produisant des couches toutes rattachées à la bonne
 source. Un style invalide échouerait silencieusement par un fond gris.
+
+## `redirection-par-role.js`
+
+Se connecte **réellement** depuis `espace-client.html`, avec chaque rôle, et vérifie où
+l'on atterrit et combien de menus s'affichent.
+
+C'est le contrôle qui manquait : le PDG pouvait être redirigé vers l'ancienne page
+consolidée sans que rien ne le signale — l'espace existait, les tests passaient, et
+personne ne voyait que la porte d'entrée ne menait pas au bon endroit.
+
+Il couvre aussi la table de repli de la page de connexion, qui ne connaissait aucun des
+sept nouveaux rôles : un backend plus ancien que la page envoyait alors un directeur
+vers `dashboard.html`, c'est-à-dire l'espace **client**.

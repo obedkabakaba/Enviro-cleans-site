@@ -56,14 +56,36 @@ const ESPACES = [
       await l.click();
       await page.waitForTimeout(750);
       vues += 1;
-      const etat = await page.evaluate(() => ({
-        erreurs: Array.from(document.querySelectorAll('.erreur')).map(e => e.textContent.trim().slice(0,110)),
-        graphiques: document.querySelectorAll('.graphique svg').length,
-        vides: document.querySelectorAll('.etat-vide').length,
-      }));
+      const etat = await page.evaluate(() => {
+        // Un panneau qui ne rend RIEN est le défaut le plus discret qui soit : la page
+        // paraît complète, la section est titrée, et elle est creuse. C'est exactement ce
+        // qui est arrivé au cockpit du PDG — trois domaines sur quatre calculés par le
+        // backend puis jetés parce que le frontend cherchait une clé absente.
+        // Un état vide EXPLICITE ne compte pas : il dit ce qui manque, c'est légitime.
+        const panneauxCreux = [];
+        document.querySelectorAll('.panneau').forEach((p) => {
+          const corps = p.querySelector('.corps') || p;
+          const texte = (corps.textContent || '').trim();
+          const aDuContenu = corps.querySelector(
+            'table, svg, .kpi, .etat-vide, .signal, .bloc, ul, .avertissement, .note');
+          if (!aDuContenu && texte.length < 3) {
+            const titre = (p.querySelector('h2') || {}).textContent || '(sans titre)';
+            panneauxCreux.push(titre.trim().slice(0, 40));
+          }
+        });
+        return {
+          erreurs: Array.from(document.querySelectorAll('.erreur')).map(e => e.textContent.trim().slice(0,110)),
+          graphiques: document.querySelectorAll('.graphique svg').length,
+          vides: document.querySelectorAll('.etat-vide').length,
+          panneauxCreux,
+        };
+      });
       if (etat.erreurs.length) {
         defauts += 1;
         console.log(`  ✗ ${vue} — ${etat.erreurs[0]}`);
+      } else if (etat.panneauxCreux.length) {
+        defauts += 1;
+        console.log(`  ✗ ${vue} — panneau(x) sans contenu : ${etat.panneauxCreux.join(', ')}`);
       } else {
         console.log(`  ✓ ${vue}${etat.graphiques ? '  · ' + etat.graphiques + ' graphique(s)' : ''}`);
       }
