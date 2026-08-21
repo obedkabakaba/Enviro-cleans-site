@@ -18,6 +18,7 @@ function localStorageFactice() {
     getItem: (cle) => (valeurs.has(cle) ? valeurs.get(cle) : null),
     setItem: (cle, valeur) => valeurs.set(cle, String(valeur)),
     removeItem: (cle) => valeurs.delete(cle),
+    _dump: () => Object.fromEntries(valeurs),
   };
 }
 
@@ -57,7 +58,7 @@ function chargerFetch(scenarios) {
     console,
   });
   vm.runInContext(fs.readFileSync(SCRIPT, 'utf8'), contexte);
-  return { api: window.EnviroAPI, appels };
+  return { api: window.EnviroAPI, appels, stockage };
 }
 
 async function principal() {
@@ -124,6 +125,31 @@ async function principal() {
   }
 
   {
+    const correspondances = {
+      administrateur: 'admAccessToken',
+      gestionnaire: 'gestAccessToken',
+      superviseur: 'supAccessToken',
+      collecteur: 'colAccessToken',
+    };
+    for (const [role, cleAttendue] of Object.entries(correspondances)) {
+      const { api, stockage } = chargerFetch([reponse(200, '{}')]);
+      api.Session.enregistrer({
+        accessToken: `token-${role}`,
+        refreshToken: `refresh-${role}`,
+        user: { role },
+      });
+      assert.equal(stockage.getItem('ec.accessToken'), `token-${role}`);
+      assert.equal(stockage.getItem(cleAttendue), `token-${role}`,
+        `la clé historique ${cleAttendue} doit être amorcée`);
+      const clesEtrangeres = Object.values(correspondances).filter((cle) => cle !== cleAttendue);
+      for (const cle of clesEtrangeres) {
+        assert.equal(stockage.getItem(cle), null, `la clé étrangère ${cle} ne doit pas être créée`);
+      }
+    }
+    console.log('  ok   la session commune amorce la clé historique du rôle connecté');
+  }
+
+  {
     const { api, appels } = chargerFetch([new TypeError('CORS ou réseau')]);
     await assert.rejects(
       api.appelPublic('/api/auth/login', { method: 'POST', body: {} }),
@@ -133,7 +159,7 @@ async function principal() {
     console.log('  ok   un échec permanent est borné et correctement classé');
   }
 
-  console.log('\n  5 tests du transport public passent.\n');
+  console.log('\n  6 tests du transport public passent.\n');
 }
 
 principal().catch((err) => {
