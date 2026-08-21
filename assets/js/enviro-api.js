@@ -132,6 +132,79 @@
   // ── Appels API ─────────────────────────────────────────────────────────────
   var renouvellementEnCours = null;
 
+  function attendre(delaiMs) {
+    return new Promise(function (resolve) { global.setTimeout(resolve, delaiMs); });
+  }
+
+  /**
+   * Lit aussi bien une réponse JSON qu'une page HTML/textuelle renvoyée par l'hébergeur.
+   * Render peut répondre temporairement 502/503 avec du HTML pendant le réveil du service ;
+   * appeler directement `response.json()` transformait alors cette réponse en fausse
+   * « impossibilité de contacter le serveur ».
+   */
+  function lireReponsePublique(reponse) {
+    return reponse.text().then(function (texte) {
+      var data = null;
+      if (texte) {
+        try { data = JSON.parse(texte); } catch (e) { data = { message: texte }; }
+      }
+      return {
+        ok: reponse.ok,
+        status: reponse.status,
+        data: data || {},
+      };
+    });
+  }
+
+  /**
+   * Appel public tolérant au réveil de Render.
+   *
+   * Une connexion peut arriver pendant que l'instance gratuite redémarre. Les erreurs
+   * réseau et les 502/503/504 sont donc retentées deux fois. Les réponses métier (400,
+   * 401, 403, 429…) ne le sont jamais : elles doivent rester visibles telles quelles.
+   */
+  function appelPublic(chemin, options) {
+    options = options || {};
+    var nombreTentatives = options.nombreTentatives || 3;
+    var corps = options.body === undefined ? undefined : JSON.stringify(options.body);
+    var entetes = options.headers || (corps === undefined ? {} : { 'Content-Type': 'application/json' });
+
+    function tenter(numero) {
+      return fetch(BASE_URL + chemin, {
+        method: options.method || 'GET',
+        headers: entetes,
+        body: corps,
+        cache: 'no-store',
+      })
+        .then(lireReponsePublique)
+        .then(function (resultat) {
+          var transitoire = [502, 503, 504].indexOf(resultat.status) !== -1;
+          if (transitoire && numero < nombreTentatives) {
+            return attendre(numero * 900).then(function () { return tenter(numero + 1); });
+          }
+          return resultat;
+        })
+        .catch(function (cause) {
+          if (numero < nombreTentatives) {
+            return attendre(numero * 900).then(function () { return tenter(numero + 1); });
+          }
+          var erreur = new Error('RESEAU_INDISPONIBLE');
+          erreur.code = 'RESEAU_INDISPONIBLE';
+          erreur.cause = cause;
+          throw erreur;
+        });
+    }
+
+    return tenter(1);
+  }
+
+  /** Réveille l'API en arrière-plan dès l'ouverture de la page de connexion. */
+  function reveiller() {
+    return appelPublic('/api/health', { nombreTentatives: 2 })
+      .then(function (resultat) { return resultat.ok; })
+      .catch(function () { return false; });
+  }
+
   /**
    * Renouvelle l'access token. Mutualisé : si dix appels expirent en même temps,
    * un seul renouvellement part et les autres attendent son résultat.
@@ -155,7 +228,13 @@
         Session.enregistrer(data);
         return data.accessToken;
       })
-      .finally(function () { renouvellementEnCours = null; });
+      .then(function (token) {
+        renouvellementEnCours = null;
+        return token;
+      }, function (err) {
+        renouvellementEnCours = null;
+        throw err;
+      });
 
     return renouvellementEnCours;
   }
@@ -224,6 +303,8 @@
     CLES: CLES,
     Session: Session,
     appel: appel,
+    appelPublic: appelPublic,
+    reveiller: reveiller,
     get: function (chemin) { return appel(chemin); },
     post: function (chemin, body) { return appel(chemin, { method: 'POST', body: body }); },
     put: function (chemin, body) { return appel(chemin, { method: 'PUT', body: body }); },
