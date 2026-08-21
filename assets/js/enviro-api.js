@@ -166,15 +166,29 @@
   function appelPublic(chemin, options) {
     options = options || {};
     var nombreTentatives = options.nombreTentatives || 3;
-    var corps = options.body === undefined ? undefined : JSON.stringify(options.body);
-    var entetes = options.headers || (corps === undefined ? {} : { 'Content-Type': 'application/json' });
+    var corps;
+    var entetes;
+
+    if (options.formulaire && options.body) {
+      corps = Object.keys(options.body).map(function (cle) {
+        var valeur = options.body[cle] === null || options.body[cle] === undefined
+          ? ''
+          : options.body[cle];
+        return encodeURIComponent(cle) + '=' + encodeURIComponent(valeur);
+      }).join('&');
+      // Type CORS « simple » : aucun preflight OPTIONS. Indispensable pour certains
+      // navigateurs de Smart TV qui bloquent les requêtes JSON avant leur envoi.
+      entetes = options.headers || { 'Content-Type': 'application/x-www-form-urlencoded' };
+    } else {
+      corps = options.body === undefined ? undefined : JSON.stringify(options.body);
+      entetes = options.headers || (corps === undefined ? {} : { 'Content-Type': 'application/json' });
+    }
 
     function tenter(numero) {
       return fetch(BASE_URL + chemin, {
         method: options.method || 'GET',
         headers: entetes,
         body: corps,
-        cache: 'no-store',
       })
         .then(lireReponsePublique)
         .then(function (resultat) {
