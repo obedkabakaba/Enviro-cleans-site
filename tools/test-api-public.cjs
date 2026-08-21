@@ -103,6 +103,27 @@ async function principal() {
   }
 
   {
+    const { api, appels } = chargerFetch([reponse(401, '{"message":"Refusé"}')]);
+    await api.appelPublic('/api/auth/login', {
+      method: 'POST',
+      body: { identifiant: 'nom+test', mot_de_passe: 'mot de passe' },
+      formulaire: true,
+    });
+    assert.equal(appels.length, 1);
+    assert.equal(
+      appels[0].options.headers['Content-Type'],
+      'application/x-www-form-urlencoded'
+    );
+    assert.equal(
+      appels[0].options.body,
+      'identifiant=nom%2Btest&mot_de_passe=mot%20de%20passe'
+    );
+    assert.equal('cache' in appels[0].options, false,
+      'les anciens fetch ne doivent recevoir aucune option cache non essentielle');
+    console.log('  ok   le login Smart TV évite entièrement le preflight CORS');
+  }
+
+  {
     const { api, appels } = chargerFetch([new TypeError('CORS ou réseau')]);
     await assert.rejects(
       api.appelPublic('/api/auth/login', { method: 'POST', body: {} }),
@@ -112,7 +133,7 @@ async function principal() {
     console.log('  ok   un échec permanent est borné et correctement classé');
   }
 
-  console.log('\n  4 tests du transport public passent.\n');
+  console.log('\n  5 tests du transport public passent.\n');
 }
 
 principal().catch((err) => {

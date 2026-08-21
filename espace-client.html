@@ -400,7 +400,9 @@
     try {
       resultat = await EnviroAPI.appelPublic('/api/auth/login', {
         method: 'POST',
-        body: { identifiant, mot_de_passe }
+        body: { identifiant, mot_de_passe },
+        // Évite le preflight CORS, mal géré ou mis en cache par certains téléviseurs.
+        formulaire: true
       });
     } catch (err) {
       console.error('Erreur de connexion à l\'API:', err);
