@@ -368,6 +368,18 @@
   // La destination est désormais décidée par le backend (src/config/espaces.js) et
   // renvoyée dans `data.espace.page`. La table ci-dessous ne sert plus que de repli
   // si l'API est plus ancienne que cette page.
+  //
+  // ── Pourquoi les sept nouveaux rôles ont été ajoutés ici ──
+  //
+  // Cette table ne couvrait que les rôles historiques. Le repli existe précisément pour
+  // le cas « l'API est plus ancienne que cette page » — or c'est dans CE cas que les
+  // nouveaux rôles en ont le plus besoin : un backend antérieur à `pdg.html` renvoie
+  // l'ancienne destination, ou rien du tout, et le PDG tombait alors sur
+  // `dashboard.html`, c'est-à-dire l'espace CLIENT.
+  //
+  // Un directeur qui atterrit dans l'espace client ne voit évidemment rien de son
+  // espace, et le symptôme ne désigne pas sa cause. Le repli couvre donc désormais tous
+  // les rôles, et reste aligné sur src/config/espaces.js côté backend.
   const REDIRECTS_REPLI = {
     client: 'dashboard.html',
     administrateur: 'administrateur.html',
@@ -375,6 +387,14 @@
     superviseur: 'superviseur.html',
     collecteur: 'collecteur.html',
     agent_marketing: 'dashboard.html',
+
+    pdg: 'pdg.html',
+    dga: 'direction-generale-adjointe.html',
+    directeur_marketing: 'direction-marketing.html',
+    directeur_financier: 'direction-financiere.html',
+    directeur_rh: 'direction-rh.html',
+    directeur_operations_commerciales: 'direction-operations-commerciales.html',
+    administrateur_technique: 'centre-technique.html',
   };
 
   async function handleLogin(){
@@ -442,9 +462,13 @@
       return;
     }
 
+    // `dashboard.html` n'est PAS un repli acceptable pour un rôle inconnu : c'est
+    // l'espace CLIENT, et y envoyer un membre du personnel produit un écran vide dont la
+    // cause est invisible — le symptôme ne désigne pas sa cause. La page d'attente, elle,
+    // explique la situation.
     const destination = (data.espace && data.espace.page)
       || REDIRECTS_REPLI[data.user.role]
-      || 'dashboard.html';
+      || (data.user.role === 'client' ? 'dashboard.html' : 'espace-en-construction.html');
     const suite = lireParametreRecherche('suite');
     const cible = (suite && /^[a-z0-9-]+\.html$/i.test(suite)) ? suite : destination;
 
