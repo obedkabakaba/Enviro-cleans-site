@@ -41,6 +41,16 @@
     { access: 'admAccessToken', refresh: 'admRefreshToken', user: 'admUser' },
   ];
 
+  // Les quatre espaces historiques ne lisent pas encore la clé commune. Une connexion
+  // réalisée depuis `espace-client.html` doit donc amorcer LA clé correspondant au rôle,
+  // sinon la page d'arrivée conclut immédiatement que la session est absente.
+  var ANCIENNE_PAR_ROLE = {
+    gestionnaire: ANCIENNES[1],
+    superviseur: ANCIENNES[2],
+    collecteur: ANCIENNES[3],
+    administrateur: ANCIENNES[4],
+  };
+
   /**
    * Reprend une session ouverte sous une ancienne clé et la recopie vers la nouvelle.
    *
@@ -83,13 +93,24 @@
    * une session valide. On ne CRÉE jamais une ancienne clé : on met seulement à jour
    * celles qui existent déjà.
    */
-  function propagerVersAnciennesCles(accessToken, refreshToken) {
+  function propagerVersAnciennesCles(accessToken, refreshToken, utilisateur) {
     ANCIENNES.forEach(function (jeu) {
       if (localStorage.getItem(jeu.access)) {
         localStorage.setItem(jeu.access, accessToken);
         if (refreshToken) localStorage.setItem(jeu.refresh, refreshToken);
       }
     });
+
+    var role = utilisateur && (
+      utilisateur.role ||
+      (utilisateur.Role && utilisateur.Role.code)
+    );
+    var jeuRole = ANCIENNE_PAR_ROLE[role];
+    if (!jeuRole) return;
+
+    localStorage.setItem(jeuRole.access, accessToken);
+    if (refreshToken) localStorage.setItem(jeuRole.refresh, refreshToken);
+    if (utilisateur) localStorage.setItem(jeuRole.user, JSON.stringify(utilisateur));
   }
 
   // ── Session ────────────────────────────────────────────────────────────────
@@ -109,6 +130,7 @@
     peut: function (code) { return Session.permissions().indexOf(code) !== -1; },
 
     enregistrer: function (data) {
+      var utilisateur = data.user || Session.user();
       if (data.accessToken) localStorage.setItem(CLES.access, data.accessToken);
       if (data.refreshToken) localStorage.setItem(CLES.refresh, data.refreshToken);
       if (data.user) localStorage.setItem(CLES.user, JSON.stringify(data.user));
@@ -116,7 +138,9 @@
 
       // Tant que les six espaces historiques lisent leur propre clé, ils doivent
       // recevoir le token à jour, sinon ils se déconnecteraient tout seuls.
-      if (data.accessToken) propagerVersAnciennesCles(data.accessToken, data.refreshToken);
+      if (data.accessToken) {
+        propagerVersAnciennesCles(data.accessToken, data.refreshToken, utilisateur);
+      }
     },
 
     effacer: function () {
