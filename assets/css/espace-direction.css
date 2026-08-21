@@ -56,8 +56,32 @@
   --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
 }
 
+/* ════════════════════════════════════════
+ * THÈME SOMBRE — DEUX PORTES, PAS UNE
+ * ════════════════════════════════════════
+ *
+ * Ce fichier ne déclarait le thème sombre que sous `prefers-color-scheme`. Or
+ * `theme-init.js` pose TOUJOURS `data-theme` sur `<html>`, et le bouton de bascule ne
+ * fait rien d'autre que changer cet attribut. Résultat : **le bouton n'avait aucun
+ * effet sur les sept espaces de direction.** Sur un système en clair, cliquer sur la
+ * lune posait `data-theme="dark"` et la page restait blanche ; sur un système en
+ * sombre, demander le clair ne rendait rien de clair.
+ *
+ * Le site public, lui, portait 94 règles `data-theme` et fonctionnait — la bascule
+ * marchait partout SAUF là où ces écrans venaient d'être ajoutés. C'est le genre de
+ * défaut qu'on ne voit pas en développant : on teste en changeant le réglage du
+ * système, jamais en cliquant sur son propre bouton.
+ *
+ * Les jetons sombres sont donc déclarés deux fois, à l'identique :
+ *   - sous la requête média, pour le réglage du système, avec la garde
+ *     `:not([data-theme="light"])` — un choix explicite de clair doit gagner ;
+ *   - sous `[data-theme="dark"]`, pour le choix explicite de sombre.
+ *
+ * Aucune couleur n'a sa seule définition ici : `:root` en clair est complet à lui seul.
+ */
+
 @media (prefers-color-scheme: dark){
-  :root{
+  :root:not([data-theme="light"]){
     --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
     --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#77889a;
     --info:#7ba0f0;
@@ -74,6 +98,22 @@
   }
 }
 
+:root[data-theme="dark"]{
+    --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#77889a;
+    --info:#7ba0f0;
+
+    /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce
+     * sont les sombres qui échouent. Les variantes de texte y sont donc plus CLAIRES,
+     * et non plus foncées — sauf le rouge, qui reste sous le seuil et est éclairci. */
+    --vert-texte:#3ab54a; --teal-texte:#17a2a2; --ok-texte:#3ab54a;
+    --alerte-texte:#ef8f8b; --attention-texte:#e08a1e; --info-texte:#7ba0f0;
+
+    --bouton:#2a8335; --bouton-survol:#1f6b3a; --bouton-danger:#c22f2a;
+
+    --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
+}
+
 *{ box-sizing:border-box; }
 
 body{
@@ -81,6 +121,140 @@ body{
   font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   font-size:14px; line-height:1.5;
 }
+
+
+/* ════════════════════════════════════════
+ * PALETTE DES GRAPHIQUES
+ * ════════════════════════════════════════
+ *
+ * Ces couleurs ne sont pas choisies à l'œil : elles ont été passées au validateur de
+ * palette, qui vérifie six propriétés — bande de luminosité, plancher de chroma,
+ * séparation sous daltonisme (protanopie et deutéranopie simulées), plancher de
+ * distinction en vision normale, contraste sur le fond, et appartenance à une palette
+ * documentée.
+ *
+ * ── Deux plafonds différents, et pourquoi ──
+ *
+ * Les formes où deux couleurs quelconques peuvent se retrouver côte à côte (donuts,
+ * nuages de points, cartes) sont testées SUR TOUTES LES PAIRES. Aucune combinaison de
+ * plus de trois teintes ne passe ce test — c'est une limite mathématique, pas un
+ * manque d'effort. Ces formes s'arrêtent donc à trois séries, la quatrième et les
+ * suivantes étant regroupées en « Autres ».
+ *
+ * Les formes où seules les voisines se touchent (barres, lignes, empilements) sont
+ * testées sur les paires ADJACENTES et tiennent six séries.
+ *
+ * ── Deux réserves connues, et leur contrepartie ──
+ *
+ * En clair, le jaune (--serie-4) est à 2,17:1 sur blanc, sous le seuil de 3:1. La règle
+ * de compensation s'applique : chaque graphique porte un tableau de données dépliable,
+ * donc aucune valeur ne dépend de la seule couleur.
+ *
+ * Le vert et l'orange sont à ΔE 9,4 en deutéranopie — au-dessus du seuil de 8, mais
+ * sans marge confortable. Les écarts de 2 px entre segments et les étiquettes directes
+ * font le reste du travail.
+ *
+ * Les valeurs sombres ne sont pas un « éclaircissement automatique » des claires :
+ * ce sont les mêmes familles de teintes, re-choisies pour le fond sombre et validées
+ * comme un jeu à part entière.
+ */
+:root{
+  --serie-1:#1f6b3a; --serie-2:#eb6834; --serie-3:#2a78d6;
+  --serie-4:#eda100; --serie-5:#4a3aa7; --serie-6:#e34948;
+
+  /* Rampe séquentielle : une seule teinte, du clair au foncé. C'est le choix par
+     défaut pour une grandeur — plus c'est foncé, plus c'est grand. */
+  --sequentiel-1:#dbeee3; --sequentiel-2:#a8d6bd; --sequentiel-3:#6cb890;
+  --sequentiel-4:#3a9463; --sequentiel-5:#1f6b3a;
+
+  --grille:#e3e8ec;
+  --graphique-fond:#ffffff;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --serie-1:#199e70; --serie-2:#d95926; --serie-3:#3987e5;
+    --serie-4:#c98500; --serie-5:#9085e9; --serie-6:#e66767;
+    --sequentiel-1:#12352a; --sequentiel-2:#17553d; --sequentiel-3:#1a7554;
+    --sequentiel-4:#199e70; --sequentiel-5:#4cc194;
+    --grille:#243447;
+    --graphique-fond:#141f2e;
+  }
+}
+
+:root[data-theme="dark"]{
+  --serie-1:#199e70; --serie-2:#d95926; --serie-3:#3987e5;
+  --serie-4:#c98500; --serie-5:#9085e9; --serie-6:#e66767;
+  --sequentiel-1:#12352a; --sequentiel-2:#17553d; --sequentiel-3:#1a7554;
+  --sequentiel-4:#199e70; --sequentiel-5:#4cc194;
+  --grille:#243447;
+  --graphique-fond:#141f2e;
+}
+
+/* ── Anatomie d'un graphique ── */
+.graphique{ margin:4px 0 2px; }
+.graphique svg{ display:block; width:100%; height:auto; overflow:visible; }
+/* Un donut isolé se centre ; les autres formes se calent à gauche, alignées sur le
+   texte du panneau. */
+.graphique svg[style*="max-width:200px"]{ margin:0 auto; }
+.graphique .titre-graphique{
+  font-size:12.5px; font-weight:700; color:var(--texte); margin-bottom:2px;
+}
+.graphique .sous-titre-graphique{
+  font-size:11.5px; color:var(--texte-faible); margin-bottom:10px;
+}
+
+/* Le texte ne porte JAMAIS la couleur d'une série : l'identité vient de la pastille
+   colorée posée à côté. Un jaune lisible en aplat ne l'est pas en texte. */
+.graphique text{ fill:var(--texte-doux); font-size:11px; font-family:inherit; }
+.graphique text.valeur{ fill:var(--texte); font-weight:700; }
+.graphique .grille-ligne{ stroke:var(--grille); stroke-width:1; }
+.graphique .axe{ stroke:var(--grille); stroke-width:1; }
+
+.legende{
+  display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:12px;
+  font-size:12px; color:var(--texte-doux);
+}
+.legende span{ display:inline-flex; align-items:center; gap:6px; }
+.legende i{ width:11px; height:11px; border-radius:3px; flex:none; }
+
+/* Tableau de données : la contrepartie obligatoire des réserves ci-dessus. */
+details.donnees-graphique{ margin-top:10px; }
+details.donnees-graphique summary{
+  cursor:pointer; font-size:11.5px; color:var(--texte-faible);
+}
+details.donnees-graphique summary:hover{ color:var(--texte-doux); }
+details.donnees-graphique table{ min-width:0; margin-top:8px; }
+
+/* Info-bulle : la couche d'interaction attendue sur tout graphique HTML. */
+.infobulle-graphique{
+  position:fixed; z-index:60; pointer-events:none; opacity:0;
+  background:var(--surface); border:1px solid var(--bordure); border-radius:8px;
+  padding:8px 11px; font-size:12px; color:var(--texte);
+  box-shadow:0 4px 20px rgba(0,0,0,.16); max-width:260px;
+  transition:opacity .1s;
+}
+.infobulle-graphique strong{ display:block; margin-bottom:3px; }
+.infobulle-graphique .ligne{ display:flex; align-items:center; gap:7px; margin-top:2px; }
+.infobulle-graphique .ligne i{ width:9px; height:9px; border-radius:2px; flex:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .infobulle-graphique{ transition:none; }
+}
+
+/* ── Grille des communes : le substitut assumé d'une carte choroplèthe ── */
+.grille-communes{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(112px, 1fr)); gap:2px;
+}
+.case-commune{
+  padding:11px 12px; border-radius:6px; min-height:62px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.case-commune .nom{ font-size:11.5px; line-height:1.25; }
+.case-commune .val{ font-size:17px; font-weight:800; font-family:'Montserrat',sans-serif; }
+
+.sparkline{ vertical-align:middle; }
+.kpi-motif{ font-size:11.5px; color:var(--texte-faible); font-style:italic; }
 
 /* ── Structure ── */
 /* `minmax(0, 1fr)` et non `1fr` : la taille minimale par défaut d'une piste de grille
