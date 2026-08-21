@@ -342,6 +342,23 @@
   // ── Connexion à l'API Enviro Cleans ──
   const API_BASE_URL = 'https://enviro-cleans-api.onrender.com';
 
+  // Lance le réveil de Render sans bloquer l'interface. Quand l'utilisateur finit de
+  // saisir ses identifiants, l'API a généralement déjà quitté son état de veille.
+  EnviroAPI.reveiller();
+
+  // URLSearchParams manque encore dans certains anciens WebView et navigateurs intégrés.
+  // Son absence ne doit surtout pas transformer une connexion réussie en erreur réseau.
+  function lireParametreRecherche(nom){
+    const recherche = (location.search || '').replace(/^\?/, '').split('&');
+    for(let i = 0; i < recherche.length; i += 1){
+      const morceaux = recherche[i].split('=');
+      if(decodeURIComponent(morceaux[0] || '') === nom){
+        return decodeURIComponent((morceaux.slice(1).join('=') || '').replace(/\+/g, ' '));
+      }
+    }
+    return null;
+  }
+
   // ── Redirection après connexion ──
   // Cette table pointait vers cinq fichiers qui N'EXISTENT PAS dans le dépôt
   // (admin-dashboard.html, gestionnaire-dashboard.html, superviseur-dashboard.html,
@@ -379,54 +396,59 @@
     btn.disabled = true;
     btn.textContent = 'Connexion...';
 
+    let resultat;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      resultat = await EnviroAPI.appelPublic('/api/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifiant, mot_de_passe })
+        body: { identifiant, mot_de_passe }
       });
-
-      const data = await response.json();
-
-      if(!response.ok){
-        errorBox.textContent = data.message || 'Identifiant ou mot de passe incorrect.';
-        errorBox.style.display = 'block';
-        if(data.emailNonVerifie){
-          errorBox.innerHTML += ' <a href="javascript:void(0)" onclick="renvoyerLienVerification()" style="color:var(--green);text-decoration:underline;font-weight:600;">Renvoyer le lien</a>';
-        }
-        return;
-      }
-
-      // Connexion réussie. Le stockage passe par EnviroAPI pour que TOUS les espaces
-      // lisent la même clé : chaque page avait auparavant la sienne (gestAccessToken,
-      // supAccessToken, colAccessToken, admAccessToken…), ce qui rendait la connexion
-      // unique inopérante et obligeait chaque espace à reproposer un formulaire.
-      EnviroAPI.Session.enregistrer(data);
-
-      // Le backend fait autorité sur la destination.
-      const destination = (data.espace && data.espace.page)
-        || REDIRECTS_REPLI[data.user.role]
-        || 'dashboard.html';
-
-      // Si l'utilisateur avait été renvoyé ici depuis une page protégée, on l'y ramène,
-      // à condition que la cible soit bien une page locale (jamais une URL externe).
-      const suite = new URLSearchParams(location.search).get('suite');
-      const cible = (suite && /^[a-z0-9-]+\.html$/i.test(suite)) ? suite : destination;
-
-      // Petite transition pour que le client voie bien que la connexion a réussi
-      const transition = document.getElementById('loginTransition');
-      transition.classList.add('show');
-      setTimeout(() => { window.location.replace(cible); }, 650);
-      return;
-
     } catch (err) {
       console.error('Erreur de connexion à l\'API:', err);
-      errorBox.textContent = 'Impossible de contacter le serveur. Réessayez dans un instant (le serveur peut prendre 30 à 50 secondes à démarrer s\'il était inactif).';
+      errorBox.textContent = 'Le serveur reste inaccessible après plusieurs tentatives. Vérifiez votre connexion puis réessayez.';
       errorBox.style.display = 'block';
-    } finally {
       btn.disabled = false;
       btn.textContent = originalText;
+      return;
     }
+
+    const data = resultat.data || {};
+    if(!resultat.ok){
+      if([502, 503, 504].indexOf(resultat.status) !== -1){
+        errorBox.textContent = 'Le serveur démarre encore. Patientez quelques secondes puis réessayez.';
+      } else {
+        errorBox.textContent = data.message || 'Identifiant ou mot de passe incorrect.';
+      }
+      errorBox.style.display = 'block';
+      if(data.emailNonVerifie){
+        errorBox.innerHTML += ' <a href="javascript:void(0)" onclick="renvoyerLienVerification()" style="color:var(--green);text-decoration:underline;font-weight:600;">Renvoyer le lien</a>';
+      }
+      btn.disabled = false;
+      btn.textContent = originalText;
+      return;
+    }
+
+    // À partir d'ici, le serveur a répondu avec succès. Toute erreur éventuelle est donc
+    // locale au navigateur et ne doit plus être présentée comme une panne du serveur.
+    try {
+      EnviroAPI.Session.enregistrer(data);
+    } catch (err) {
+      console.error('Stockage de session indisponible:', err);
+      errorBox.textContent = 'Ce navigateur bloque le stockage nécessaire à la connexion. Autorisez les données du site ou quittez la navigation privée.';
+      errorBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = originalText;
+      return;
+    }
+
+    const destination = (data.espace && data.espace.page)
+      || REDIRECTS_REPLI[data.user.role]
+      || 'dashboard.html';
+    const suite = lireParametreRecherche('suite');
+    const cible = (suite && /^[a-z0-9-]+\.html$/i.test(suite)) ? suite : destination;
+
+    const transition = document.getElementById('loginTransition');
+    transition.classList.add('show');
+    setTimeout(() => { window.location.replace(cible); }, 650);
   }
 
   async function renvoyerLienVerification(){
