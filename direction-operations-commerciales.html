@@ -574,6 +574,36 @@
         { nom: 'Position des véhicules', disponible: false,
           motif: d.positions_vehicules.motif },
       ])
+        + E.panneau('Carte du jour',
+          G.carte(
+            d.arrets.map(function (a) {
+              return {
+                latitude: a.latitude, longitude: a.longitude,
+                libelle: a.client + ' — ' + (a.numero_abonne || ''),
+                etat: a.statut,
+                detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
+              };
+            }).concat(d.incidents.filter(function (i) {
+              return i.latitude !== null && i.longitude !== null;
+            }).map(function (i) {
+              return {
+                latitude: i.latitude, longitude: i.longitude,
+                libelle: i.titre, etat: 'incident', type: 'incident',
+                detail: i.severite + ' · ' + (i.zone || ''),
+              };
+            })),
+            {
+              titre: null,
+              tournees: d.tournees.map(function (t) {
+                return {
+                  nom: t.nom || ('Tournée ' + t.id),
+                  arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
+                };
+              }),
+              motifVide: 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
+                + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
+            }
+          ))
         + E.panneau('Tournées en cours',
           E.tableau(['Tournée', 'Zone', 'Collecteur', 'Véhicule', 'Arrêts', 'Traités',
             'Échecs', 'Progression', 'Statut'], tournees,
@@ -645,10 +675,21 @@
           : { nom: 'Tonnage collecté', disponible: false, motif: d.tonnage.motif },
       ])
         + E.panneau('Motifs d’échec',
-          E.tableau(['Motif', 'Occurrences'], motifs,
-            { vide: 'Aucun échec sur la période.' }),
-          { sousTitre: 'Un motif « non catégorisé » ne peut pas être analysé : c’est ce '
-            + 'qui empêche de traiter les causes racines.' })
+          G.barres((d.motifs_echec || []).map(function (m) {
+            return {
+              libelle: m.motif === 'non_categorise' ? 'Non catégorisé' : m.motif.replace(/_/g, ' '),
+              valeur: m.total,
+              couleur: m.motif === 'non_categorise' ? 'var(--texte-faible)' : 'var(--serie-1)',
+            };
+          }), {
+            unite: 'échec(s)',
+            colonneLibelle: 'Motif',
+            colonneValeur: 'Occurrences',
+            largeurLibelle: 175,
+            motifVide: 'Aucun échec de collecte sur la période.',
+          }),
+          { sousTitre: 'Les échecs sans motif catégorisé apparaissent en gris : ils ne '
+            + 'peuvent pas alimenter une analyse de causes racines.' })
         + E.panneau('Journal des collectes',
           E.tableau(['Heure', 'Client', 'Adresse', 'Catégorie', 'Poids', 'Preuve', 'Statut',
             'Motif d’échec', 'Collecteur'], lignes,

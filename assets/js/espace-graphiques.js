@@ -862,3 +862,19 @@ window.G = (function () {
       + '</div>';
   };
 }(window.G));
+
+/**
+ * Active les infobulles une fois pour toute la page.
+ *
+ * La délégation est posée sur `document` : elle couvre donc les graphiques injectés plus
+ * tard, à chaque changement de vue, sans qu'aucune vue ait à s'en occuper. C'est aussi
+ * ce qui évite d'attacher un écouteur par marque — une vue à trois cents barres en
+ * créerait trois cents.
+ */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    window.G.activerInfobulles(document);
+  });
+} else {
+  window.G.activerInfobulles(document);
+}

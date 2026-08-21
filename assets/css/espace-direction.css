@@ -83,7 +83,7 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#77889a;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#8b9caf;
     --info:#7ba0f0;
 
     /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce
@@ -100,7 +100,7 @@
 
 :root[data-theme="dark"]{
     --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#77889a;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#8b9caf;
     --info:#7ba0f0;
 
     /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce

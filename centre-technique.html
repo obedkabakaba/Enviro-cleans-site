@@ -69,7 +69,19 @@
   .e-configure{ background:rgba(74,144,217,.14); color:var(--info-texte); }
   .e-non_configure{ background:var(--surface-2); color:var(--texte-doux); }
   .e-indisponible{ background:var(--surface-2); color:var(--texte-doux); }
-  .e-echec{ background:rgba(217,83,79,.14); color:var(--alerte-texte); }
+    /* Teinte propre, plus foncée que --alerte-texte : posée sur son fond rouge à 14 %,
+     la variante générique tombait à 4,38:1. Le fond teinté assombrit toujours un peu le
+     rendu — un contraste calculé contre le blanc ne suffit donc pas ici. */
+  .e-echec{ background:rgba(217,83,79,.14); color:#a8231e; }
+
+  /* En sombre, la relation s'inverse : sur le même fond rouge à 14 % posé sur une
+     surface foncée, c'est une teinte CLAIRE qui passe. Déclarée sous les deux portes,
+     comme tous les jetons sombres du châssis — sans quoi le bouton de bascule
+     laisserait cette étiquette illisible. */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .e-echec{ color:#f2a5a1; }
+  }
+  :root[data-theme="dark"] .e-echec{ color:#f2a5a1; }
 
   .legende{
     padding:13px 17px; border-top:1px solid var(--bordure);
@@ -491,6 +503,27 @@
       }).join('');
 
       elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Disponibilité mesurée par sonde',
+          G.barres((d.par_sonde || []).filter(function (s2) {
+            return s2.disponibilite_pct !== null;
+          }).map(function (s2) {
+            return {
+              libelle: s2.sonde.replace(/_/g, ' '),
+              valeur: s2.disponibilite_pct,
+              detail: s2.mesures + ' mesure(s), ' + s2.echecs + ' échec(s)',
+              couleur: s2.disponibilite_pct >= 99 ? 'var(--serie-1)'
+                : (s2.disponibilite_pct >= 95 ? 'var(--serie-4)' : 'var(--serie-2)'),
+            };
+          }), {
+            max: 100,
+            uniteCourte: '%',
+            colonneLibelle: 'Sonde',
+            colonneValeur: 'Disponibilité',
+            largeurLibelle: 170,
+            motifVide: 'Aucune sonde n’a produit de mesure de disponibilité sur la '
+              + 'fenêtre. Une sonde « non configurée » ne dit rien sur la disponibilité '
+              + 'd’un service : elle est donc exclue de ce calcul, pas comptée à zéro.',
+          }))
         + E.panneau('Disponibilité par sonde',
           E.tableau(['Composant', 'Sonde', 'Mesures', 'OK', 'Échecs', 'Disponibilité',
             'Latence moyenne', 'Dernière mesure', 'Dernier échec'], lignes,
@@ -764,6 +797,19 @@
               motif: 'Aucun budget déclaré : le disjoncteur de coût ne peut pas s’armer.' },
         ])
         + '<div class="note">' + echapper(d.note) + '</div>'
+        + E.panneau('Coût quotidien estimé',
+          G.courbe([{
+            nom: 'Coût estimé (USD)',
+            points: (d.quotidien || []).map(function (j) {
+              return { x: E.dateCourte(j.jour), y: Number(j.cout_estime_usd || 0) };
+            }),
+          }], {
+            aire: true,
+            unite: 'USD',
+            colonneX: 'Jour',
+            motifVide: 'Aucune consommation enregistrée : le Centre d’analyse n’a pas '
+              + 'encore été appelé, ou la clé Anthropic n’est pas configurée.',
+          }))
         + E.panneau('Consommation quotidienne',
           E.tableau(['Jour', 'Appels', 'Échecs', 'Tokens entrée', 'Tokens sortie',
             'Recherches web', 'Coût estimé'], lignes,

@@ -158,7 +158,10 @@
       var alerteGratuit = '';
       var sc = d.recouvrement.service_rendu_sans_abonnement;
       if (sc.clients > 0) {
-        alerteGratuit = '<div class="erreur"><strong>'
+        // Constat métier, pas panne de la plateforme : ce chiffre est JUSTE, et c'est
+        // précisément pour cela qu'il doit être vu. Le rouge de `.erreur` disait « la
+        // page a échoué » ; `.signal-fort` dit « regardez ceci », ce qui est le sens.
+        alerteGratuit = '<div class="signal grave"><strong>'
           + E.nombre(sc.clients) + ' client(s) servi(s) sans abonnement couvrant</strong>'
           + ' — ' + E.nombre(sc.collectes) + ' collecte(s) sur ' + E.echapper(sc.fenetre) + '.<br>'
           + '<small>' + E.echapper(sc.note) + '</small></div>';
@@ -167,7 +170,21 @@
       elContenu.innerHTML = alerteGratuit
         + E.avertissements(d.avertissements)
         + E.grilleKpi(cartes)
-        + E.panneau('Évolution mensuelle', serieHtml(d.serie_mensuelle),
+        + E.panneau('Évolution des encaissements',
+          G.courbe([{
+            nom: 'Encaissé',
+            points: (d.serie_mensuelle || []).map(function (m) {
+              return { x: m.mois, y: Number(m.montant || 0) };
+            }),
+          }], {
+            aire: true,
+            unite: d.devise_dominante || '',
+            colonneX: 'Mois',
+            motifVide: 'Aucun encaissement sur la période.',
+          }),
+          { sousTitre: 'Montants réellement encaissés, par mois. Une seule devise par '
+            + 'courbe : deux devises font deux courbes, jamais une somme.' })
+        + E.panneau('Évolution mensuelle — détail', serieHtml(d.serie_mensuelle),
           { sousTitre: 'La saisonnalité ne se voit pas sur un total.' })
         + E.panneau('Par méthode de paiement', methodesHtml(d.par_methode),
           { sousTitre: 'C’est ici que se voit un canal Mobile Money défaillant.' })
@@ -400,7 +417,7 @@
           + 'prestataire tranchera.</p></div>')
 
         + E.panneau('3. Service rendu sans abonnement couvrant',
-          '<div class="' + (gratuit.clients > 0 ? 'erreur' : 'note') + '">'
+          '<div class="' + (gratuit.clients > 0 ? 'signal grave' : 'note') + '">'
           + '<p><strong style="font-size:20px">' + E.nombre(gratuit.clients)
           + '</strong> client(s), ' + E.nombre(gratuit.collectes) + ' collecte(s) sur '
           + E.echapper(gratuit.fenetre) + '</p>'
@@ -551,7 +568,22 @@
           E.tableau(['Réf.', 'Date', 'Objet', 'Département', 'Fournisseur', 'Montant',
             'Pièce', 'Risque', 'Approbation', 'Statut'], lignes,
           { vide: d.etat_vide || 'Aucune dépense sur la période.' }))
-        + E.panneau('Répartition par statut',
+        + E.panneau('Répartition des dépenses par statut',
+          G.donut((d.par_statut || []).reduce(function (acc, l) {
+            var trouve = acc.find(function (a) { return a.libelle === l.statut; });
+            if (trouve) trouve.valeur += Number(l.montant || 0);
+            else acc.push({ libelle: l.statut.replace(/_/g, ' '), valeur: Number(l.montant || 0) });
+            return acc;
+          }, []), {
+            libelleCentre: 'toutes devises',
+            colonneLibelle: 'Statut',
+            colonneValeur: 'Montant',
+            motifVide: 'Aucune dépense sur la période.',
+          }),
+          { sousTitre: 'Attention : ce donut additionne des montants de devises '
+            + 'différentes s’il y en a. Le tableau ci-dessous les sépare — c’est lui qui '
+            + 'fait foi.' })
+        + E.panneau('Répartition par statut (par devise)',
           E.tableau(['Statut', 'Nombre', 'Montant'], parStatut,
             { vide: 'Aucune dépense.' }));
     }).catch(echec);
@@ -619,6 +651,33 @@
           { vide: d.etat_vide || 'Aucun compte financier déclaré.' }),
           { sousTitre: 'Le solde est recalculé depuis les mouvements — jamais lu dans une '
             + 'colonne, qui se désynchroniserait dès la première écriture concurrente.' })
+        + E.panneau('Trajectoire de trésorerie',
+          (function () {
+            // Réalisé, engagé et prévu ne se somment pas : ils font trois courbes.
+            // Les additionner produirait une trajectoire unique qui masquerait
+            // exactement ce que la distinction sert à montrer.
+            var parJour = {};
+            (d.flux || []).forEach(function (f) {
+              var cle = f.date_prevue;
+              parJour[cle] = parJour[cle] || { realise: 0, engage: 0, prevu: 0 };
+              var signe = f.sens === 'sortie' ? -1 : 1;
+              parJour[cle][f.nature] += signe * Number(f.montant || 0);
+            });
+            var jours = Object.keys(parJour).sort();
+            if (jours.length === 0) {
+              return G.vide('Aucun flux prévisionnel saisi : la trajectoire ne repose '
+                + 'sur rien et n’est donc pas tracée.');
+            }
+            return G.courbe(['realise', 'engage', 'prevu'].map(function (nature, i) {
+              return {
+                nom: nature.charAt(0).toUpperCase() + nature.slice(1),
+                couleur: G.SERIES[i],
+                points: jours.map(function (j) { return { x: E.dateCourte(j), y: parJour[j][nature] }; }),
+              };
+            }).filter(function (s2) {
+              return s2.points.some(function (p) { return p.y !== 0; });
+            }), { colonneX: 'Date' });
+          }()))
         + E.panneau('Prévision par nature',
           E.tableau(['Nature', 'Éléments', 'Entrées', 'Sorties'], natures,
             { vide: 'Aucun flux prévisionnel saisi.' }),
@@ -671,6 +730,26 @@
       }).join('');
 
       elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Consommation du budget par département',
+          G.barres((d.comparaison || []).map(function (c) {
+            return {
+              libelle: (c.departement || c.categorie || '—') + ' · ' + c.categorie,
+              valeur: c.realise,
+              detail: 'budget ' + E.nombre(c.budget) + ' ' + (c.devise || ''),
+              couleur: c.alerte ? 'var(--alerte)' : 'var(--serie-1)',
+            };
+          }), {
+            max: Math.max.apply(null, (d.comparaison || []).map(function (c) {
+              return Math.max(Number(c.budget || 0), Number(c.realise || 0));
+            }).concat([1])),
+            colonneLibelle: 'Ligne budgétaire',
+            colonneValeur: 'Réalisé',
+            largeurLibelle: 200,
+            motifVide: 'Aucune ligne budgétaire pour cet exercice.',
+          }),
+          { sousTitre: 'Longueur = réalisé. Les lignes en rouge dépassent leur budget. '
+            + 'Le réalisé ne compte que les dépenses PAYÉES — une demande refusée n’a '
+            + 'jamais consommé de budget.' })
         + E.panneau('Budget contre réalisé',
           E.tableau(['Département', 'Catégorie', 'Budget', 'Réalisé', 'Écart', '%', 'Alerte'],
             comparaison, { vide: d.etat_vide || 'Aucune ligne budgétaire.' }),
@@ -729,6 +808,21 @@
           E.tableau(['Offre', 'Clients', 'Paiements', 'Revenu'], offres,
             { vide: 'Aucun encaissement rattaché à une offre sur la période.' })
           + totauxHtml(d.totaux_revenus))
+        + E.panneau('Revenu encaissé par commune — vue graphique',
+          G.grilleCommunes((d.revenu_par_commune || []).filter(function (c) {
+            return Number(c.revenu) > 0;
+          }).map(function (c) {
+            return {
+              libelle: c.commune || '—',
+              valeur: Number(c.revenu || 0),
+              detail: E.nombre(c.abonnes) + ' abonné(s), ' + E.nombre(c.paiements) + ' paiement(s)',
+            };
+          }), {
+            unite: 'encaissé',
+            colonneLibelle: 'Commune',
+            colonneValeur: 'Revenu encaissé',
+            motifVide: 'Aucun encaissement rattaché à une commune sur la période.',
+          }))
         + E.panneau('Revenu encaissé par commune',
           E.tableau(['Commune', 'Abonnés', 'Revenu'], communes,
             { vide: 'Aucun encaissement rattaché à une commune.' }))
