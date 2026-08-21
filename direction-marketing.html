@@ -59,6 +59,7 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -467,6 +468,23 @@
       }).join('');
 
       elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Conversions par campagne',
+          G.barres((d.campagnes || []).map(function (c) {
+            return {
+              libelle: c.nom,
+              valeur: c.conversions,
+              detail: E.nombre(c.leads) + ' lead(s) · ' + c.canal,
+            };
+          }), {
+            unite: 'conversion(s)',
+            colonneLibelle: 'Campagne',
+            colonneValeur: 'Conversions',
+            largeurLibelle: 190,
+            motifVide: 'Aucune campagne mesurée sur la période.',
+          }),
+          { sousTitre: 'Longueur = conversions attribuées. Une campagne active sans '
+            + 'mesure saisie n’apparaît pas à zéro : elle apparaît sans barre, et '
+            + 'l’avertissement en haut de page la nomme.' })
         + E.panneau('Campagnes',
           E.tableau(['Campagne', 'Canal', 'Zone', 'Budget', 'Dépensé', 'Leads', 'Conversions',
             'Taux', 'Coût d’acquisition', 'Statut'], lignes,
@@ -530,6 +548,33 @@
           ? { nom: 'Taux de conversion', disponible: false, motif: d.conversion.motif }
           : { nom: 'Taux de conversion', valeur: d.conversion.taux, format: 'pourcent' },
       ])
+        + E.panneau('Entonnoir du pipeline',
+          (function () {
+            // Les étapes sont cumulatives : un prospect en négociation est bien passé
+            // par « contacté ». Compter chaque colonne isolément donnerait un entonnoir
+            // en dents de scie, qui ne veut rien dire.
+            var ORDRE = ['identifie', 'contacte', 'visite_planifiee', 'visite_faite',
+              'offre_envoyee', 'negociation', 'converti'];
+            var LIBELLES = {
+              identifie: 'Identifiés', contacte: 'Contactés',
+              visite_planifiee: 'Visite planifiée', visite_faite: 'Visite effectuée',
+              offre_envoyee: 'Offre envoyée', negociation: 'En négociation',
+              converti: 'Convertis',
+            };
+            var parEtape = {};
+            (d.colonnes || []).forEach(function (c) { parEtape[c.etape] = c.total; });
+            var cumule = 0;
+            var etapes = ORDRE.slice().reverse().map(function (e) {
+              cumule += (parEtape[e] || 0);
+              return { libelle: LIBELLES[e], valeur: cumule };
+            }).reverse();
+            return G.entonnoir(etapes, {
+              unite: 'prospect(s)',
+              motifVide: 'Aucun prospect dans le pipeline.',
+            });
+          }()),
+          { sousTitre: 'Chaque étape compte les prospects qui l’ont ATTEINTE, y compris '
+            + 'ceux qui l’ont dépassée depuis.' })
         + E.panneau('Pipeline',
           '<div style="display:flex;gap:12px;flex-wrap:wrap">' + colonnes + '</div>')
         + E.panneau('Prospects',
@@ -701,8 +746,39 @@
 
       elContenu.innerHTML = E.avertissements(d.avertissements)
         + E.grilleKpi(cartes)
+        + E.panneau('Composition du NPS',
+          G.donut([
+            { libelle: 'Promoteurs (9–10)', valeur: d.nps.promoteurs },
+            { libelle: 'Passifs (7–8)', valeur: d.nps.passifs },
+            { libelle: 'Détracteurs (0–6)', valeur: d.nps.detracteurs },
+          ], {
+            valeurCentre: d.nps.valeur === null ? '—' : (d.nps.valeur > 0 ? '+' : '') + d.nps.valeur,
+            libelleCentre: 'NPS',
+            unite: 'réponse(s)',
+            colonneLibelle: 'Catégorie',
+            colonneValeur: 'Réponses',
+            motifVide: d.nps.motif || 'Aucune note recueillie sur la période.',
+          }),
+          { sousTitre: d.nps.fiable
+            ? 'Calculé sur ' + E.nombre(d.nps.reponses) + ' réponse(s).'
+            : 'Calculé sur ' + E.nombre(d.nps.reponses) + ' réponse(s), sous le seuil de '
+              + 'fiabilité de ' + d.nps.effectif_minimum + '. À lire comme une tendance, '
+              + 'pas comme une mesure.' })
         + E.panneau('Réclamations par cause',
           E.tableau(['Cause', 'Nombre'], reclamations, { vide: 'Aucune réclamation.' }))
+        + E.panneau('Réclamations par commune',
+          G.grilleCommunes((d.par_commune || []).map(function (c) {
+            return {
+              libelle: c.commune || '—',
+              valeur: c.reclamations,
+              detail: E.nombre(c.total) + ' retour(s) au total',
+            };
+          }), {
+            unite: 'réclamation(s)',
+            colonneLibelle: 'Commune',
+            colonneValeur: 'Réclamations',
+            motifVide: 'Aucun retour rattaché à une commune.',
+          }))
         + E.panneau('Par commune',
           E.tableau(['Commune', 'Retours', 'Réclamations', 'Note moyenne'], communes,
             { vide: 'Aucun retour localisé.' }))

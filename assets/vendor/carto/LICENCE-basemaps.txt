@@ -1,0 +1,1 @@
+Licences BSD-3-Clause pour les trois paquets — texte de licence de MapLibre conservé ; pmtiles et basemaps n'en embarquent pas dans leur archive npm.

@@ -55,6 +55,7 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -267,6 +268,26 @@
               base: d.synthese.en_bonne_voie + ' sur ' + d.synthese.mesurables + ' mesuré(s)' },
           { nom: 'Projets à risque', valeur: d.portefeuille.projets_a_risque },
         ])
+        + E.panneau('Avancement des objectifs',
+          G.barres((d.objectifs || []).map(function (o) {
+            return {
+              libelle: o.code + ' · ' + o.intitule,
+              valeur: o.progression,
+              detail: o.resultats_mesures + ' résultat(s) mesuré(s) sur ' + o.resultats_total,
+              couleur: o.progression >= 70 ? 'var(--serie-1)'
+                : (o.progression >= 40 ? 'var(--serie-4)' : 'var(--serie-2)'),
+            };
+          }).filter(function (o) { return o.valeur !== null; }), {
+            max: 100,
+            uniteCourte: '%',
+            colonneLibelle: 'Objectif',
+            colonneValeur: 'Avancement',
+            largeurLibelle: 210,
+            motifVide: 'Aucun objectif ne porte de résultat clé mesuré : l’avancement '
+              + 'n’a pas de base de calcul.',
+          }),
+          { sousTitre: 'Moyenne des résultats clés RÉELLEMENT mesurés. Un résultat sans '
+            + 'mesure est exclu du calcul, jamais compté comme zéro.' })
         + E.panneau('Arbre des objectifs', objectifsHtml(d.objectifs, true))
         + E.panneau('Portefeuille de projets', projetsHtml(d.projets),
           { sousTitre: d.portefeuille.motif || (d.portefeuille.total !== null
@@ -456,7 +477,19 @@
         return E.panneau('Cohortes', cohortesHtml(r));
       });
       html += section('Territoire', d.territoire, function (t) {
-        return E.panneau('Par commune', territoireHtml(t));
+        return E.panneau('Abonnés par commune',
+          G.grilleCommunes((t.communes || t.par_commune || []).map(function (c) {
+            return {
+              libelle: c.commune || c.nom || '—',
+              valeur: c.abonnes !== undefined ? c.abonnes : c.total,
+            };
+          }), {
+            unite: 'abonné(s)',
+            colonneLibelle: 'Commune',
+            colonneValeur: 'Abonnés',
+            motifVide: 'Aucun abonné rattaché à une commune.',
+          }))
+          + E.panneau('Par commune', territoireHtml(t));
       });
       elContenu.innerHTML = html;
     }).catch(echec);
@@ -498,6 +531,16 @@
           { nom: 'Expirant sous 60 j', valeur: d.contrats.synthese.expirant_sous_60j },
           { nom: 'Collecteurs actifs', valeur: d.disponibilite.collecteurs_actifs },
         ])
+        + E.panneau('Répartition de l’effectif',
+          G.donut((d.effectifs.par_departement || []).map(function (dep) {
+            return { libelle: dep.nom, valeur: dep.effectif_sous_contrat };
+          }), {
+            libelleCentre: 'sous contrat',
+            unite: 'personne(s)',
+            colonneLibelle: 'Département',
+            colonneValeur: 'Effectif',
+            motifVide: 'Aucun contrat actif rattaché à un département.',
+          }))
         + E.panneau('Effectifs par département', departementsHtml(d.effectifs.par_departement))
         + '<div class="note">Cette vue ne porte ni rémunération individuelle, ni dossier '
         + 'disciplinaire : ces informations se lisent par nécessité fonctionnelle, dans '

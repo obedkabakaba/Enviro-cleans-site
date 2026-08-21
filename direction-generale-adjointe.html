@@ -52,6 +52,7 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -237,6 +238,23 @@
       }).join('');
 
       elContenu.innerHTML = '<div class="note">' + E.echapper(d.note) + '</div>'
+        + E.panneau('Actions ouvertes par département',
+          G.barres((d.par_departement || []).map(function (dep) {
+            return {
+              libelle: dep.departement,
+              valeur: dep.ouvertes,
+              detail: dep.bloquees + ' bloquée(s), ' + dep.en_retard + ' en retard',
+              couleur: dep.bloquees > 0 ? 'var(--serie-2)' : 'var(--serie-1)',
+            };
+          }), {
+            unite: 'action(s)',
+            colonneLibelle: 'Département',
+            colonneValeur: 'Actions ouvertes',
+            largeurLibelle: 165,
+            motifVide: 'Aucune action transverse enregistrée.',
+          }),
+          { sousTitre: 'En orange, les départements portant au moins une action bloquée — '
+            + 'c’est là que la coordination a quelque chose à débloquer.' })
         + E.panneau('Exécution par département',
           departementsActionsHtml(d.par_departement))
         + E.panneau('Effectifs par département',

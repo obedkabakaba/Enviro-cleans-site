@@ -54,6 +54,7 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -254,6 +255,17 @@
             base: E.nombre(d.profils_rh.rattaches_a_une_zone) + ' rattaché(s) à une zone' },
           { nom: 'Sans fiche RH', valeur: d.personnel_sans_profil_rh },
         ])
+        + E.panneau('Répartition de l’effectif par département',
+          G.donut(d.par_departement.map(function (dep) {
+            return { libelle: dep.nom, valeur: dep.effectif_sous_contrat };
+          }), {
+            libelleCentre: 'sous contrat',
+            unite: 'personne(s)',
+            colonneLibelle: 'Département',
+            colonneValeur: 'Effectif',
+            motifVide: 'Aucun contrat actif rattaché à un département : la répartition '
+              + 'ne peut pas être calculée.',
+          }))
         + E.panneau('Par rôle', rolesHtml(d.par_role))
         + E.panneau('Par département',
           E.tableau(['Département', 'Responsable', 'Sous contrat'], departements,
@@ -414,21 +426,21 @@
       elSousTitre.textContent = E.nombre(d.postes.length) + ' poste(s) · '
         + E.nombre(d.entonnoir.candidatures) + ' candidature(s) sur la période';
 
-      var etapes = [
-        ['Candidatures', d.entonnoir.candidatures],
-        ['Présélection', d.entonnoir.preselection],
-        ['Entretiens', d.entonnoir.entretiens],
-        ['Évaluations', d.entonnoir.evaluations],
-        ['Offres', d.entonnoir.offres],
-        ['Embauches', d.entonnoir.embauches],
-      ];
-      var maxi = Math.max.apply(null, etapes.map(function (e) { return e[1]; }).concat([1]));
-      var entonnoir = etapes.map(function (e) {
-        return '<tr><td>' + E.echapper(e[0]) + '</td>'
-          + '<td><div class="barre" style="width:180px"><span style="width:'
-          + Math.round((e[1] / maxi) * 100) + '%"></span></div></td>'
-          + '<td><strong>' + E.nombre(e[1]) + '</strong></td></tr>';
-      }).join('');
+      // Les étapes d'un recrutement sont ORDINALES : inverser « entretien » et « offre »
+      // changerait le sens. L'entonnoir les rend avec une rampe d'une seule teinte, pour
+      // que l'ordre se lise dans la couleur, et publie le taux de passage d'une étape à
+      // la suivante — le chiffre qui dit réellement où le processus perd des candidats.
+      var entonnoir = G.entonnoir([
+        { libelle: 'Candidatures reçues', valeur: d.entonnoir.candidatures },
+        { libelle: 'Présélection', valeur: d.entonnoir.preselection },
+        { libelle: 'Entretiens', valeur: d.entonnoir.entretiens },
+        { libelle: 'Évaluations', valeur: d.entonnoir.evaluations },
+        { libelle: 'Offres envoyées', valeur: d.entonnoir.offres },
+        { libelle: 'Embauches', valeur: d.entonnoir.embauches },
+      ], {
+        unite: 'candidat(s)',
+        motifVide: 'Aucune candidature enregistrée sur la période.',
+      });
 
       var postes = d.postes.map(function (o) {
         return '<tr>'
@@ -469,8 +481,7 @@
               base: 'sur ' + E.nombre(d.taux_conversion.base) + ' candidature(s)' }
             : { nom: 'Taux de conversion', disponible: false, motif: d.taux_conversion.motif },
         ])
-        + E.panneau('Entonnoir de recrutement',
-          E.tableau(['Étape', '', 'Candidats'], entonnoir),
+        + E.panneau('Entonnoir de recrutement', entonnoir,
           { sousTitre: 'Compte les candidats PARVENUS à chaque étape, pas ceux qui y '
             + 'stationnent : un candidat aujourd’hui en « offre » est bien passé par '
             + 'l’entretien.' })
@@ -607,6 +618,20 @@
             definition: 'Évaluations créées mais sans score : elles ne comptent dans '
               + 'aucune moyenne.' },
         ])
+        + E.panneau('Répartition des évaluations',
+          G.barres([
+            { libelle: 'Excellente (4–5)', valeur: d.repartition_scores.excellente },
+            { libelle: 'Bonne (3–3,9)', valeur: d.repartition_scores.bonne },
+            { libelle: 'Moyenne (2–2,9)', valeur: d.repartition_scores.moyenne },
+            { libelle: 'Faible (< 2)', valeur: d.repartition_scores.faible },
+            { libelle: 'Non notée', valeur: d.repartition_scores.non_notee },
+          ], {
+            unite: 'évaluation(s)',
+            colonneLibelle: 'Tranche de score',
+            colonneValeur: 'Évaluations',
+            largeurLibelle: 130,
+            motifVide: 'Aucune évaluation sur ce cycle.',
+          }))
         + E.panneau('Scorecards du cycle',
           E.tableau(['Matricule', 'Employé', 'Poste', 'Département', 'Score', 'Évaluateur',
             'Statut'], evaluations, { vide: 'Aucune évaluation dans ce cycle.' }))
@@ -668,9 +693,32 @@
           + '</tr>';
       }).join('');
 
+      // Un certificat périmé n'est ni « conforme » ni « jamais suivi » : c'est un
+      // troisième état, et le noyer dans l'un des deux fausserait la lecture dans un
+      // sens ou dans l'autre.
+      var cumul = d.conformite_obligatoire.reduce(function (acc, c) {
+        return {
+          conformes: acc.conformes + (c.conformes || 0),
+          non: acc.non + (c.non_conformes || 0),
+          expires: acc.expires + (c.expires || 0),
+        };
+      }, { conformes: 0, non: 0, expires: 0 });
+
       elContenu.innerHTML = E.avertissements(d.avertissements)
         + E.panneau('Conformité aux formations obligatoires',
-          E.tableau(['Formation', 'Effectif visé', 'Conformes', 'Non conformes', 'Expirés',
+          G.donut([
+            { libelle: 'Conformes', valeur: cumul.conformes },
+            { libelle: 'Non conformes', valeur: cumul.non },
+            { libelle: 'Certificat expiré', valeur: cumul.expires },
+          ], {
+            libelleCentre: 'obligations',
+            unite: 'personne(s)',
+            colonneLibelle: 'Situation',
+            colonneValeur: 'Personnes',
+            motifVide: 'Aucune formation obligatoire au catalogue, ou aucun contrat actif : '
+              + 'la conformité n’a pas de population de référence.',
+          })
+          + E.tableau(['Formation', 'Effectif visé', 'Conformes', 'Non conformes', 'Expirés',
             'Taux'], conformite,
           { vide: 'Aucune formation obligatoire déclarée.' }),
           { sousTitre: 'Un certificat périmé ne vaut pas conformité : il est compté à '

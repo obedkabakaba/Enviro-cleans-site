@@ -7,151 +7,21 @@
 <link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
 <script src="assets/js/theme-init.js"></script>
 <link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css">
 <style>
-  /* ── Jetons de couleur : définis en clair sur :root, redéfinis en sombre.
-     Aucun contour blanc en dur, qui casserait le mode sombre. ── */
-  :root{
-    --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
-    --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
-    --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
-    --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a;
-    --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-      --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
-      --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
-    }
-  }
+  /* ── Ce qui est propre à l'espace opérations ──
+   *
+   * Cette page embarquait une COPIE complète du châssis : ses propres jetons de
+   * couleur, sa propre grille, ses propres tableaux. Elle a donc échappé à toutes les
+   * corrections faites depuis — le contraste accessible, la palette de graphiques, et
+   * surtout la réparation du bouton de thème, qui ne fonctionnait pas ici non plus.
+   *
+   * Elle charge maintenant le châssis commun. Ne restent ci-dessous que les règles
+   * qu'aucun autre espace n'utilise. */
 
-  *{ box-sizing:border-box; }
-  body{
-    margin:0; background:var(--fond); color:var(--texte);
-    font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    font-size:14px; line-height:1.5;
-  }
-
-  /* ── Shell ── */
-  .shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
-  .sidebar{
-    background:var(--surface); border-right:1px solid var(--bordure);
-    padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
-  }
-  .marque{ padding:0 20px 20px; border-bottom:1px solid var(--bordure); margin-bottom:14px; }
-  .marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
-  .marque span{ font-size:11.5px; color:var(--texte-faible); }
-  .menu a{
-    display:block; padding:10px 20px; color:var(--texte-doux);
-    text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
-  }
-  .menu a:hover{ background:var(--surface-2); color:var(--texte); }
-  .menu a.actif{ color:var(--vert); border-left-color:var(--vert); background:var(--surface-2); font-weight:600; }
-
-  .principal{ padding:22px 26px 60px; min-width:0; }
-  .topbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:22px; }
-  h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
-  .sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
-
-  .filtres{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-  input[type=date], select{
-    padding:7px 10px; border:1px solid var(--bordure); border-radius:7px;
-    background:var(--surface); color:var(--texte); font-size:13px;
-  }
-  button.action{
-    padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
-    color:#fff; font-weight:600; font-size:13px; cursor:pointer;
-  }
-  button.action:hover{ background:var(--vert-profond); }
-  button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
-
-  /* ── Cartes KPI ── */
-  .grille-kpi{ display:grid; grid-template-columns:repeat(auto-fill,minmax(228px,1fr)); gap:14px; margin-bottom:22px; }
-  .kpi{
-    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
-    padding:16px 17px; box-shadow:var(--ombre); position:relative;
-  }
-  .kpi .libelle{ font-size:12px; color:var(--texte-doux); font-weight:600; margin-bottom:8px; padding-right:22px; }
-  .kpi .valeur{ font-family:'Montserrat',sans-serif; font-size:27px; font-weight:800; line-height:1.1; }
-  .kpi .unite{ font-size:14px; color:var(--texte-faible); font-weight:600; margin-left:3px; }
-  .kpi .base{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; }
-  .kpi.non-mesure .valeur{ color:var(--texte-faible); font-size:18px; font-weight:600; }
-  .kpi .motif{ font-size:11.5px; color:var(--texte-faible); margin-top:7px; font-style:italic; }
-
-  /* Info-bulle portant la définition et la formule : un chiffre sans définition
-     n'est pas exploitable. */
-  .info{
-    position:absolute; top:13px; right:13px; width:17px; height:17px;
-    border-radius:50%; border:1px solid var(--bordure); color:var(--texte-faible);
-    font-size:11px; line-height:15px; text-align:center; cursor:help; user-select:none;
-  }
-  .info:hover{ border-color:var(--vert); color:var(--vert); }
-
-  /* ── Panneaux ── */
-  .panneau{
-    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
-    box-shadow:var(--ombre); margin-bottom:20px; overflow:hidden;
-  }
-  .panneau > header{
-    padding:14px 17px; border-bottom:1px solid var(--bordure);
-    display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
-  }
-  .panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14.5px; margin:0; }
-  .panneau .corps{ padding:16px 17px; }
-
-  /* ── Tableaux : défilement propre, jamais de débordement de page ── */
-  .table-wrap{ overflow-x:auto; }
-  table{ width:100%; border-collapse:collapse; font-size:13px; min-width:560px; }
-  th{
-    text-align:left; padding:9px 11px; font-size:11.5px; text-transform:uppercase;
-    letter-spacing:.03em; color:var(--texte-faible); border-bottom:1px solid var(--bordure); white-space:nowrap;
-  }
-  td{ padding:10px 11px; border-bottom:1px solid var(--bordure); }
-  tbody tr:last-child td{ border-bottom:none; }
-  tbody tr:hover{ background:var(--surface-2); }
-
-  .puce{ display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; }
-  .puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
-  .puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
-  .puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
-  .puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
-
-  .barre{ height:6px; background:var(--surface-2); border-radius:99px; overflow:hidden; min-width:80px; }
-  .barre span{ display:block; height:100%; background:var(--vert); }
-  .barre span.charge-haute{ background:var(--attention); }
-  .barre span.charge-critique{ background:var(--alerte); }
-
-  /* ── Graphique en barres, accessible : un tableau équivalent l'accompagne ── */
-  .graphique{ display:flex; align-items:flex-end; gap:3px; height:150px; padding-top:10px; }
-  .graphique .jour{ flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:2px; min-width:6px; }
-  .graphique .part-ok{ background:var(--vert); border-radius:2px 2px 0 0; }
-  .graphique .part-echec{ background:var(--alerte); }
-  .legende{ display:flex; gap:16px; font-size:12px; color:var(--texte-doux); margin-top:12px; flex-wrap:wrap; }
-  .legende i{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; }
-
-  details.donnees summary{ cursor:pointer; font-size:12.5px; color:var(--texte-doux); margin-top:12px; }
-
-  /* ── États ── */
-  .squelette{ background:var(--surface-2); border-radius:6px; height:15px; animation:pulse 1.4s ease-in-out infinite; }
-  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
-  .etat-vide{ padding:28px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
-  .erreur{
-    padding:13px 15px; border-radius:9px; font-size:13.5px;
-    background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
-  }
-  .avertissement{
-    padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:10px;
-    background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
-  }
-
-  @media (max-width:900px){
-    .shell{ grid-template-columns:1fr; }
-    .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
-    .menu{ display:flex; overflow-x:auto; }
-    .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
-    .menu a.actif{ border-left:none; border-bottom-color:var(--vert); }
-    .principal{ padding:18px 15px 50px; }
-  }
+  /* Rien pour l'instant : les barres de charge utilisent `.barre` du châssis, qui porte
+     déjà `.charge-haute` et `.charge-critique`. Ce bloc reste comme point d'accroche
+     pour une règle réellement spécifique à cet espace. */
 </style>
 </head>
 <body>
@@ -202,6 +72,9 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/carte-config.js"></script>
+<script src="assets/js/carte-maplibre.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -336,11 +209,10 @@
       + '</div>';
   }
 
+  // Même rendu que partout ailleurs : au-delà de deux, les avertissements sont repliés
+  // derrière leur compte. Cette page avait sa propre implémentation, qui les empilait.
   function afficherAvertissements(liste) {
-    if (!liste || liste.length === 0) { elAvertissements.innerHTML = ''; return; }
-    elAvertissements.innerHTML = liste.map(function (a) {
-      return '<div class="avertissement">' + echapper(a) + '</div>';
-    }).join('');
+    elAvertissements.innerHTML = E.avertissements(liste);
   }
 
   // ── Vue : centre de contrôle ───────────────────────────────────────────────
@@ -704,6 +576,7 @@
         { nom: 'Position des véhicules', disponible: false,
           motif: d.positions_vehicules.motif },
       ])
+        + E.panneau('Carte du jour', '<div id="carteDuJour"></div>')
         + E.panneau('Tournées en cours',
           E.tableau(['Tournée', 'Zone', 'Collecteur', 'Véhicule', 'Arrêts', 'Traités',
             'Échecs', 'Progression', 'Statut'], tournees,
@@ -716,6 +589,40 @@
             arrets, { vide: 'Aucun arrêt géolocalisé.' }),
           { sousTitre: 'Les coordonnées ouvrent la position dans une carte externe : '
             + 'aucun fond cartographique payant n’est chargé dans la page.' });
+
+      // Le conteneur vient d'être injecté : la carte se monte maintenant. Elle décide
+      // seule entre fond de plan et repli SVG, selon ce qui est configuré et joignable.
+      var pointsCarte = d.arrets.map(function (a) {
+        return {
+          latitude: a.latitude,
+          longitude: a.longitude,
+          libelle: a.client + ' — ' + (a.numero_abonne || ''),
+          etat: a.statut,
+          detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
+        };
+      }).concat(d.incidents.filter(function (i) {
+        return i.latitude !== null && i.longitude !== null;
+      }).map(function (i) {
+        return {
+          latitude: i.latitude,
+          longitude: i.longitude,
+          libelle: i.titre,
+          etat: 'incident',
+          type: 'incident',
+          detail: i.severite + ' · ' + (i.zone || ''),
+        };
+      }));
+
+      CarteInteractive.afficher('carteDuJour', pointsCarte, {
+        tournees: d.tournees.map(function (t) {
+          return {
+            nom: t.nom || ('Tournée ' + t.id),
+            arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
+          };
+        }),
+        motifVide: 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
+          + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
+      });
     }).catch(afficherErreur);
   }
 
@@ -775,10 +682,21 @@
           : { nom: 'Tonnage collecté', disponible: false, motif: d.tonnage.motif },
       ])
         + E.panneau('Motifs d’échec',
-          E.tableau(['Motif', 'Occurrences'], motifs,
-            { vide: 'Aucun échec sur la période.' }),
-          { sousTitre: 'Un motif « non catégorisé » ne peut pas être analysé : c’est ce '
-            + 'qui empêche de traiter les causes racines.' })
+          G.barres((d.motifs_echec || []).map(function (m) {
+            return {
+              libelle: m.motif === 'non_categorise' ? 'Non catégorisé' : m.motif.replace(/_/g, ' '),
+              valeur: m.total,
+              couleur: m.motif === 'non_categorise' ? 'var(--texte-faible)' : 'var(--serie-1)',
+            };
+          }), {
+            unite: 'échec(s)',
+            colonneLibelle: 'Motif',
+            colonneValeur: 'Occurrences',
+            largeurLibelle: 175,
+            motifVide: 'Aucun échec de collecte sur la période.',
+          }),
+          { sousTitre: 'Les échecs sans motif catégorisé apparaissent en gris : ils ne '
+            + 'peuvent pas alimenter une analyse de causes racines.' })
         + E.panneau('Journal des collectes',
           E.tableau(['Heure', 'Client', 'Adresse', 'Catégorie', 'Poids', 'Preuve', 'Statut',
             'Motif d’échec', 'Collecteur'], lignes,

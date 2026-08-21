@@ -19,21 +19,99 @@
  * dans leur page.
  */
 
+/* ── Deux familles de couleurs, et pourquoi il en faut deux ──
+ *
+ * Une couleur de marque lisible en aplat ne l'est pas forcément en TEXTE. Le vert
+ * Envirocleans (#3ab54a) est superbe sur une barre de progression ; en texte sur fond
+ * clair il tombe à 2,55:1, et du blanc posé dessus à 2,66:1 — très en dessous du seuil
+ * d'accessibilité de 4,5:1. Le bouton d'action principal, présent sur chaque écran,
+ * était donc illisible pour une partie des utilisateurs.
+ *
+ * Les jetons sont donc dédoublés :
+ *   --vert, --teal, --alerte…            → APLATS (barres, pastilles, fonds teintés)
+ *   --vert-texte, --teal-texte, …        → TEXTE, contraste vérifié ≥ 4,5:1
+ *
+ * L'identité visuelle ne change pas : ce sont les mêmes teintes, assombries juste assez
+ * pour être lues. Chaque valeur a été calculée, pas choisie à l'œil, et le contrôle
+ * `verif-theme` les remesure sur les écrans réels dans les deux thèmes.
+ */
 :root{
   --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
-  --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
+  --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#636f7c;
   --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
   --alerte:#d9534f; --attention:#e08a1e; --ok:#3ab54a; --info:#3f6fd8;
+
+  /* Variantes de TEXTE — contraste ≥ 4,5:1 sur --surface et --surface-2. */
+  --vert-texte:#277a31; --teal-texte:#117878; --ok-texte:#25722e;
+  --alerte-texte:#c22f2a; --attention-texte:#8f5813; --info-texte:#2f60cc;
+
+  /* Fonds de bouton portant du texte blanc — contraste vérifié. */
+  --bouton:#1f6b3a; --bouton-survol:#17532d; --bouton-danger:#b8322e;
+
+  /* Chaque valeur ci-dessus est vérifiée contre le PIRE fond sur lequel elle se pose —
+   * --fond, --surface et --surface-2 pour le texte courant, le fond teinté propre à
+   * chaque état pour les puces et les bandeaux. Viser seulement le blanc laissait
+   * passer du 4,35:1 sur le gris de page. */
+
   --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
 }
 
+/* ════════════════════════════════════════
+ * THÈME SOMBRE — DEUX PORTES, PAS UNE
+ * ════════════════════════════════════════
+ *
+ * Ce fichier ne déclarait le thème sombre que sous `prefers-color-scheme`. Or
+ * `theme-init.js` pose TOUJOURS `data-theme` sur `<html>`, et le bouton de bascule ne
+ * fait rien d'autre que changer cet attribut. Résultat : **le bouton n'avait aucun
+ * effet sur les sept espaces de direction.** Sur un système en clair, cliquer sur la
+ * lune posait `data-theme="dark"` et la page restait blanche ; sur un système en
+ * sombre, demander le clair ne rendait rien de clair.
+ *
+ * Le site public, lui, portait 94 règles `data-theme` et fonctionnait — la bascule
+ * marchait partout SAUF là où ces écrans venaient d'être ajoutés. C'est le genre de
+ * défaut qu'on ne voit pas en développant : on teste en changeant le réglage du
+ * système, jamais en cliquant sur son propre bouton.
+ *
+ * Les jetons sombres sont donc déclarés deux fois, à l'identique :
+ *   - sous la requête média, pour le réglage du système, avec la garde
+ *     `:not([data-theme="light"])` — un choix explicite de clair doit gagner ;
+ *   - sous `[data-theme="dark"]`, pour le choix explicite de sombre.
+ *
+ * Aucune couleur n'a sa seule définition ici : `:root` en clair est complet à lui seul.
+ */
+
 @media (prefers-color-scheme: dark){
-  :root{
+  :root:not([data-theme="light"]){
     --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#8b9caf;
     --info:#7ba0f0;
+
+    /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce
+     * sont les sombres qui échouent. Les variantes de texte y sont donc plus CLAIRES,
+     * et non plus foncées — sauf le rouge, qui reste sous le seuil et est éclairci. */
+    --vert-texte:#3ab54a; --teal-texte:#17a2a2; --ok-texte:#3ab54a;
+    --alerte-texte:#ef8f8b; --attention-texte:#e08a1e; --info-texte:#7ba0f0;
+
+    --bouton:#2a8335; --bouton-survol:#1f6b3a; --bouton-danger:#c22f2a;
+
     --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
   }
+}
+
+:root[data-theme="dark"]{
+    --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
+    --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#8b9caf;
+    --info:#7ba0f0;
+
+    /* Sur fond sombre, la relation s'inverse : les teintes vives passent le seuil, ce
+     * sont les sombres qui échouent. Les variantes de texte y sont donc plus CLAIRES,
+     * et non plus foncées — sauf le rouge, qui reste sous le seuil et est éclairci. */
+    --vert-texte:#3ab54a; --teal-texte:#17a2a2; --ok-texte:#3ab54a;
+    --alerte-texte:#ef8f8b; --attention-texte:#e08a1e; --info-texte:#7ba0f0;
+
+    --bouton:#2a8335; --bouton-survol:#1f6b3a; --bouton-danger:#c22f2a;
+
+    --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
 }
 
 *{ box-sizing:border-box; }
@@ -44,8 +122,173 @@ body{
   font-size:14px; line-height:1.5;
 }
 
+
+/* ════════════════════════════════════════
+ * PALETTE DES GRAPHIQUES
+ * ════════════════════════════════════════
+ *
+ * Ces couleurs ne sont pas choisies à l'œil : elles ont été passées au validateur de
+ * palette, qui vérifie six propriétés — bande de luminosité, plancher de chroma,
+ * séparation sous daltonisme (protanopie et deutéranopie simulées), plancher de
+ * distinction en vision normale, contraste sur le fond, et appartenance à une palette
+ * documentée.
+ *
+ * ── Deux plafonds différents, et pourquoi ──
+ *
+ * Les formes où deux couleurs quelconques peuvent se retrouver côte à côte (donuts,
+ * nuages de points, cartes) sont testées SUR TOUTES LES PAIRES. Aucune combinaison de
+ * plus de trois teintes ne passe ce test — c'est une limite mathématique, pas un
+ * manque d'effort. Ces formes s'arrêtent donc à trois séries, la quatrième et les
+ * suivantes étant regroupées en « Autres ».
+ *
+ * Les formes où seules les voisines se touchent (barres, lignes, empilements) sont
+ * testées sur les paires ADJACENTES et tiennent six séries.
+ *
+ * ── Deux réserves connues, et leur contrepartie ──
+ *
+ * En clair, le jaune (--serie-4) est à 2,17:1 sur blanc, sous le seuil de 3:1. La règle
+ * de compensation s'applique : chaque graphique porte un tableau de données dépliable,
+ * donc aucune valeur ne dépend de la seule couleur.
+ *
+ * Le vert et l'orange sont à ΔE 9,4 en deutéranopie — au-dessus du seuil de 8, mais
+ * sans marge confortable. Les écarts de 2 px entre segments et les étiquettes directes
+ * font le reste du travail.
+ *
+ * Les valeurs sombres ne sont pas un « éclaircissement automatique » des claires :
+ * ce sont les mêmes familles de teintes, re-choisies pour le fond sombre et validées
+ * comme un jeu à part entière.
+ */
+:root{
+  --serie-1:#1f6b3a; --serie-2:#eb6834; --serie-3:#2a78d6;
+  --serie-4:#eda100; --serie-5:#4a3aa7; --serie-6:#e34948;
+
+  /* Rampe séquentielle : une seule teinte, du clair au foncé. C'est le choix par
+     défaut pour une grandeur — plus c'est foncé, plus c'est grand. */
+  --sequentiel-1:#dbeee3; --sequentiel-2:#a8d6bd; --sequentiel-3:#6cb890;
+  --sequentiel-4:#3a9463; --sequentiel-5:#1f6b3a;
+
+  --grille:#e3e8ec;
+  --graphique-fond:#ffffff;
+}
+
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --serie-1:#199e70; --serie-2:#d95926; --serie-3:#3987e5;
+    --serie-4:#c98500; --serie-5:#9085e9; --serie-6:#e66767;
+    --sequentiel-1:#12352a; --sequentiel-2:#17553d; --sequentiel-3:#1a7554;
+    --sequentiel-4:#199e70; --sequentiel-5:#4cc194;
+    --grille:#243447;
+    --graphique-fond:#141f2e;
+  }
+}
+
+:root[data-theme="dark"]{
+  --serie-1:#199e70; --serie-2:#d95926; --serie-3:#3987e5;
+  --serie-4:#c98500; --serie-5:#9085e9; --serie-6:#e66767;
+  --sequentiel-1:#12352a; --sequentiel-2:#17553d; --sequentiel-3:#1a7554;
+  --sequentiel-4:#199e70; --sequentiel-5:#4cc194;
+  --grille:#243447;
+  --graphique-fond:#141f2e;
+}
+
+/* ── Anatomie d'un graphique ── */
+.graphique{ margin:4px 0 2px; }
+.graphique svg{ display:block; width:100%; height:auto; overflow:visible; }
+/* Un donut isolé se centre ; les autres formes se calent à gauche, alignées sur le
+   texte du panneau. */
+.graphique svg[style*="max-width:200px"]{ margin:0 auto; }
+.graphique .titre-graphique{
+  font-size:12.5px; font-weight:700; color:var(--texte); margin-bottom:2px;
+}
+.graphique .sous-titre-graphique{
+  font-size:11.5px; color:var(--texte-faible); margin-bottom:10px;
+}
+
+/* Le texte ne porte JAMAIS la couleur d'une série : l'identité vient de la pastille
+   colorée posée à côté. Un jaune lisible en aplat ne l'est pas en texte. */
+.graphique text{ fill:var(--texte-doux); font-size:11px; font-family:inherit; }
+.graphique text.valeur{ fill:var(--texte); font-weight:700; }
+.graphique .grille-ligne{ stroke:var(--grille); stroke-width:1; }
+.graphique .axe{ stroke:var(--grille); stroke-width:1; }
+
+.legende{
+  display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:12px;
+  font-size:12px; color:var(--texte-doux);
+}
+.legende span{ display:inline-flex; align-items:center; gap:6px; }
+.legende i{ width:11px; height:11px; border-radius:3px; flex:none; }
+
+/* Tableau de données : la contrepartie obligatoire des réserves ci-dessus. */
+details.donnees-graphique{ margin-top:10px; }
+details.donnees-graphique summary{
+  cursor:pointer; font-size:11.5px; color:var(--texte-faible);
+}
+details.donnees-graphique summary:hover{ color:var(--texte-doux); }
+details.donnees-graphique table{ min-width:0; margin-top:8px; }
+
+/* Info-bulle : la couche d'interaction attendue sur tout graphique HTML. */
+.infobulle-graphique{
+  position:fixed; z-index:60; pointer-events:none; opacity:0;
+  background:var(--surface); border:1px solid var(--bordure); border-radius:8px;
+  padding:8px 11px; font-size:12px; color:var(--texte);
+  box-shadow:0 4px 20px rgba(0,0,0,.16); max-width:260px;
+  transition:opacity .1s;
+}
+.infobulle-graphique strong{ display:block; margin-bottom:3px; }
+.infobulle-graphique .ligne{ display:flex; align-items:center; gap:7px; margin-top:2px; }
+.infobulle-graphique .ligne i{ width:9px; height:9px; border-radius:2px; flex:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .infobulle-graphique{ transition:none; }
+}
+
+/* ── Grille des communes : le substitut assumé d'une carte choroplèthe ── */
+.grille-communes{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(112px, 1fr)); gap:2px;
+}
+.case-commune{
+  padding:11px 12px; border-radius:6px; min-height:62px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.case-commune .nom{ font-size:11.5px; line-height:1.25; }
+.case-commune .val{ font-size:17px; font-weight:800; font-family:'Montserrat',sans-serif; }
+
+.sparkline{ vertical-align:middle; }
+
+/* ── Carte interactive ──
+ *
+ * La hauteur est fixe et en pixels : une carte en hauteur relative se retrouve à zéro
+ * pixel dans un conteneur qui n'en impose aucune, et MapLibre affiche alors un canevas
+ * vide sans la moindre erreur — un symptôme long à diagnostiquer. */
+.carte-hote{
+  height:440px; border-radius:10px; overflow:hidden;
+  background:var(--surface-2); border:1px solid var(--bordure);
+}
+@media (max-width:900px){ .carte-hote{ height:320px; } }
+
+/* Les contrôles de MapLibre suivent le thème du châssis plutôt que leur blanc d'origine,
+   qui trouait le mode sombre. */
+:root[data-theme="dark"] .maplibregl-ctrl-group,
+:root[data-theme="dark"] .maplibregl-popup-content{
+  background:var(--surface); color:var(--texte);
+}
+:root[data-theme="dark"] .maplibregl-ctrl-group button+button{ border-top-color:var(--bordure); }
+:root[data-theme="dark"] .maplibregl-popup-tip{ border-top-color:var(--surface); }
+:root[data-theme="dark"] .maplibregl-ctrl-attrib{
+  background:rgba(20,31,46,.85); color:var(--texte-doux);
+}
+:root[data-theme="dark"] .maplibregl-ctrl-attrib a{ color:var(--info-texte); }
+.maplibregl-popup-content{ font-family:inherit; font-size:12.5px; padding:9px 12px; }
+.kpi-motif{ font-size:11.5px; color:var(--texte-faible); font-style:italic; }
+
 /* ── Structure ── */
-.shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+/* `minmax(0, 1fr)` et non `1fr` : la taille minimale par défaut d'une piste de grille
+ * est `auto`, c'est-à-dire la largeur du CONTENU. Un tableau large refuse alors de se
+ * réduire, la colonne s'élargit, et la page entière défile horizontalement — même quand
+ * le tableau est pourtant dans un conteneur `overflow-x:auto` censé le contenir. C'est
+ * la cause la plus fréquente de débordement horizontal dans une mise en page en grille,
+ * et elle est invisible tant qu'aucun contenu n'est assez large pour la déclencher. */
+.shell{ display:grid; grid-template-columns:248px minmax(0, 1fr); min-height:100vh; }
 
 .sidebar{
   background:var(--surface); border-right:1px solid var(--bordure);
@@ -61,7 +304,8 @@ body{
 }
 .menu a:hover{ background:var(--surface-2); color:var(--texte); }
 .menu a.actif{
-  color:var(--vert); border-left-color:var(--vert);
+  /* Texte : la variante lisible. Barre latérale : la couleur de marque, en aplat. */
+  color:var(--vert-texte); border-left-color:var(--vert);
   background:var(--surface-2); font-weight:600;
 }
 
@@ -83,13 +327,14 @@ input[type=date], select, input[type=text], textarea{
 textarea{ width:100%; resize:vertical; min-height:70px; }
 
 button.action{
-  padding:7px 14px; border:none; border-radius:7px; background:var(--vert);
+  padding:7px 14px; border:none; border-radius:7px; background:var(--bouton);
   color:#fff; font-weight:600; font-size:13px; cursor:pointer;
 }
-button.action:hover{ background:var(--vert-profond); }
+button.action:hover{ background:var(--bouton-survol); }
 button.action:disabled{ opacity:.55; cursor:not-allowed; }
 button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
-button.danger{ background:var(--alerte); }
+button.danger{ background:var(--bouton-danger); }
+button.danger:hover{ background:var(--alerte-texte); }
 
 /* ── Cartes d'indicateur ── */
 .grille-kpi{
@@ -150,11 +395,11 @@ tbody tr:hover{ background:var(--surface-2); }
   display:inline-block; padding:2px 9px; border-radius:99px;
   font-size:11px; font-weight:700; white-space:nowrap;
 }
-.puce.ok{ background:rgba(58,181,74,.14); color:var(--ok); }
-.puce.attention{ background:rgba(224,138,30,.14); color:var(--attention); }
-.puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte); }
+.puce.ok{ background:rgba(58,181,74,.14); color:var(--ok-texte); }
+.puce.attention{ background:rgba(224,138,30,.14); color:var(--attention-texte); }
+.puce.alerte{ background:rgba(217,83,79,.14); color:var(--alerte-texte); }
 .puce.neutre{ background:var(--surface-2); color:var(--texte-doux); }
-.puce.info{ background:rgba(63,111,216,.14); color:var(--info); }
+.puce.info{ background:rgba(63,111,216,.14); color:var(--info-texte); }
 
 /* ── Blocs de contenu ── */
 .bloc{
@@ -172,7 +417,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 ul.compact{ margin:0; padding-left:19px; }
 ul.compact li{ margin-bottom:5px; }
-a.citation{ color:var(--info); word-break:break-word; }
+a.citation{ color:var(--info-texte); word-break:break-word; }
 
 /* ── États de chargement, vide et erreur ── */
 .squelette{
@@ -185,12 +430,29 @@ a.citation{ color:var(--info); word-break:break-word; }
 
 .erreur{
   padding:13px 15px; border-radius:9px; font-size:13.5px; margin-bottom:14px;
-  background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte);
+  background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32);
+  color:var(--alerte-texte);
 }
 .avertissement{
   padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
-  background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30); color:var(--attention);
+  background:rgba(224,138,30,.10); border:1px solid rgba(224,138,30,.30);
+  color:var(--attention-texte);
 }
+/* Avertissements repliés : le compte reste visible, le détail est à un clic. */
+.avertissement.replie{ padding:0; }
+.avertissement.replie summary{
+  padding:11px 14px; cursor:pointer; list-style:none; user-select:none;
+}
+.avertissement.replie summary::-webkit-details-marker{ display:none; }
+.avertissement.replie summary::after{
+  content:' ▾'; opacity:.7; font-size:11px;
+}
+.avertissement.replie[open] summary::after{ content:' ▴'; }
+.avertissement.replie[open] summary{ border-bottom:1px solid rgba(224,138,30,.26); }
+.avertissement.replie ul{ margin:0; padding:10px 16px 12px 32px; }
+.avertissement.replie li{ margin-bottom:7px; }
+.avertissement.replie li:last-child{ margin-bottom:0; }
+
 .note{
   padding:11px 14px; border-radius:9px; font-size:13px; margin-bottom:12px;
   background:rgba(63,111,216,.08); border:1px solid rgba(63,111,216,.26); color:var(--texte-doux);

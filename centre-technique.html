@@ -7,60 +7,32 @@
 <link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
 <script src="assets/js/theme-init.js"></script>
 <link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/espace-direction.css"/>
 <style>
-  :root{
-    --fond:#f4f6f8; --surface:#ffffff; --surface-2:#f9fafb;
-    --bordure:#e3e8ec; --texte:#0f1b2d; --texte-doux:#5a6672; --texte-faible:#8b96a2;
-    --vert:#3ab54a; --vert-profond:#1f6b3a; --teal:#17a2a2;
-    --alerte:#d9534f; --attention:#e08a1e; --info:#4a90d9;
-    --ombre:0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
-  }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --fond:#0d1520; --surface:#141f2e; --surface-2:#1a2736;
-      --bordure:#243447; --texte:#e8eef4; --texte-doux:#9fb0c2; --texte-faible:#6d7f92;
-      --ombre:0 1px 3px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.2);
-    }
-  }
+  /* ════════════════════════════════════════
+   * CENTRE TECHNIQUE — STYLES PROPRES À CET ÉCRAN
+   * ════════════════════════════════════════
+   *
+   * Cette page embarquait une COPIE COMPLÈTE du châssis : palette, grille, sidebar,
+   * panneaux, tableaux, boutons. Elle a donc échappé à la correction de contraste
+   * appliquée aux autres espaces, et affichait encore du texte à 3,01:1 alors que
+   * partout ailleurs le seuil de 4,5:1 était atteint. C'est exactement ce que la
+   * duplication produit : une correction faite à un endroit, oubliée à l'autre.
+   *
+   * Le châssis commun est désormais chargé (`espace-direction.css`), et ne subsistent
+   * ici que les règles réellement spécifiques : la sémantique des quatre états de sonde,
+   * ses pastilles, ses étiquettes et sa légende.
+   */
 
-  *{ box-sizing:border-box; }
-  body{
-    margin:0; background:var(--fond); color:var(--texte);
-    font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    font-size:14px; line-height:1.5;
-  }
-
-  .shell{ display:grid; grid-template-columns:242px 1fr; min-height:100vh; }
-  .sidebar{
-    background:var(--surface); border-right:1px solid var(--bordure);
-    padding:20px 0; position:sticky; top:0; height:100vh; overflow-y:auto;
-  }
-  .marque{ padding:0 20px 18px; border-bottom:1px solid var(--bordure); margin-bottom:12px; }
-  .marque strong{ font-family:'Montserrat',sans-serif; font-size:15px; display:block; }
-  .marque span{ font-size:11.5px; color:var(--texte-faible); }
-  .menu a{
-    display:block; padding:10px 20px; color:var(--texte-doux);
-    text-decoration:none; font-size:13.5px; border-left:3px solid transparent;
-  }
-  .menu a:hover{ background:var(--surface-2); color:var(--texte); }
-  .menu a.actif{ color:var(--teal); border-left-color:var(--teal); background:var(--surface-2); font-weight:600; }
-
-  .principal{ padding:22px 26px 60px; min-width:0; }
-  .topbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:20px; }
-  h1{ font-family:'Montserrat',sans-serif; font-size:20px; margin:0; }
-  .sous-titre{ color:var(--texte-faible); font-size:12.5px; margin-top:3px; }
-
-  button.action{
-    padding:7px 14px; border:none; border-radius:7px; background:var(--teal);
-    color:#fff; font-weight:600; font-size:13px; cursor:pointer;
-  }
-  button.action:hover{ filter:brightness(1.08); }
-  button.secondaire{ background:transparent; color:var(--texte-doux); border:1px solid var(--bordure); }
+  /* La sidebar du Centre technique est en teal, pas en vert : c'est ce qui distingue
+     l'espace technique des espaces métier d'un seul coup d'œil. La variante de TEXTE
+     est utilisée pour le libellé actif, l'aplat pour la barre latérale. */
+  .menu a.actif{ color:var(--teal-texte); border-left-color:var(--teal); }
 
   /* ── Bandeau d'état global ── */
   .bandeau{
-    padding:14px 17px; border-radius:11px; margin-bottom:18px;
-    display:flex; align-items:center; gap:13px; flex-wrap:wrap;
+    display:flex; align-items:center; gap:11px; padding:13px 16px; border-radius:11px;
+    margin-bottom:20px; background:var(--surface-2); border:1px solid var(--bordure);
   }
   .bandeau.ok{ background:rgba(58,181,74,.10); border:1px solid rgba(58,181,74,.32); }
   .bandeau.degrade{ background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); }
@@ -70,17 +42,9 @@
   .bandeau strong{ font-family:'Montserrat',sans-serif; font-size:14.5px; }
 
   /* ── Sondes ── */
-  .panneau{
-    background:var(--surface); border:1px solid var(--bordure); border-radius:11px;
-    box-shadow:var(--ombre); margin-bottom:18px; overflow:hidden;
-  }
-  .panneau > header{ padding:13px 17px; border-bottom:1px solid var(--bordure); }
-  .panneau > header h2{ font-family:'Montserrat',sans-serif; font-size:14px; margin:0; }
-  .panneau > header small{ color:var(--texte-faible); font-size:12px; }
-
   .sonde{
-    display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:start;
-    padding:13px 17px; border-bottom:1px solid var(--bordure);
+    display:grid; grid-template-columns:auto 1fr auto; gap:11px; align-items:start;
+    padding:11px 17px; border-bottom:1px solid var(--bordure);
   }
   .sonde:last-child{ border-bottom:none; }
   .sonde .pastille{ width:9px; height:9px; border-radius:50%; margin-top:6px; flex-shrink:0; }
@@ -88,49 +52,46 @@
   .sonde .msg{ font-size:12.5px; color:var(--texte-doux); margin-top:3px; }
   .sonde .meta{ font-size:11.5px; color:var(--texte-faible); text-align:right; white-space:nowrap; }
 
+  /* Les quatre états, et leur code couleur. « Non configuré » est GRIS et non rouge :
+     une fonctionnalité désactivée n'est pas une panne, et le confondre avec un échec
+     ferait passer un cockpit parfaitement sain pour un cockpit en alerte. */
   .p-ok{ background:var(--vert); }
   .p-configure{ background:var(--info); }
   .p-non_configure{ background:var(--texte-faible); }
   .p-indisponible{ background:var(--texte-faible); }
   .p-echec{ background:var(--alerte); }
 
-  .etiquette{ display:inline-block; padding:1px 8px; border-radius:99px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
-  .e-ok{ background:rgba(58,181,74,.14); color:var(--vert); }
-  .e-configure{ background:rgba(74,144,217,.14); color:var(--info); }
-  .e-non_configure{ background:var(--surface-2); color:var(--texte-faible); }
-  .e-indisponible{ background:var(--surface-2); color:var(--texte-faible); }
-  .e-echec{ background:rgba(217,83,79,.14); color:var(--alerte); }
+  .etiquette{
+    display:inline-block; padding:1px 8px; border-radius:99px; font-size:10.5px;
+    font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+  }
+  .e-ok{ background:rgba(58,181,74,.14); color:var(--ok-texte); }
+  .e-configure{ background:rgba(74,144,217,.14); color:var(--info-texte); }
+  .e-non_configure{ background:var(--surface-2); color:var(--texte-doux); }
+  .e-indisponible{ background:var(--surface-2); color:var(--texte-doux); }
+    /* Teinte propre, plus foncée que --alerte-texte : posée sur son fond rouge à 14 %,
+     la variante générique tombait à 4,38:1. Le fond teinté assombrit toujours un peu le
+     rendu — un contraste calculé contre le blanc ne suffit donc pas ici. */
+  .e-echec{ background:rgba(217,83,79,.14); color:#a8231e; }
+
+  /* En sombre, la relation s'inverse : sur le même fond rouge à 14 % posé sur une
+     surface foncée, c'est une teinte CLAIRE qui passe. Déclarée sous les deux portes,
+     comme tous les jetons sombres du châssis — sans quoi le bouton de bascule
+     laisserait cette étiquette illisible. */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .e-echec{ color:#f2a5a1; }
+  }
+  :root[data-theme="dark"] .e-echec{ color:#f2a5a1; }
 
   .legende{
-    background:var(--surface-2); border-radius:9px; padding:13px 16px;
-    font-size:12.5px; color:var(--texte-doux); margin-bottom:18px;
+    padding:13px 17px; border-top:1px solid var(--bordure);
+    font-size:12px; color:var(--texte-doux);
   }
   .legende dl{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:5px 11px; }
   .legende dt{ font-weight:700; }
   .legende dd{ margin:0; }
 
-  .table-wrap{ overflow-x:auto; }
-  table{ width:100%; border-collapse:collapse; font-size:12.5px; min-width:520px; }
-  th{ text-align:left; padding:9px 11px; font-size:11px; text-transform:uppercase; color:var(--texte-faible); border-bottom:1px solid var(--bordure); white-space:nowrap; }
-  td{ padding:9px 11px; border-bottom:1px solid var(--bordure); }
-  tbody tr:last-child td{ border-bottom:none; }
   code{ font-size:11.5px; background:var(--surface-2); padding:1px 5px; border-radius:4px; }
-
-  .squelette{ background:var(--surface-2); border-radius:6px; height:15px; animation:pulse 1.4s ease-in-out infinite; margin-bottom:9px; }
-  @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.45} }
-  .etat-vide{ padding:26px 18px; text-align:center; color:var(--texte-faible); font-size:13.5px; }
-  .erreur{ padding:13px 15px; border-radius:9px; font-size:13.5px; background:rgba(217,83,79,.10); border:1px solid rgba(217,83,79,.32); color:var(--alerte); }
-
-  @media (max-width:900px){
-    .shell{ grid-template-columns:1fr; }
-    .sidebar{ position:static; height:auto; border-right:none; border-bottom:1px solid var(--bordure); }
-    .menu{ display:flex; overflow-x:auto; }
-    .menu a{ white-space:nowrap; border-left:none; border-bottom:3px solid transparent; }
-    .menu a.actif{ border-left:none; border-bottom-color:var(--teal); }
-    .principal{ padding:18px 15px 50px; }
-    .sonde{ grid-template-columns:auto 1fr; }
-    .sonde .meta{ grid-column:2; text-align:left; }
-  }
 </style>
 </head>
 <body>
@@ -176,6 +137,7 @@
 <script src="assets/js/enviro-api.js"></script>
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
+<script src="assets/js/espace-graphiques.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -541,6 +503,27 @@
       }).join('');
 
       elContenu.innerHTML = E.avertissements(d.avertissements)
+        + E.panneau('Disponibilité mesurée par sonde',
+          G.barres((d.par_sonde || []).filter(function (s2) {
+            return s2.disponibilite_pct !== null;
+          }).map(function (s2) {
+            return {
+              libelle: s2.sonde.replace(/_/g, ' '),
+              valeur: s2.disponibilite_pct,
+              detail: s2.mesures + ' mesure(s), ' + s2.echecs + ' échec(s)',
+              couleur: s2.disponibilite_pct >= 99 ? 'var(--serie-1)'
+                : (s2.disponibilite_pct >= 95 ? 'var(--serie-4)' : 'var(--serie-2)'),
+            };
+          }), {
+            max: 100,
+            uniteCourte: '%',
+            colonneLibelle: 'Sonde',
+            colonneValeur: 'Disponibilité',
+            largeurLibelle: 170,
+            motifVide: 'Aucune sonde n’a produit de mesure de disponibilité sur la '
+              + 'fenêtre. Une sonde « non configurée » ne dit rien sur la disponibilité '
+              + 'd’un service : elle est donc exclue de ce calcul, pas comptée à zéro.',
+          }))
         + E.panneau('Disponibilité par sonde',
           E.tableau(['Composant', 'Sonde', 'Mesures', 'OK', 'Échecs', 'Disponibilité',
             'Latence moyenne', 'Dernière mesure', 'Dernier échec'], lignes,
@@ -814,6 +797,19 @@
               motif: 'Aucun budget déclaré : le disjoncteur de coût ne peut pas s’armer.' },
         ])
         + '<div class="note">' + echapper(d.note) + '</div>'
+        + E.panneau('Coût quotidien estimé',
+          G.courbe([{
+            nom: 'Coût estimé (USD)',
+            points: (d.quotidien || []).map(function (j) {
+              return { x: E.dateCourte(j.jour), y: Number(j.cout_estime_usd || 0) };
+            }),
+          }], {
+            aire: true,
+            unite: 'USD',
+            colonneX: 'Jour',
+            motifVide: 'Aucune consommation enregistrée : le Centre d’analyse n’a pas '
+              + 'encore été appelé, ou la clé Anthropic n’est pas configurée.',
+          }))
         + E.panneau('Consommation quotidienne',
           E.tableau(['Jour', 'Appels', 'Échecs', 'Tokens entrée', 'Tokens sortie',
             'Recherches web', 'Coût estimé'], lignes,
