@@ -160,7 +160,12 @@ body{
  */
 :root{
   --serie-1:#1f6b3a; --serie-2:#eb6834; --serie-3:#2a78d6;
-  --serie-4:#eda100; --serie-5:#4a3aa7; --serie-6:#e34948;
+  /* Ambre assombri : le #eda100 d'origine ne donnait que 2,17:1 sur fond blanc, sous
+     le minimum WCAG de 3:1 pour un élément graphique porteur de sens. Une série qu'on
+     ne distingue pas de son fond ne transporte aucune information. Vérifié par
+     scripts/validate_palette.js, qui contrôle aussi l'écart perceptuel avec les cinq
+     autres séries — assombrir une couleur peut la rapprocher d'une voisine. */
+  --serie-4:#d28300; --serie-5:#4a3aa7; --serie-6:#e34948;
 
   /* Rampe séquentielle : une seule teinte, du clair au foncé. C'est le choix par
      défaut pour une grandeur — plus c'est foncé, plus c'est grand. */
