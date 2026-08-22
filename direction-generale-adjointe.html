@@ -46,6 +46,10 @@
     </div>
 
     <div id="contenu"></div>
+    <!-- Zone de gestion : formulaires et tableaux d'écriture. Séparée de
+         #contenu, que les vues d'analyse réécrivent entièrement à chaque
+         chargement — un bloc ajouté là serait effacé par la réponse suivante. -->
+    <section id="zoneGestion"></section>
   </main>
 </div>
 
@@ -53,6 +57,7 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/espace-ressources.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -305,6 +310,18 @@
             'Progression', 'Blocage', 'Statut'], lignes,
           { vide: d.etat_vide || 'Aucune action.' }));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/actions',
+      titre: 'Gérer les actions',
+      id: 'gestion_direction_actions',
+      filtres: ["statut", "priorite"],
+    });
   }
 
   // ── Projets ────────────────────────────────────────────────────────────────
@@ -346,6 +363,18 @@
         + E.panneau('Détail des projets', projetsHtml(d.projets))
         + E.panneau('Jalons', jalonsHtml(d.jalons));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/projets',
+      titre: 'Gérer les projets',
+      id: 'gestion_direction_projets',
+      filtres: ["statut", "phase"],
+    });
   }
 
   function projetsHtml(projets) {
@@ -606,6 +635,18 @@
         ])
         + (blocs || '<div class="etat-vide">Aucun objectif saisi.</div>');
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/objectifs',
+      titre: 'Gérer les objectifs',
+      id: 'gestion_direction_objectifs',
+      filtres: ["statut", "perimetre"],
+    });
   }
 
   // ── Rapports consolidés ────────────────────────────────────────────────────

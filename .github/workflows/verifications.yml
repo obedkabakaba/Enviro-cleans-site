@@ -1,0 +1,74 @@
+# ════════════════════════════════════════
+# INTÉGRATION CONTINUE — contrôles du site
+# ════════════════════════════════════════
+#
+# Le site n'a ni build ni dépendances : c'est du HTML, du CSS et du JavaScript servis
+# tels quels par GitHub Pages. Il n'y a donc rien à compiler — mais trois choses à
+# vérifier, et chacune correspond à un défaut réellement survenu.
+#
+#   1. **La syntaxe JavaScript.** Sans build, une parenthèse manquante ne se voit qu'à
+#      l'ouverture de la page, par l'utilisateur. Aucun outil ne l'attrape avant.
+#
+#   2. **La palette des graphiques.** Les couleurs de série doivent rester distinguables
+#      entre elles et lisibles sur les deux thèmes. Une teinte ajoutée à la main, jugée
+#      « jolie », suffit à rendre deux courbes indiscernables pour une partie des
+#      lecteurs.
+#
+#   3. **L'absence de secret.** Rien de sensible n'a sa place dans un dépôt servi
+#      publiquement — et le frontend d'un site public est le pire endroit possible.
+#
+# Le parcours des espaces au navigateur (tools/verification/) demande une API et une base
+# : il tourne en local, documenté dans tools/verification/LISEZ-MOI.md.
+
+name: Vérifications
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verifications:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Syntaxe JavaScript des modules partagés
+        run: |
+          echec=0
+          for f in assets/js/*.js tools/verification/*.js; do
+            if ! node --check "$f" 2>/tmp/erreur; then
+              echo "::error file=$f::$(head -3 /tmp/erreur | tr '\n' ' ')"
+              echec=1
+            fi
+          done
+          [ "$echec" -eq 0 ] && echo "Tous les modules JavaScript sont syntaxiquement valides."
+          exit $echec
+
+      - name: Syntaxe JavaScript des pages
+        # Le script d'une page est extrait puis vérifié : c'est là que vit l'essentiel du
+        # code des espaces, et c'est là qu'une erreur casse un écran entier.
+        run: node tools/verification/syntaxe-des-pages.js
+
+      - name: Palette des graphiques
+        run: |
+          if [ -f scripts/validate_palette.js ]; then
+            node scripts/validate_palette.js
+          else
+            echo "Aucun validateur de palette : étape ignorée."
+          fi
+
+      - name: Aucun secret dans le dépôt
+        run: |
+          if grep -rIn --exclude-dir=node_modules --exclude-dir=.git \
+               -E "(sk-ant-[A-Za-z0-9_-]{20,}|eyJhbGciOi[A-Za-z0-9_.-]{40,}|service_role)" .; then
+            echo "::error::Un secret semble présent dans le dépôt."
+            exit 1
+          fi
+          echo "Aucun secret détecté."

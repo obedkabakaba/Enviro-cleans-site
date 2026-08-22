@@ -53,6 +53,10 @@
     </div>
 
     <div id="contenu"></div>
+    <!-- Zone de gestion : formulaires et tableaux d'écriture. Séparée de
+         #contenu, que les vues d'analyse réécrivent entièrement à chaque
+         chargement — un bloc ajouté là serait effacé par la réponse suivante. -->
+    <section id="zoneGestion"></section>
   </main>
 </div>
 
@@ -60,6 +64,7 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/espace-ressources.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -492,6 +497,18 @@
           { sousTitre: 'Le coût d’acquisition n’est calculé que si la DÉPENSE est saisie : '
             + 'un budget prévu n’est pas une dépense.' });
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'marketing/campagnes',
+      titre: 'Gérer les campagnes',
+      id: 'gestion_marketing_campagnes',
+      filtres: ["statut", "canal"],
+    });
   }
 
   // ── Prospects (CRM) ────────────────────────────────────────────────────────
@@ -593,6 +610,18 @@
         }
       );
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'marketing/prospects',
+      titre: 'Gérer les prospects',
+      id: 'gestion_marketing_prospects',
+      filtres: ["etape", "source"],
+    });
   }
 
   function activitesProspect(id) {
@@ -675,6 +704,18 @@
           E.tableau(['Offre', 'Prix', 'Durée', 'Fréquence', 'Abonnés actifs', 'Statut'],
             publiees, { vide: d.etat_vide || 'Aucune offre publiée.' }));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'marketing/offres',
+      titre: 'Gérer les propositions d\'offre',
+      id: 'gestion_marketing_offres',
+      filtres: ["statut"],
+    });
   }
 
   // ── Satisfaction ───────────────────────────────────────────────────────────
@@ -857,6 +898,18 @@
           E.tableau(['Titre', 'Type', 'Langue', 'Tags', 'Créé le', 'Fichier'], biblio,
             { vide: 'Bibliothèque vide.' }));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'marketing/contenus',
+      titre: 'Gérer les contenus',
+      id: 'gestion_marketing_contenus',
+      filtres: ["type_contenu"],
+    });
   }
 
   // ── Budget marketing ───────────────────────────────────────────────────────

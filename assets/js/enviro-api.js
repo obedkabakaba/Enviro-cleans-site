@@ -327,6 +327,10 @@
       var err = new Error(corps.message || 'Erreur ' + reponse.status);
       err.statut = reponse.status;
       err.permissionsRequises = corps.permissions_requises || null;
+      // Erreurs de validation, champ par champ. Sans ce report, un formulaire refusé
+      // n'afficherait que « Données invalides. » — l'utilisateur devrait deviner lequel
+      // des douze champs pose problème.
+      err.champs = corps.champs || null;
       throw err;
     });
   }
@@ -346,6 +350,7 @@
     get: function (chemin) { return appel(chemin); },
     post: function (chemin, body) { return appel(chemin, { method: 'POST', body: body }); },
     put: function (chemin, body) { return appel(chemin, { method: 'PUT', body: body }); },
+    patch: function (chemin, body) { return appel(chemin, { method: 'PATCH', body: body }); },
     supprimer: function (chemin) { return appel(chemin, { method: 'DELETE' }); },
     rediriger: rediriger,
 

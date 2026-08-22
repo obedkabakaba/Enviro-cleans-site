@@ -66,6 +66,10 @@
 
     <div id="zoneAvertissements"></div>
     <div id="contenu"></div>
+    <!-- Zone de gestion : formulaires et tableaux d'écriture. Séparée de
+         #contenu, que les vues d'analyse réécrivent entièrement à chaque
+         chargement — un bloc ajouté là serait effacé par la réponse suivante. -->
+    <section id="zoneGestion"></section>
   </main>
 </div>
 
@@ -73,6 +77,7 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/espace-ressources.js"></script>
 <script src="assets/js/carte-config.js"></script>
 <script src="assets/js/carte-maplibre.js"></script>
 <script>
@@ -766,6 +771,18 @@
           E.tableau(['Véhicule', 'Opération', 'Prévue', 'Réalisée', 'Coût', 'Criticité',
             'Statut'], maintenance, { vide: 'Aucune opération de maintenance planifiée.' }));
     }).catch(afficherErreur);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'operations/vehicules',
+      titre: 'Gérer la flotte',
+      id: 'gestion_operations_vehicules',
+      filtres: ["statut", "type_vehicule"],
+    });
   }
 
   // ── Incidents ──────────────────────────────────────────────────────────────
@@ -833,6 +850,18 @@
             { vide: 'Aucune cause racine renseignée. Sans elle, les mêmes incidents se '
               + 'reproduisent sans être traités.' }));
     }).catch(afficherErreur);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'operations/incidents',
+      titre: 'Gérer les incidents',
+      id: 'gestion_operations_incidents',
+      filtres: ["statut", "severite"],
+    });
   }
 
   // ── Stocks ─────────────────────────────────────────────────────────────────
@@ -884,6 +913,18 @@
           E.tableau(['Date', 'Article', 'Quantité', 'Motif', 'Zone', 'Saisi par'],
             mouvements, { vide: 'Aucun mouvement enregistré.' }));
     }).catch(afficherErreur);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'operations/stocks',
+      titre: 'Gérer les articles',
+      id: 'gestion_operations_stocks',
+      filtres: ["categorie"],
+    });
   }
 
   // ── Clients ────────────────────────────────────────────────────────────────
