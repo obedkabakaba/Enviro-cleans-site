@@ -509,3 +509,47 @@ details.brut pre{
   .menu a.actif{ border-left:none; border-bottom-color:var(--vert); }
   .principal{ padding:18px 15px 50px; }
 }
+
+
+/* ════════════════════════════════════════
+   FORMULAIRES ET FICHES DE RESSOURCE
+   ════════════════════════════════════════
+   Les écrans de direction sont passés de la consultation à l'écriture : ces règles
+   habillent les formulaires construits à partir de la description de champs renvoyée
+   par le serveur. Aucune couleur nouvelle — uniquement les jetons déjà validés, pour
+   que les deux thèmes restent corrects sans traitement particulier. */
+
+.grille-champs{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px;
+}
+/* Un champ long (description, hypothèses) occupe toute la largeur : le couper en
+   colonne étroite rendrait la saisie pénible sans rien gagner. */
+.grille-champs .champ:has(textarea){ grid-column:1 / -1; }
+
+.champ{ display:flex; flex-direction:column; gap:5px; font-size:13px; }
+.champ > span{ color:var(--texte-doux); font-weight:600; }
+.champ em{ color:var(--alerte-texte); font-style:normal; }
+.champ input, .champ select, .champ textarea{ width:100%; }
+
+/* Le message d'erreur occupe sa place en permanence : sans hauteur réservée, chaque
+   refus de validation ferait sauter le formulaire d'une ligne sous le curseur. */
+.erreur-champ{ min-height:15px; font-size:12px; color:var(--alerte-texte); }
+.erreur-globale{ font-size:13px; color:var(--alerte-texte); align-self:center; }
+
+.fiche{
+  display:grid; grid-template-columns:minmax(140px,auto) 1fr;
+  gap:6px 16px; margin:0 0 4px; font-size:13px;
+}
+.fiche dt{ color:var(--texte-faible); }
+.fiche dd{ margin:0; color:var(--texte); word-break:break-word; }
+
+.liste-effets{ margin:6px 0 0; padding-left:18px; font-size:13px; line-height:1.6; }
+.liste-effets strong{ color:var(--vert-texte); }
+
+/* Les lignes de tableau deviennent cliquables : il faut que cela se voie, et que le
+   clavier y accède comme la souris. */
+.table-wrap tbody tr[data-id]{ cursor:pointer; }
+.table-wrap tbody tr[data-id]:hover{ background:var(--surface-2, var(--graphique-fond)); }
+.table-wrap tbody tr[data-id]:focus-visible{
+  outline:2px solid var(--bouton); outline-offset:-2px;
+}

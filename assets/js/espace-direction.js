@@ -226,6 +226,12 @@
         a.classList.toggle('actif', a.getAttribute('data-vue') === vue);
       });
 
+      // La zone de gestion est vidée AVANT la vue : sans cela, le tableau de la vue
+      // précédente resterait visible sous la nouvelle, et un formulaire à demi rempli
+      // survivrait à un changement d'écran.
+      var zone = document.getElementById('zoneGestion');
+      if (zone) zone.innerHTML = '';
+
       vues[vue]();
     }
 

@@ -48,6 +48,10 @@
     </div>
 
     <div id="contenu"></div>
+    <!-- Zone de gestion : formulaires et tableaux d'écriture. Séparée de
+         #contenu, que les vues d'analyse réécrivent entièrement à chaque
+         chargement — un bloc ajouté là serait effacé par la réponse suivante. -->
+    <section id="zoneGestion"></section>
   </main>
 </div>
 
@@ -55,6 +59,7 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/espace-ressources.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -492,6 +497,18 @@
           E.tableau(['Date', 'Candidat', 'Poste', 'Lieu', 'Évaluateur', 'Score'],
             entretiens, { vide: 'Aucun entretien planifié.' }));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'rh/postes',
+      titre: 'Gérer les postes ouverts',
+      id: 'gestion_rh_postes',
+      filtres: ["statut"],
+    });
   }
 
   // ── Paie ───────────────────────────────────────────────────────────────────
@@ -730,6 +747,18 @@
           E.tableau(['Employé', 'Formation', 'Obtenu le', 'Expire le', 'Certificat'],
             certificats, { vide: 'Aucun certificat enregistré.' }));
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'rh/formations',
+      titre: 'Gérer le catalogue de formations',
+      id: 'gestion_rh_formations',
+      filtres: ["categorie"],
+    });
   }
 
   // ── Discipline & sécurité ──────────────────────────────────────────────────

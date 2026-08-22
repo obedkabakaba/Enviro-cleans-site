@@ -49,6 +49,10 @@
     </div>
 
     <div id="contenu"></div>
+    <!-- Zone de gestion : formulaires et tableaux d'écriture. Séparée de
+         #contenu, que les vues d'analyse réécrivent entièrement à chaque
+         chargement — un bloc ajouté là serait effacé par la réponse suivante. -->
+    <section id="zoneGestion"></section>
   </main>
 </div>
 
@@ -56,6 +60,7 @@
 <script src="assets/js/enviro-auth.js"></script>
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
+<script src="assets/js/espace-ressources.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -469,6 +474,18 @@
           { sousTitre: d.portefeuille.motif || (d.portefeuille.total !== null
             ? 'Total : ' + E.montant(d.portefeuille.total) + ' ' + d.portefeuille.devise : '') });
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/objectifs',
+      titre: 'Gérer les objectifs',
+      id: 'gestion_direction_objectifs',
+      filtres: ["statut", "perimetre"],
+    });
   }
 
   function objectifsHtml(objectifs, detaille) {
@@ -759,6 +776,18 @@
         + E.panneau('Exigences de conformité', conformiteHtml(d.conformite.exigences))
         + E.avertissements(d.conformite.avertissements);
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/risques',
+      titre: 'Gérer les risques',
+      id: 'gestion_direction_risques',
+      filtres: ["statut", "niveau"],
+    });
   }
 
   function matriceHtml(matrice) {
@@ -858,6 +887,18 @@
             + 'hypothèses, jamais recalculés : ce sont des choix financiers, pas des '
             + 'formules universelles.' });
     }).catch(echec);
+  
+
+    // Bloc de gestion : liste filtrable, formulaire de création et de
+    // modification, soumission au circuit d'approbation. Les champs et leurs
+    // règles viennent du serveur — les redéclarer ici créerait deux copies de
+    // la même vérité, qui divergeraient à la première évolution.
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/investissements',
+      titre: 'Gérer les scénarios',
+      id: 'gestion_direction_investissements',
+      filtres: ["statut"],
+    });
   }
 
   // ── Conseil de direction ───────────────────────────────────────────────────
