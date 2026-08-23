@@ -56,6 +56,9 @@ jobs:
         # code des espaces, et c'est là qu'une erreur casse un écran entier.
         run: node tools/verification/syntaxe-des-pages.js
 
+      - name: Centre de commandement PDG
+        run: node tools/verification/verifier-commandement-pdg.js
+
       - name: Palette des graphiques
         run: |
           if [ -f scripts/validate_palette.js ]; then
