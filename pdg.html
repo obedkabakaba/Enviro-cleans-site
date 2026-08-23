@@ -30,7 +30,15 @@
   .pdg-resume-terrain span { display: flex; align-items: baseline; gap: 7px; }
   .pdg-resume-terrain strong { font-size: 22px; color: var(--primaire); }
   .pdg-direction-card { margin: 0; }
-  .pdg-direction-card .panneau-entete { display: flex; justify-content: space-between; gap: 12px; }
+  .pdg-direction-card .panneau-entete { display: flex; justify-content: space-between;
+    align-items: center; gap: 12px; padding: 14px 17px; border-bottom: 1px solid var(--bordure); }
+  .pdg-direction-card .panneau-entete h2, .pdg-formulaire .panneau-entete h2,
+  .pdg-invitation .panneau-entete h2 { margin: 0; font-size: 14.5px; }
+  .pdg-formulaire .panneau-entete, .pdg-invitation .panneau-entete {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 14px 17px; border-bottom: 1px solid var(--bordure); }
+  .pdg-direction-card .panneau-contenu, .pdg-formulaire .panneau-contenu,
+  .pdg-invitation .panneau-contenu { padding: 16px 17px; }
   .pdg-titulaire { display: flex; flex-direction: column; gap: 8px; }
   .pdg-actions-ligne { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
   .pdg-historique { margin-top: 16px; color: var(--texte-faible); }
@@ -155,7 +163,12 @@
     contenu: elContenu,
     sousTitre: elSousTitre,
     periode: periode,
-    naviguer: function (vue) { allerA(vue); },
+    naviguer: function (vue) {
+      var lien = document.querySelector('.menu a[data-vue="' + vue + '"]');
+      var groupe = lien && lien.closest('details');
+      if (groupe) groupe.open = true;
+      allerA(vue);
+    },
   });
 
   var TITRES = {
