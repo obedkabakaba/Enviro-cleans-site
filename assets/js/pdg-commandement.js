@@ -82,7 +82,12 @@ window.PdgCommandement = (function () {
 
       Promise.all([
         EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain')),
-        EnviroAPI.get('/api/pdg/directions'),
+        peut('executive.appointment.manage')
+          ? EnviroAPI.get('/api/pdg/directions')
+          : Promise.resolve({
+            directions: [],
+            resume: { total: 0, pourvues: 0, a_pourvoir: 0, invitations_en_attente: 0 },
+          }),
         EnviroAPI.get('/api/pdg/approbations?statut=ouvertes&limite=5'),
       ]).then(function (resultats) {
         var terrain = resultats[0] || {};
