@@ -8,6 +8,55 @@
 <script src="assets/js/theme-init.js"></script>
 <link rel="stylesheet" href="assets/css/site-refresh.css"/>
 <link rel="stylesheet" href="assets/css/espace-direction.css"/>
+<style>
+  .menu-groupe { margin-top: 8px; }
+  .menu-groupe summary { cursor: pointer; padding: 11px 14px; color: var(--texte-faible);
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+  .menu-groupe[open] summary { color: var(--texte); }
+  .menu-groupe a { margin-left: 10px; }
+  .pdg-commandes { display: flex; gap: 9px; flex-wrap: wrap; margin: 0 0 18px; }
+  .pdg-lien-action { display: inline-flex; align-items: center; justify-content: center;
+    text-decoration: none; box-sizing: border-box; }
+  .action.danger { background: var(--rouge, #b83b36); border-color: transparent; color: #fff; }
+  .pdg-alerte { display: grid; grid-template-columns: auto 1fr auto; gap: 12px;
+    align-items: center; padding: 11px 0; border-bottom: 1px solid var(--bordure); }
+  .pdg-alerte:last-child { border-bottom: 0; }
+  .pdg-direction-mini-grille, .pdg-direction-grille { display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 14px; }
+  .pdg-direction-mini { display: flex; flex-direction: column; gap: 5px; padding: 13px;
+    border: 1px solid var(--bordure); border-radius: 10px; background: var(--fond-secondaire); }
+  .pdg-direction-mini small, .pdg-titulaire small { color: var(--texte-faible); }
+  .pdg-resume-terrain { display: flex; flex-wrap: wrap; gap: 18px 28px; }
+  .pdg-resume-terrain span { display: flex; align-items: baseline; gap: 7px; }
+  .pdg-resume-terrain strong { font-size: 22px; color: var(--primaire); }
+  .pdg-direction-card { margin: 0; }
+  .pdg-direction-card .panneau-entete { display: flex; justify-content: space-between; gap: 12px; }
+  .pdg-titulaire { display: flex; flex-direction: column; gap: 8px; }
+  .pdg-actions-ligne { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+  .pdg-historique { margin-top: 16px; color: var(--texte-faible); }
+  .pdg-historique > div { display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; padding: 8px 0; }
+  .pdg-formulaire, .pdg-invitation { margin-bottom: 18px; }
+  .pdg-champs { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px; margin-bottom: 14px; }
+  .pdg-champs label, .pdg-jour-carte label { display: flex; flex-direction: column; gap: 6px;
+    font-size: 12px; font-weight: 700; color: var(--texte-faible); }
+  .pdg-champs input, .pdg-copie input, .pdg-jour-carte input { width: 100%; box-sizing: border-box;
+    padding: 10px 11px; border: 1px solid var(--bordure); border-radius: 8px;
+    background: var(--fond); color: var(--texte); }
+  .pdg-copie { display: flex; gap: 8px; margin: 10px 0; }
+  .pdg-copie input { flex: 1; }
+  .pdg-terrain-onglets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pdg-terrain-onglets .actif { background: var(--primaire); color: #fff; }
+  .pdg-jour-carte { display: flex; align-items: end; gap: 10px; margin-bottom: 14px; }
+  #cartePdgKinshasa { min-height: 420px; }
+  @media (max-width: 700px) {
+    .pdg-alerte { grid-template-columns: auto 1fr; }
+    .pdg-alerte .action { grid-column: 1 / -1; }
+    .pdg-copie { flex-direction: column; }
+    #cartePdgKinshasa { min-height: 330px; }
+  }
+</style>
 </head>
 <body>
 <div class="shell">
@@ -17,27 +66,34 @@
       <span>Président-directeur général</span>
     </div>
     <div class="menu">
-      <a href="#" class="actif" data-vue="executive">Vue exécutive</a>
-      <a href="#" data-vue="performance">Performance globale</a>
-      <a href="#" data-vue="strategie">Stratégie &amp; objectifs</a>
-      <a href="#" data-vue="finances">Finances</a>
-      <a href="#" data-vue="operations">Opérations</a>
-      <a href="#" data-vue="croissance">Clients &amp; croissance</a>
-      <a href="#" data-vue="capital">Capital humain</a>
-      <a href="#" data-vue="risques">Risques &amp; conformité</a>
-      <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
-      <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
-      <a href="#" data-vue="approbations">Approbations</a>
-      <a href="#" data-vue="rapports">Rapports exécutifs</a>
-      <a href="#" data-vue="journal">Journal de direction</a>
-      <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
+      <a href="#" class="actif" data-vue="commandement">Aujourd’hui</a>
+      <a href="#" data-vue="directions">Directions &amp; accès</a>
+      <a href="#" data-vue="terrain">Terrain &amp; carte clients</a>
+      <a href="#" data-vue="approbations">Décisions à prendre</a>
+
+      <details class="menu-groupe">
+        <summary>Pilotage et analyses</summary>
+        <a href="#" data-vue="executive">Vue exécutive</a>
+        <a href="#" data-vue="performance">Performance globale</a>
+        <a href="#" data-vue="strategie">Stratégie &amp; objectifs</a>
+        <a href="#" data-vue="finances">Finances</a>
+        <a href="#" data-vue="operations">Opérations</a>
+        <a href="#" data-vue="croissance">Clients &amp; croissance</a>
+        <a href="#" data-vue="capital">Capital humain</a>
+        <a href="#" data-vue="risques">Risques &amp; conformité</a>
+        <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
+        <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
+        <a href="#" data-vue="rapports">Rapports exécutifs</a>
+        <a href="#" data-vue="journal">Journal de direction</a>
+        <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
+      </details>
     </div>
   </nav>
 
   <main class="principal">
     <div class="topbar">
       <div>
-        <h1 id="titreVue">Vue exécutive</h1>
+        <h1 id="titreVue">Aujourd’hui</h1>
         <div class="sous-titre" id="sousTitre">Chargement…</div>
       </div>
       <div class="filtres">
@@ -61,6 +117,9 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/carte-config.js"></script>
+<script src="assets/js/carte-maplibre.js"></script>
+<script src="assets/js/pdg-commandement.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -87,11 +146,22 @@
   'use strict';
 
   var E = window.EspaceDirection;
-  var etat = { debut: null, fin: null, role: null };
+  var etat = { debut: null, fin: null, role: null, permissions: [] };
   var elContenu = document.getElementById('contenu');
   var elSousTitre = document.getElementById('sousTitre');
+  var allerA;
+  var commandementUi = PdgCommandement.creer({
+    E: E,
+    contenu: elContenu,
+    sousTitre: elSousTitre,
+    periode: periode,
+    naviguer: function (vue) { allerA(vue); },
+  });
 
   var TITRES = {
+    commandement: 'Aujourd’hui',
+    directions: 'Directions & accès',
+    terrain: 'Terrain & carte clients',
     executive: 'Vue exécutive',
     performance: 'Performance globale',
     strategie: 'Stratégie & objectifs',
@@ -1255,7 +1325,10 @@
 
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
-  var allerA = E.router({
+  allerA = E.router({
+    commandement: commandementUi.aujourdHui,
+    directions: commandementUi.directions,
+    terrain: commandementUi.terrain,
     executive: vueExecutive,
     performance: vuePerformance,
     strategie: vueStrategie,
@@ -1285,8 +1358,10 @@
   EnviroAuth.proteger({ permissions: ['executive.dashboard.read'] })
     .then(function (ctx) {
       etat.role = ctx.role;
+      etat.permissions = ctx.permissions || [];
+      commandementUi.autoriser(etat.permissions);
       EnviroAuth.appliquerPermissionsAuDOM(ctx.permissions);
-      allerA('executive');
+      allerA('commandement');
     });
 }());
 </script>
