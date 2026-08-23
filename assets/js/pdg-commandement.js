@@ -14,6 +14,7 @@ window.PdgCommandement = (function () {
     var periode = options.periode;
     var naviguer = options.naviguer;
     var permissions = [];
+    var sequenceTerrain = 0;
 
     function autoriser(liste) {
       permissions = Array.isArray(liste) ? liste : [];
@@ -28,7 +29,7 @@ window.PdgCommandement = (function () {
     }
 
     function nombre(v) {
-      return E.nombre(v === null || v === undefined ? 0 : v);
+      return E.nombre(v);
     }
 
     function valeurKpi(operations, code) {
@@ -76,11 +77,12 @@ window.PdgCommandement = (function () {
     // ── Aujourd'hui ──────────────────────────────────────────────────────────
 
     function aujourdHui() {
+      sequenceTerrain += 1;
       contenu.innerHTML = actionsPrincipales() + E.squelette(7);
       sousTitre.textContent = 'Ce qui appelle votre attention et vos commandes';
       brancherNavigation(contenu);
 
-      Promise.all([
+      Promise.allSettled([
         EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain')),
         peut('executive.appointment.manage')
           ? EnviroAPI.get('/api/pdg/directions')
@@ -90,9 +92,15 @@ window.PdgCommandement = (function () {
           }),
         EnviroAPI.get('/api/pdg/approbations?statut=ouvertes&limite=5'),
       ]).then(function (resultats) {
-        var terrain = resultats[0] || {};
-        var directions = resultats[1] || {};
-        var approbations = resultats[2] || {};
+        function valeur(index, repli) {
+          return resultats[index].status === 'fulfilled' ? resultats[index].value : repli;
+        }
+        var terrain = valeur(0, {});
+        var directions = valeur(1, {
+          directions: [],
+          resume: { total: null, pourvues: null, a_pourvoir: null, invitations_en_attente: null },
+        });
+        var approbations = valeur(2, { demandes: [], total: null });
         var ops = terrain.operations || {};
         var travailleurs = terrain.travailleurs || {};
         var marketing = terrain.marketing || {};
@@ -101,6 +109,8 @@ window.PdgCommandement = (function () {
         var syntheseAgents = agents.synthese || {};
         var resumeCarte = terrain.carte || {};
         var demandes = approbations.demandes || [];
+        var totalDemandes = approbations.total === null || approbations.total === undefined
+          ? demandes.length : approbations.total;
 
         var alertes = [];
         if ((directions.resume || {}).a_pourvoir > 0) {
@@ -111,10 +121,10 @@ window.PdgCommandement = (function () {
             libelle: 'Nommer',
           });
         }
-        if (demandes.length > 0) {
+        if (totalDemandes > 0) {
           alertes.push({
             niveau: 'attention',
-            texte: nombre(demandes.length) + ' décision(s) attendent votre examen.',
+            texte: nombre(totalDemandes) + ' décision(s) attendent votre examen.',
             action: 'approbations',
             libelle: 'Examiner',
           });
@@ -126,6 +136,14 @@ window.PdgCommandement = (function () {
             action: 'terrain',
             cible: 'carte',
             libelle: 'Voir le terrain',
+          });
+        }
+        if (resultats.some(function (r) { return r.status === 'rejected'; })) {
+          alertes.push({
+            niveau: 'attention',
+            texte: 'Certaines données sont temporairement indisponibles. Les autres restent affichées.',
+            action: 'commandement',
+            libelle: 'Actualiser',
           });
         }
 
@@ -163,7 +181,7 @@ window.PdgCommandement = (function () {
             { nom: 'Arrêts cartographiés', valeur: resumeCarte.arrets_cartographies },
             { nom: 'Travailleurs actifs', valeur: effectifs.total_actifs },
             { nom: 'Agents marketing actifs', valeur: syntheseAgents.agents_actifs },
-            { nom: 'Décisions en attente', valeur: demandes.length },
+            { nom: 'Décisions en attente', valeur: totalDemandes },
           ])
           + E.panneau('À décider maintenant', lignesAlertes)
           + E.panneau('Vos directions',
@@ -252,6 +270,7 @@ window.PdgCommandement = (function () {
     }
 
     function directions(invitation) {
+      sequenceTerrain += 1;
       contenu.innerHTML = E.squelette(5);
       sousTitre.textContent = 'Nommer les titulaires et ouvrir leurs accès';
 
@@ -397,7 +416,8 @@ window.PdgCommandement = (function () {
         marketing: chargerMarketingTerrain,
         travailleurs: chargerTravailleursTerrain,
       };
-      (appels[cible] || chargerResumeTerrain)();
+      var generation = ++sequenceTerrain;
+      (appels[cible] || chargerResumeTerrain)(generation);
     }
 
     function terrain() {
@@ -408,10 +428,11 @@ window.PdgCommandement = (function () {
       activerTerrain(cible);
     }
 
-    function chargerResumeTerrain() {
+    function chargerResumeTerrain(generation) {
       var cible = panneauTerrain();
       cible.innerHTML = E.squelette(6);
       EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain')).then(function (d) {
+        if (generation !== sequenceTerrain) return;
         var ops = d.operations || {};
         var marketing = d.marketing || {};
         var travailleurs = d.travailleurs || {};
@@ -436,14 +457,17 @@ window.PdgCommandement = (function () {
             + '<button class="action" data-ouvrir-carte>Ouvrir la carte clients</button>');
         var bouton = cible.querySelector('[data-ouvrir-carte]');
         if (bouton) bouton.addEventListener('click', function () { activerTerrain('carte'); });
-      }).catch(function (err) { afficherErreur(err, cible); });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
-    function chargerCarteTerrain(jour) {
+    function chargerCarteTerrain(generation, jour) {
       var cible = panneauTerrain();
       var suffixe = jour ? '?jour=' + encodeURIComponent(jour) : '';
       cible.innerHTML = E.squelette(5);
       EnviroAPI.get('/api/pdg/terrain/carte' + suffixe).then(function (d) {
+        if (generation !== sequenceTerrain) return;
         var tournees = (d.tournees || []).map(function (t) {
           var progression = t.arrets > 0 ? Math.round(((t.traites + t.echecs) / t.arrets) * 100) : 0;
           return '<tr><td><strong>' + attr(t.nom || ('Tournée #' + t.id)) + '</strong></td>'
@@ -476,7 +500,8 @@ window.PdgCommandement = (function () {
               'Progression', 'Statut'], tournees, { vide: 'Aucune tournée ce jour.' }));
 
         document.getElementById('actualiserCartePdg').addEventListener('click', function () {
-          chargerCarteTerrain(document.getElementById('jourCartePdg').value);
+          var nouvelleGeneration = ++sequenceTerrain;
+          chargerCarteTerrain(nouvelleGeneration, document.getElementById('jourCartePdg').value);
         });
 
         var points = (d.arrets || []).map(function (a) {
@@ -509,13 +534,22 @@ window.PdgCommandement = (function () {
           }),
           motifVide: 'Aucun client géolocalisé pour cette journée.',
         });
-      }).catch(function (err) { afficherErreur(err, cible); });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
-    function chargerTourneesTerrain() {
+    function chargerTourneesTerrain(generation, page, statut) {
       var cible = panneauTerrain();
+      page = page || 1;
+      statut = statut || '';
       cible.innerHTML = E.squelette(5);
-      EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain/tournees')).then(function (d) {
+      var url = urlAvecPeriode('/api/pdg/terrain/tournees');
+      url += (url.indexOf('?') === -1 ? '?' : '&') + 'page=' + encodeURIComponent(page)
+        + '&taille=25' + (statut ? '&statut=' + encodeURIComponent(statut) : '');
+      EnviroAPI.get(url).then(function (d) {
+        if (generation !== sequenceTerrain) return;
+        var pagination = d.pagination || {};
         var lignes = (d.tournees || []).map(function (t) {
           return '<tr><td>' + attr(E.dateCourte(t.date_tournee)) + '</td>'
             + '<td><strong>' + attr(t.nom) + '</strong></td><td>' + attr(t.zone || '—') + '</td>'
@@ -524,7 +558,29 @@ window.PdgCommandement = (function () {
             + '<td>' + nombre(t.echecs) + '</td><td>' + nombre(t.progression) + ' %</td>'
             + '<td>' + attr(t.statut) + '</td></tr>';
         }).join('');
-        cible.innerHTML = E.grilleKpi([
+        var statuts = [
+          ['', 'Tous les statuts'],
+          ['planifiee', 'Planifiées'],
+          ['en_cours', 'En cours'],
+          ['terminee', 'Terminées'],
+          ['manquee', 'Manquées'],
+          ['annulee', 'Annulées'],
+        ];
+        var commandes = '<div class="pdg-filtres-tournees"><label>Statut'
+          + '<select id="statutTourneesPdg">'
+          + statuts.map(function (option) {
+            return '<option value="' + option[0] + '"' + (option[0] === statut ? ' selected' : '')
+              + '>' + option[1] + '</option>';
+          }).join('') + '</select></label>'
+          + '<div class="pdg-pagination">'
+          + '<button class="action secondaire" data-page-tournees="' + (pagination.page - 1) + '"'
+          + (pagination.page <= 1 ? ' disabled' : '') + '>Précédente</button>'
+          + '<span>Page ' + nombre(pagination.page) + ' sur ' + nombre(pagination.pages) + '</span>'
+          + '<button class="action secondaire" data-page-tournees="' + (pagination.page + 1) + '"'
+          + (pagination.page >= pagination.pages ? ' disabled' : '') + '>Suivante</button>'
+          + '</div></div>';
+
+        cible.innerHTML = commandes + E.grilleKpi([
           { nom: 'Tournées trouvées', valeur: (d.pagination || {}).total },
           {
             nom: 'Terminées (page)',
@@ -539,13 +595,30 @@ window.PdgCommandement = (function () {
             'Effectués', 'Échecs', 'Progression', 'Statut'], lignes, {
             vide: d.etat_vide || 'Aucune tournée sur la période.',
           }));
-      }).catch(function (err) { afficherErreur(err, cible); });
+        cible.querySelector('#statutTourneesPdg').addEventListener('change', function (event) {
+          var nouvelleGeneration = ++sequenceTerrain;
+          chargerTourneesTerrain(nouvelleGeneration, 1, event.target.value);
+        });
+        cible.querySelectorAll('[data-page-tournees]').forEach(function (bouton) {
+          bouton.addEventListener('click', function () {
+            var nouvelleGeneration = ++sequenceTerrain;
+            chargerTourneesTerrain(
+              nouvelleGeneration,
+              Number(bouton.getAttribute('data-page-tournees')),
+              cible.querySelector('#statutTourneesPdg').value
+            );
+          });
+        });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
-    function chargerEquipesTerrain() {
+    function chargerEquipesTerrain(generation) {
       var cible = panneauTerrain();
       cible.innerHTML = E.squelette(4);
       EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain/equipes')).then(function (d) {
+        if (generation !== sequenceTerrain) return;
         var lignes = (d.collecteurs || []).map(function (c) {
           return '<tr><td><strong>' + attr(c.collecteur) + '</strong></td><td>' + attr(c.zone || '—') + '</td>'
             + '<td>' + nombre(c.tournees) + '</td><td>' + nombre(c.jours_travailles) + '</td>'
@@ -563,13 +636,16 @@ window.PdgCommandement = (function () {
             'Moyenne/jour', 'Pic', 'Capacité'], lignes, {
             vide: d.etat_vide || 'Aucun collecteur mobilisé.',
           }));
-      }).catch(function (err) { afficherErreur(err, cible); });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
-    function chargerMarketingTerrain() {
+    function chargerMarketingTerrain(generation) {
       var cible = panneauTerrain();
       cible.innerHTML = E.squelette(4);
       EnviroAPI.get(urlAvecPeriode('/api/pdg/terrain/marketing')).then(function (d) {
+        if (generation !== sequenceTerrain) return;
         var bloc = d.agents || {};
         var s = bloc.synthese || {};
         var lignes = (bloc.par_agent || []).map(function (a) {
@@ -588,13 +664,16 @@ window.PdgCommandement = (function () {
               'Clients déclarés', 'Dossiers constatés'], lignes, {
               vide: 'Aucun rapport d’agent marketing sur la période.',
             }));
-      }).catch(function (err) { afficherErreur(err, cible); });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
-    function chargerTravailleursTerrain() {
+    function chargerTravailleursTerrain(generation) {
       var cible = panneauTerrain();
       cible.innerHTML = E.squelette(4);
       EnviroAPI.get('/api/pdg/terrain/travailleurs').then(function (d) {
+        if (generation !== sequenceTerrain) return;
         var eff = d.effectifs || {};
         var dispo = d.disponibilite || {};
         var roles = (eff.par_role || []).map(function (r) {
@@ -624,7 +703,9 @@ window.PdgCommandement = (function () {
             E.tableau(['Jour', 'Disponibles', 'Capacité', 'Saisie'], semaine, {
               vide: 'Aucune disponibilité enregistrée.',
             }), { sousTitre: d.note || '' });
-      }).catch(function (err) { afficherErreur(err, cible); });
+      }).catch(function (err) {
+        if (generation === sequenceTerrain) afficherErreur(err, cible);
+      });
     }
 
     return {
