@@ -66,8 +66,13 @@ jobs:
 
       - name: Aucun secret dans le dépôt
         run: |
-          if grep -rIn --exclude-dir=node_modules --exclude-dir=.git \
-               -E "(sk-ant-[A-Za-z0-9_-]{20,}|eyJhbGciOi[A-Za-z0-9_.-]{40,}|service_role)" .; then
+          # Les fragments sont séparés pour que le scanner ne reconnaisse pas sa propre
+          # expression dans ce fichier de workflow.
+          anthropic='sk''-ant-[A-Za-z0-9_-]{20,}'
+          jwt='eyJ''hbGciOi[A-Za-z0-9_.-]{40,}'
+          supabase='service''_role'
+          motif="(${anthropic}|${jwt}|${supabase})"
+          if grep -rIn --exclude-dir=node_modules --exclude-dir=.git -E "${motif}" .; then
             echo "::error::Un secret semble présent dans le dépôt."
             exit 1
           fi
