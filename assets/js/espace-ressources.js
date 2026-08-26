@@ -392,9 +392,38 @@
         }
         corps += '<button class="action secondaire" id="fermerFiche">Fermer</button></div>';
 
+        // ── Les commandes du circuit ──
+        //
+        // « Modifier » et « Soumettre » ci-dessus agissent sur le CONTENU de la pièce.
+        // Faire avancer son circuit — approuver, autoriser, décaisser, convertir — est
+        // autre chose : chaque étape a sa permission, ses gardes et son effet. La barre
+        // les rend telles que le serveur les calcule, plutôt que de les écrire ici où
+        // elles finiraient par diverger du circuit réel.
+        corps += '<div id="commandesRessource"></div>';
+
         panneau.innerHTML = E().panneau(
           d.libelle + ' ' + E().echapper(String(l.reference || l.code || '#' + l.id)), corps
         );
+
+        if (global.EspaceCommandes) {
+          global.EspaceCommandes.barre({
+            cible: 'commandesRessource',
+            ressource: options.ressource,
+            id: id,
+            // Après une commande réussie, la liste est rechargée — le statut affiché
+            // dans le tableau doit suivre celui de la fiche — PUIS la fiche est
+            // rouverte sur la même pièce.
+            //
+            // Recharger seulement la liste effaçait le panneau : `#panneauRessource` est
+            // créé par le rendu de la liste, donc réécrit avec elle. L'utilisateur voyait
+            // sa fiche disparaître au moment précis où il venait d'agir dessus, sans
+            // savoir si la commande avait abouti.
+            apres: function () {
+              charger();
+              setTimeout(function () { fiche(data, id); }, 350);
+            },
+          });
+        }
 
         document.getElementById('fermerFiche').addEventListener('click', function () {
           panneau.innerHTML = '';
