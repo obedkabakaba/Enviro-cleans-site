@@ -97,6 +97,7 @@
         <a href="#" data-vue="risques">Risques &amp; conformité</a>
         <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
         <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
+        <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
         <a href="#" data-vue="rapports">Rapports exécutifs</a>
         <a href="#" data-vue="journal">Journal de direction</a>
         <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
@@ -131,6 +132,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script src="assets/js/carte-config.js"></script>
 <script src="assets/js/carte-maplibre.js"></script>
 <script src="assets/js/pdg-commandement.js"></script>
@@ -192,6 +194,7 @@
     investissements: 'Investissements',
     conseil: 'Conseil de direction',
     approbations: 'Approbations',
+    documents: 'Documents & contrats',
     rapports: 'Rapports exécutifs',
     journal: 'Journal de direction',
     administration: 'Administration métier',
@@ -1359,6 +1362,7 @@
     investissements: vueInvestissements,
     conseil: vueConseil,
     approbations: vueApprobations,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
     journal: vueJournal,
     administration: vueAdministration,

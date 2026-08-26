@@ -31,6 +31,7 @@
       <a href="#" data-vue="approbations">Approbations</a>
       <a href="#" data-vue="fournisseurs">Fournisseurs</a>
       <a href="#" data-vue="audit">Audit financier</a>
+      <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="rapports">Rapports</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
@@ -63,6 +64,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -105,6 +107,7 @@
     approbations: 'Approbations',
     fournisseurs: 'Fournisseurs',
     audit: 'Audit financier',
+    documents: 'Documents & contrats',
     rapports: 'Rapports',
     registre: 'Registre des KPI',
   };
@@ -1220,6 +1223,7 @@
     approbations: vueApprobations,
     fournisseurs: vueFournisseurs,
     audit: vueAudit,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
     registre: vueRegistre,
   }, TITRES);

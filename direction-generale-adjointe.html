@@ -25,6 +25,7 @@
       <a href="#" data-vue="incidents">Incidents critiques</a>
       <a href="#" data-vue="reunions">Réunions &amp; tâches</a>
       <a href="#" data-vue="objectifs">Objectifs</a>
+      <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="rapports">Rapports consolidés</a>
       <a href="#" data-vue="delegations">Délégations</a>
       <a href="#" data-vue="journal">Journal de direction</a>
@@ -58,6 +59,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -93,6 +95,7 @@
     incidents: 'Incidents critiques',
     reunions: 'Réunions & tâches',
     objectifs: 'Objectifs',
+    documents: 'Documents & contrats',
     rapports: 'Rapports consolidés',
     delegations: 'Délégations',
     journal: 'Journal de direction',
@@ -780,6 +783,7 @@
     incidents: vueIncidents,
     reunions: vueReunions,
     objectifs: vueObjectifs,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
     delegations: vueDelegations,
     journal: vueJournal,

@@ -59,6 +59,14 @@ jobs:
       - name: Centre de commandement PDG
         run: node tools/verification/verifier-commandement-pdg.js
 
+      - name: Espace documentaire
+        # Attrape les régressions silencieuses : un espace où le module est chargé mais
+        # dont l'entrée de menu a disparu, un bouton d'action qui ne viendrait plus de la
+        # machine à états du serveur, ou la perte d'un des avertissements qui bloquent
+        # l'approbation. La page se charge dans tous ces cas ; elle est simplement
+        # devenue inutile ou mensongère.
+        run: node tools/verification/verifier-espace-documents.js
+
       - name: Palette des graphiques
         run: |
           if [ -f scripts/validate_palette.js ]; then

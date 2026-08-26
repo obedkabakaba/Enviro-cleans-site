@@ -34,6 +34,7 @@
       <a href="#" data-vue="satisfaction">Satisfaction</a>
       <a href="#" data-vue="contenus">Contenus</a>
       <a href="#" data-vue="budget">Budget marketing</a>
+      <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="rapports">Rapports</a>
     </div>
   </nav>
@@ -65,6 +66,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -104,6 +106,7 @@
     satisfaction: 'Satisfaction',
     contenus: 'Contenus',
     budget: 'Budget marketing',
+    documents: 'Documents & contrats',
     rapports: 'Rapports',
   };
 
@@ -1076,6 +1079,7 @@
     satisfaction: vueSatisfaction,
     contenus: vueContenus,
     budget: vueBudget,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
   }, TITRES);
 
