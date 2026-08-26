@@ -558,3 +558,30 @@ details.brut pre{
 .table-wrap tbody tr[data-id]:focus-visible{
   outline:2px solid var(--bouton); outline-offset:-2px;
 }
+
+/* ════════════════════════════════════════
+   Conteneurs de carte (§11)
+   ════════════════════════════════════════
+
+   Une carte posée dans un conteneur sans hauteur ne se voit pas : MapLibre dessine un
+   canevas de zéro pixel et ne le corrige jamais de lui-même. La hauteur minimale est
+   donc portée par la feuille de style, et non par chaque page — c'est la seule façon
+   qu'un nouvel espace ne reproduise pas l'oubli. */
+/* La hauteur ne s'applique QUE lorsqu'une vraie carte est posée.
+
+   `.carte-hote` est le conteneur que CarteInteractive crée juste avant d'instancier
+   MapLibre : la règle prend donc effet à temps. Sans le `:has()`, l'état vide — « aucun
+   client géolocalisé sur cette période » — héritait des 420 pixels et laissait un vide
+   de la hauteur d'un écran sous une seule ligne de texte. Un écran sain avait alors
+   l'air cassé, ce qui est précisément le genre de détail qui fait douter du reste. */
+#carteMarketingKinshasa:has(.carte-hote),
+#carteDgaKinshasa:has(.carte-hote) {
+  min-height: 420px;
+}
+
+@media (max-width: 720px) {
+  #carteMarketingKinshasa:has(.carte-hote),
+  #carteDgaKinshasa:has(.carte-hote) {
+    min-height: 320px;
+  }
+}

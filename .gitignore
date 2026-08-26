@@ -1,0 +1,4 @@
+# Playwright n'est nécessaire que pour les contrôles de navigateur de tools/verification.
+# Il s'installe à la demande — `npm install --no-save playwright` — et n'a rien à faire
+# dans un dépôt servi tel quel par GitHub Pages.
+node_modules/

@@ -29,6 +29,7 @@
       <a href="#" data-vue="formations">Formations</a>
       <a href="#" data-vue="discipline" data-permission="hr.discipline.restricted">Discipline &amp; sécurité</a>
       <a href="#" data-vue="organigramme">Organigramme</a>
+      <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="rapports">Rapports RH</a>
     </div>
   </nav>
@@ -60,6 +61,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -102,6 +104,7 @@
     formations: 'Formations',
     discipline: 'Discipline & sécurité',
     organigramme: 'Organigramme',
+    documents: 'Documents & contrats',
     rapports: 'Rapports RH',
   };
 
@@ -1018,6 +1021,7 @@
     formations: vueFormations,
     discipline: vueDiscipline,
     organigramme: vueOrganigramme,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
   }, TITRES);
 

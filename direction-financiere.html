@@ -31,6 +31,7 @@
       <a href="#" data-vue="approbations">Approbations</a>
       <a href="#" data-vue="fournisseurs">Fournisseurs</a>
       <a href="#" data-vue="audit">Audit financier</a>
+      <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="rapports">Rapports</a>
       <a href="#" data-vue="registre">Registre des KPI</a>
     </div>
@@ -63,6 +64,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-documents.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -105,6 +107,7 @@
     approbations: 'Approbations',
     fournisseurs: 'Fournisseurs',
     audit: 'Audit financier',
+    documents: 'Documents & contrats',
     rapports: 'Rapports',
     registre: 'Registre des KPI',
   };
@@ -512,11 +515,27 @@
    * existent dans l'historique et les ignorer donnerait un total crédible et incomplet.
    */
   function totauxHtml(t) {
-    if (!t) return '';
+    // Retourner une chaîne vide produisait un PANNEAU CREUX : un cadre titré « Total des
+    // dépenses de la période » et rien dedans. C'est le défaut le plus discret qui soit —
+    // l'écran paraît complet, et la section est vide. Un état vide EXPLICITE dit ce qui
+    // manque ; un panneau creux laisse croire à un défaut de chargement.
+    if (!t) {
+      return '<div class="etat-vide">Aucune dépense enregistrée sur la période. '
+        + 'Le total apparaîtra dès la première saisie.</div>';
+    }
     var parties = (t.par_devise || []).map(function (d) {
       return '<strong>' + E.montant(d.montant) + ' ' + E.echapper(d.devise) + '</strong>';
     });
-    var html = parties.length ? parties.join(' &nbsp;·&nbsp; ') : '—';
+
+    // Aucune devise ET aucune ligne sans devise : il n'y a rien, et il faut le DIRE.
+    // Un tiret seul dans un panneau se lit comme un affichage cassé, pas comme un total
+    // nul — et le contrôle de parcours le comptait d'ailleurs comme un panneau creux.
+    if (parties.length === 0 && !(t.lignes_sans_devise > 0)) {
+      return '<div class="etat-vide">Aucune dépense enregistrée sur la période. '
+        + 'Le total apparaîtra dès la première saisie.</div>';
+    }
+
+    var html = parties.join(' &nbsp;·&nbsp; ');
     if (t.lignes_sans_devise > 0) {
       html += ' <span class="puce attention">' + t.lignes_sans_devise
         + ' ligne(s) sans devise : ' + E.montant(t.montant_sans_devise)
@@ -1220,6 +1239,7 @@
     approbations: vueApprobations,
     fournisseurs: vueFournisseurs,
     audit: vueAudit,
+    documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
     registre: vueRegistre,
   }, TITRES);

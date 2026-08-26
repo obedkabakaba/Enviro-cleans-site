@@ -29,6 +29,84 @@ window.CarteInteractive = (function () {
   var modules = null;
   var chargementEnCours = null;
 
+  /**
+   * Les cartes vivantes, indexées par conteneur.
+   *
+   * ── Le défaut que ce registre corrige ──
+   *
+   * Le routeur des espaces remplace `innerHTML` à chaque changement de vue. Le DOM de la
+   * carte disparaissait donc, mais l'instance MapLibre, elle, restait vivante : son
+   * contexte WebGL, ses écouteurs et son MutationObserver de thème n'étaient jamais
+   * libérés. Un navigateur plafonne le nombre de contextes WebGL simultanés — autour de
+   * seize. Au bout d'une quinzaine d'allers-retours entre deux menus, le plus ancien
+   * contexte était détruit d'office par le navigateur et la carte cessait de s'afficher,
+   * sans message et sans erreur en console.
+   *
+   * Le symptôme est particulièrement trompeur : la carte « marche », puis « ne marche
+   * plus », sans que rien n'ait changé — et elle remarche après un rechargement de page.
+   */
+  var vivantes = typeof WeakMap === 'function' ? new WeakMap() : null;
+
+  /** Détruit proprement la carte déjà posée dans ce conteneur, s'il y en a une. */
+  function libererConteneur(el) {
+    if (!vivantes || !vivantes.has(el)) return;
+    var precedente = vivantes.get(el);
+    vivantes.delete(el);
+    try { precedente.observateurTaille.disconnect(); } catch (_) { /* déjà libéré */ }
+    try { precedente.carte.remove(); } catch (_) { /* déjà détruite */ }
+  }
+
+  /**
+   * Attend que le conteneur ait des dimensions réelles.
+   *
+   * Une carte instanciée dans un conteneur de taille nulle — un onglet encore masqué,
+   * un panneau replié, une vue rendue avant sa mise en page — produit un canevas 0 × 0
+   * qui ne se répare jamais tout seul. MapLibre ne relit pas la taille de son conteneur
+   * de lui-même.
+   *
+   * On attend donc, sur quelques images, que la mise en page ait eu lieu. Passé ce
+   * délai on instancie quand même : l'observateur de taille posé juste après rattrapera
+   * la carte dès qu'elle deviendra visible.
+   */
+  function attendreDimensions(el, essaisRestants) {
+    if (el.offsetWidth > 0 && el.offsetHeight > 0) return Promise.resolve(true);
+    if (essaisRestants <= 0) return Promise.resolve(false);
+    return new Promise(function (resoudre) {
+      requestAnimationFrame(function () {
+        resoudre(attendreDimensions(el, essaisRestants - 1));
+      });
+    });
+  }
+
+  /**
+   * Redimensionne la carte quand son conteneur change de taille.
+   *
+   * C'est l'équivalent MapLibre de `map.invalidateSize()` de Leaflet, et c'est ce qui
+   * rend la carte utilisable dans un menu : au moment où la vue devient visible, le
+   * conteneur passe de 0 à sa taille réelle, et la carte se réajuste au lieu de rester
+   * un carré vide.
+   */
+  function suivreTaille(el, carte, utiles) {
+    if (typeof ResizeObserver !== 'function') {
+      return { disconnect: function () {} };
+    }
+    var derniereLargeur = 0;
+    var observateur = new ResizeObserver(function () {
+      if (el.offsetWidth === 0 || el.offsetHeight === 0) return;
+      try {
+        carte.resize();
+        // Le premier passage de 0 à une taille réelle est aussi le moment où le cadrage
+        // initial n'a rien pu calculer : on le rejoue une fois.
+        if (derniereLargeur === 0 && utiles && utiles.length > 0) {
+          carte.fitBounds(bornes(utiles), { padding: 40, maxZoom: 15, animate: false });
+        }
+        derniereLargeur = el.offsetWidth;
+      } catch (_) { /* carte détruite entre-temps */ }
+    });
+    observateur.observe(el);
+    return observateur;
+  }
+
   function config() {
     return window.ENVIRO_CARTE || {};
   }
@@ -143,6 +221,10 @@ window.CarteInteractive = (function () {
     var el = typeof conteneur === 'string' ? document.getElementById(conteneur) : conteneur;
     if (!el) return Promise.resolve({ mode: 'aucun-conteneur' });
 
+    // Toute reconstruction commence par libérer la précédente : sans cela, les contextes
+    // WebGL s'accumulent jusqu'à ce que le navigateur commence à en détruire au hasard.
+    libererConteneur(el);
+
     function replier(motif) {
       // `sansNote` : le repli explique lui-même pourquoi il n'y a pas de fond. Laisser
       // les deux notes reviendrait à dire deux fois la même chose, à deux endroits.
@@ -218,6 +300,10 @@ window.CarteInteractive = (function () {
         throw new Error('MODULES:' + err.message);
       });
     }).then(function (mods) {
+      // Vingt images, soit environ un tiers de seconde : assez pour laisser la vue se
+      // mettre en page, trop peu pour se voir.
+      return attendreDimensions(hote, 20).then(function () { return mods; });
+    }).then(function (mods) {
       var carte = new mods.maplibregl.Map({
         container: hote,
         style: construireStyle(mods),
@@ -268,6 +354,12 @@ window.CarteInteractive = (function () {
         attributes: true, attributeFilter: ['data-theme'],
       });
       carte.on('remove', function () { observateur.disconnect(); });
+
+      var observateurTaille = suivreTaille(hote, carte, utiles);
+      if (vivantes) vivantes.set(el, { carte: carte, observateurTaille: observateurTaille });
+      carte.on('remove', function () {
+        try { observateurTaille.disconnect(); } catch (_) { /* déjà libéré */ }
+      });
 
       return { mode: 'maplibre', carte: carte };
     }).catch(function (err) {
@@ -392,5 +484,8 @@ window.CarteInteractive = (function () {
     estConfiguree: estConfiguree,
     afficher: afficher,
     couleurEtat: couleurEtat,
+    // Exposée pour qu'une page qui démonte elle-même sa vue puisse libérer la carte
+    // sans attendre le prochain appel à `afficher`.
+    liberer: libererConteneur,
   };
 }());
