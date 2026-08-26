@@ -67,6 +67,11 @@ jobs:
         # devenue inutile ou mensongère.
         run: node tools/verification/verifier-espace-documents.js
 
+      - name: Barre de commandes
+        # Attrape le retour de boutons écrits en dur — qui divergent toujours du circuit
+        # réel — et la perte du motif de refus, qui transforme un bouton grisé en impasse.
+        run: node tools/verification/verifier-commandes.js
+
       - name: Cartes des espaces
         # Une carte sans hauteur est invisible sans la moindre erreur, et une instance
         # non libérée épuise les contextes WebGL du navigateur au bout d'une quinzaine

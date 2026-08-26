@@ -64,6 +64,7 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/espace-commandes.js"></script>
 <script src="assets/js/espace-documents.js"></script>
 <script>
 /**
@@ -73,16 +74,33 @@
  *
  * Aucune valeur n'est écrite en dur. Tout vient de /api/direction-financiere/*.
  *
- * ── Les deux avertissements que cet écran répète ──
+ * ── Deux affirmations de cet en-tête étaient devenues fausses ──
  *
- * 1. AUCUNE DEVISE n'est stockée sur `payments`. Les montants sont affichés sans symbole,
- *    délibérément : écrire « USD » ou « CDF » serait une invention, et une invention
- *    qu'on ne remarquerait pas avant d'avoir additionné les deux.
+ * Elles disaient qu'aucune devise n'était stockée sur `payments`, et qu'AUCUNE TABLE DE
+ * DÉPENSES n'existait. Les deux sont démenties par le schéma depuis les migrations 010 et
+ * 014 : `payments.devise` existe, `expenses` aussi — avec sa devise, ses budgets et ses
+ * fournisseurs.
  *
- * 2. AUCUNE TABLE DE DÉPENSES n'existe. Marge, rentabilité, coût par collecte et
- *    trésorerie sont affichés « non mesuré » avec leur motif — jamais estimés. Un
- *    tableau de bord financier sans dépenses est incomplet ; un tableau de bord financier
- *    qui invente ses dépenses est dangereux.
+ * Les laisser écrites coûtait cher : elles justifiaient d'afficher « non mesuré » là où la
+ * donnée était disponible, et de renoncer à des indicateurs atteignables. Un commentaire
+ * obsolète ne se contente pas d'être faux, il oriente les décisions.
+ *
+ * ── Ce qui reste vrai, et qui compte ──
+ *
+ * Les montants ne sont jamais additionnés entre devises. Les totaux sont rendus PAR
+ * devise, et les lignes sans devise comptées à part : additionner 1 000 USD et 1 000 CDF
+ * donnerait 2 000 de rien.
+ *
+ * Ce qui n'est pas saisi reste « non mesuré », jamais estimé — mais le motif a changé de
+ * nature. Ce n'est plus « la table n'existe pas » (un problème d'architecture, qui demande
+ * du code) mais « personne n'a saisi » (un problème d'usage, qui demande une habitude).
+ *
+ * ── Le circuit financier ──
+ *
+ * Depuis la migration 025, une dépense suit : brouillon → soumise → approuvee → autorisee
+ * → decaissee → rapprochee. Chaque étape a sa permission et sa garde ; le décaissement
+ * écrit un mouvement de trésorerie. Les commandes sont rendues par `espace-commandes.js`
+ * d'après ce que le serveur calcule, jamais écrites dans cette page.
  */
 (function () {
   'use strict';
