@@ -39,6 +39,7 @@
       { nom: 'Convertis sur la période', valeur: c.convertis_periode },
       { nom: 'Placés sur la carte', valeur: c.places },
       { nom: 'Sans coordonnées', valeur: c.sans_gps },
+      { nom: 'Prospects relevés', valeur: c.prospects_places },
       {
         nom: 'Taux de géolocalisation',
         valeur: c.taux_geolocalisation,
@@ -93,24 +94,43 @@
           + '<td>' + ED.nombre(z.total) + '</td>'
           + '<td>' + ED.nombre(z.ouverts) + '</td>'
           + '<td>' + ED.nombre(z.convertis) + '</td>'
+          + '<td>' + ED.nombre(z.releves) + '</td>'
           + '</tr>';
       }).join('');
 
+      // Deux couches, une seule carte. Les prospects relevés et les clients convertis
+      // sont distingués par leur libellé : les fondre en une couche unique ferait
+      // paraître le portefeuille plus fourni qu'il n'est.
+      var points = (d.points || []).concat(
+        (d.points_prospects || []).map(function (p) {
+          return {
+            id: 'prospect-' + p.id,
+            latitude: p.latitude,
+            longitude: p.longitude,
+            nom: 'Prospect — ' + p.nom,
+            etat: p.etat,
+            detail: p.detail,
+          };
+        })
+      );
+
       el.innerHTML = couverture(d.couverture)
-        + ED.panneau('Clients acquis — carte de Kinshasa',
+        + ED.panneau('Clients et prospects — carte de Kinshasa',
           '<div id="carteMarketingKinshasa"></div>',
-          { sousTitre: 'Chaque point est un client CONVERTI, à ses coordonnées réelles '
-            + 'issues de client_locations. La couleur suit la source d’acquisition.' })
+          { sousTitre: 'Les clients convertis sont placés à leurs coordonnées réelles. '
+            + 'Un prospect n’apparaît que si sa position a été RELEVÉE sur le terrain — '
+            + 'jamais au centre de sa zone.' })
         + ED.panneau('Prospects par zone',
-          ED.tableau(['Zone', 'Commune', 'Prospects', 'Ouverts', 'Convertis'], parZone,
-            { vide: 'Aucun prospect enregistré sur la période.' }),
-          { sousTitre: 'Les prospects ne portent pas de coordonnées en base : ils sont '
-            + 'comptés par zone, jamais placés à un point inventé.' })
+          ED.tableau(['Zone', 'Commune', 'Prospects', 'Ouverts', 'Convertis', 'Position relevée'],
+            parZone, { vide: 'Aucun prospect enregistré sur la période.' }),
+          { sousTitre: 'La colonne « position relevée » dit ce que la carte montre '
+            + 'réellement de chaque zone. Les prospects sans position y sont comptés, '
+            + 'jamais posés au centre de la zone.' })
         + listeSansGps(d.geolocalisation_manquante)
         + '<p class="meta">' + e(d.note) + '</p>';
 
-      global.CarteInteractive.afficher('carteMarketingKinshasa', d.points || [], {
-        motifVide: 'Aucun client converti et géolocalisé sur cette période.',
+      global.CarteInteractive.afficher('carteMarketingKinshasa', points, {
+        motifVide: 'Aucun client converti ni prospect relevé sur cette période.',
       });
     }).catch(function (err) { ED.afficherErreur(el, err); });
   }
