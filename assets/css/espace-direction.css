@@ -558,3 +558,23 @@ details.brut pre{
 .table-wrap tbody tr[data-id]:focus-visible{
   outline:2px solid var(--bouton); outline-offset:-2px;
 }
+
+/* ════════════════════════════════════════
+   Conteneurs de carte (§11)
+   ════════════════════════════════════════
+
+   Une carte posée dans un conteneur sans hauteur ne se voit pas : MapLibre dessine un
+   canevas de zéro pixel et ne le corrige jamais de lui-même. La hauteur minimale est
+   donc portée par la feuille de style, et non par chaque page — c'est la seule façon
+   qu'un nouvel espace ne reproduise pas l'oubli. */
+#carteMarketingKinshasa,
+#carteDgaKinshasa {
+  min-height: 420px;
+}
+
+@media (max-width: 720px) {
+  #carteMarketingKinshasa,
+  #carteDgaKinshasa {
+    min-height: 320px;
+  }
+}

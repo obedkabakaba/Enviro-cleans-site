@@ -67,6 +67,13 @@ jobs:
         # devenue inutile ou mensongère.
         run: node tools/verification/verifier-espace-documents.js
 
+      - name: Cartes des espaces
+        # Une carte sans hauteur est invisible sans la moindre erreur, et une instance
+        # non libérée épuise les contextes WebGL du navigateur au bout d'une quinzaine
+        # d'allers-retours entre deux menus. Ni l'un ni l'autre ne se voit en relisant
+        # le code.
+        run: node tools/verification/verifier-cartes-espaces.js
+
       - name: Palette des graphiques
         run: |
           if [ -f scripts/validate_palette.js ]; then

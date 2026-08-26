@@ -12,6 +12,7 @@
   /* Grille de cohortes : propre à cet écran, donc ici et pas dans le châssis commun. */
   .cohortes td.cellule{ text-align:center; font-variant-numeric:tabular-nums; }
   .cohortes td.vide{ color:var(--texte-faible); font-style:italic; font-size:11.5px; }
+
 </style>
 </head>
 <body>
@@ -35,6 +36,7 @@
       <a href="#" data-vue="contenus">Contenus</a>
       <a href="#" data-vue="budget">Budget marketing</a>
       <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
+      <a href="#" data-vue="carte">Carte d’acquisition</a>
       <a href="#" data-vue="rapports">Rapports</a>
     </div>
   </nav>
@@ -66,7 +68,10 @@
 <script src="assets/js/espace-direction.js"></script>
 <script src="assets/js/espace-graphiques.js"></script>
 <script src="assets/js/espace-ressources.js"></script>
+<script src="assets/js/carte-config.js"></script>
+<script src="assets/js/carte-maplibre.js"></script>
 <script src="assets/js/espace-documents.js"></script>
+<script src="assets/js/espace-carte.js"></script>
 <script>
 /**
  * ════════════════════════════════════════
@@ -107,6 +112,7 @@
     contenus: 'Contenus',
     budget: 'Budget marketing',
     documents: 'Documents & contrats',
+    carte: 'Carte d’acquisition',
     rapports: 'Rapports',
   };
 
@@ -1080,6 +1086,7 @@
     contenus: vueContenus,
     budget: vueBudget,
     documents: function () { EspaceDocuments.vue(elContenu); },
+    carte: function () { EspaceCarte.marketing(elContenu, { debut: etat.debut, fin: etat.fin }); },
     rapports: vueRapports,
   }, TITRES);
 
