@@ -1,6 +1,11 @@
 /** Ouvre chaque vue de chaque espace, avec le bon rôle, et rapporte tout défaut. */
 const { chromium } = require('playwright');
-const API_PROD='https://enviro-cleans-api.onrender.com', API_LOCAL='http://localhost:4000';
+const API_PROD = 'https://enviro-cleans-api.onrender.com';
+
+// Ports surchargables : la pile locale ne tourne pas toujours sur les mêmes.
+//   API_LOCAL=http://127.0.0.1:3111 SITE_LOCAL=http://127.0.0.1:8111 node …
+const API_LOCAL  = process.env.API_LOCAL  || 'http://localhost:4000';
+const SITE_LOCAL = process.env.SITE_LOCAL || 'http://127.0.0.1:5500';
 
 const ESPACES = [
   ['pdg.html', '+243810000000'],
@@ -46,15 +51,30 @@ const ESPACES = [
       localStorage.setItem('ec.permissions', JSON.stringify(t.permissions || []));
     }, j);
 
-    await page.goto(`http://127.0.0.1:5500/${page_}`, { waitUntil: 'networkidle' });
+    await page.goto(`${SITE_LOCAL}/${page_}`, { waitUntil: 'networkidle' });
+
+    // Les menus sont groupés dans des <details>. Un lien d'un groupe replié existe dans
+    // le DOM mais n'est pas cliquable : `click()` attend l'actionnabilité et finit par
+    // expirer. Le parcours s'arrêtait donc au premier groupe fermé — sur l'espace PDG,
+    // c'est-à-dire à la moitié des vues, sans que rien ne signale qu'elles n'avaient pas
+    // été visitées.
+    await page.evaluate(() => {
+      document.querySelectorAll('details.menu-groupe').forEach((d) => { d.open = true; });
+    });
     const liens = await page.$$eval('.menu a[data-vue]', els => els.map(e => e.getAttribute('data-vue')));
     console.log(`\n${page_}  (${liens.length} vues)`);
 
     for (const vue of liens) {
       const l = await page.$(`.menu a[data-vue="${vue}"]`);
       if (!l) continue;
+      // Rouvrir à chaque tour : une vue peut re-rendre le menu.
+      await page.evaluate(() => {
+        document.querySelectorAll('details.menu-groupe').forEach((d) => { d.open = true; });
+      });
       await l.click();
-      await page.waitForTimeout(750);
+      // La carte charge MapLibre à la demande et les vues documentaires font deux appels
+      // successifs : 750 ms suffisaient quand toutes les vues étaient de simples tableaux.
+      await page.waitForTimeout(1500);
       vues += 1;
       const etat = await page.evaluate(() => {
         // Un panneau qui ne rend RIEN est le défaut le plus discret qui soit : la page

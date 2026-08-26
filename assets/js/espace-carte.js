@@ -32,6 +32,12 @@
   var API = global.EnviroAPI;
   var e = ED.echapper;
 
+  /** Le routeur pose « Chargement… » ; c'est à la vue de le remplacer une fois chargée. */
+  function sousTitre(texte) {
+    var el = document.getElementById('sousTitre');
+    if (el) el.textContent = texte;
+  }
+
   /** Bandeau de couverture : combien sont placés, combien ne peuvent pas l'être. */
   function couverture(c) {
     if (!c) return '';
@@ -114,6 +120,10 @@
         })
       );
 
+      sousTitre(ED.nombre(d.couverture.places) + ' client(s) et '
+        + ED.nombre(d.couverture.prospects_places) + ' prospect(s) placés · période du '
+        + ED.dateCourte(d.periode.debut) + ' au ' + ED.dateCourte(d.periode.fin));
+
       el.innerHTML = couverture(d.couverture)
         + ED.panneau('Clients et prospects — carte de Kinshasa',
           '<div id="carteMarketingKinshasa"></div>',
@@ -171,6 +181,9 @@
             + '<td>' + ED.nombre(t.echecs) + '</td>'
             + '</tr>';
         }).join('');
+
+        sousTitre(ED.nombre(r.blocages_ouverts) + ' action(s) bloquée(s), dont '
+          + ED.nombre(r.blocages_en_retard) + ' en retard · ' + ED.dateCourte(d.jour));
 
         el.innerHTML = ED.grilleKpi([
           { nom: 'Incidents ouverts', valeur: r.incidents_ouverts },

@@ -50,6 +50,18 @@
    */
   var MENTION_JURISTE = 'À faire vérifier par un juriste compétent en droit congolais.';
 
+  /**
+   * Met à jour le sous-titre de l'écran.
+   *
+   * Le routeur pose « Chargement… » AVANT d'appeler la vue, et compte sur elle pour le
+   * remplacer. Une vue qui ne le fait pas laisse l'écran afficher « Chargement… » sous
+   * un contenu entièrement chargé — l'utilisateur attend quelque chose qui est déjà là.
+   */
+  function sousTitre(texte) {
+    var el = document.getElementById('sousTitre');
+    if (el) el.textContent = texte;
+  }
+
   var LIBELLE_STATUT = {
     brouillon: 'Brouillon',
     en_revision: 'En révision',
@@ -137,6 +149,9 @@
         + 'brouillons : la donnée manquante bloque la version finale.'
         + '</div>';
     }
+
+    sousTitre(ED.nombre(d.total) + ' document(s) — domaines ouverts : '
+      + (cat.domaines_lisibles || []).join(', '));
 
     etat.cible.innerHTML = alerteIdentite
       + '<div class="barre-actions">'
