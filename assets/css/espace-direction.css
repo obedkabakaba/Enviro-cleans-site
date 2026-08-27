@@ -424,6 +424,17 @@ ul.compact{ margin:0; padding-left:19px; }
 ul.compact li{ margin-bottom:5px; }
 a.citation{ color:var(--info-texte); word-break:break-word; }
 
+/* ── Lien d'ouverture dans une liste ──
+   Un <button> plutôt qu'un <a href="#"> : ouvrir une pièce n'est pas une navigation, et
+   un lien mort renvoie l'utilisateur en haut de page au moindre clic manqué. La mise en
+   forme de lien reste, parce que c'est ce que l'œil cherche dans une liste. */
+button.lien-inline{
+  background:none; border:0; padding:0; font:inherit; cursor:pointer;
+  color:var(--info-texte); text-decoration:underline; text-underline-offset:2px;
+}
+button.lien-inline:hover{ text-decoration:none; }
+button.lien-inline:focus-visible{ outline:2px solid var(--info-texte); outline-offset:2px; }
+
 /* ── États de chargement, vide et erreur ── */
 .squelette{
   background:var(--surface-2); border-radius:6px; height:15px;

@@ -33,6 +33,7 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="controle">Centre de contrôle</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="tournees">Tournées</a>
       <a href="#" data-vue="equipes">Équipes</a>
       <a href="#" data-vue="zones">Zones</a>
@@ -109,6 +110,7 @@
   var elAvertissements = document.getElementById('zoneAvertissements');
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     controle: 'Centre de contrôle',
     tournees: 'Tournées',
     equipes: 'Équipes',
@@ -173,14 +175,19 @@
       + '</div>';
   }
 
+  // Les neuf états du circuit `operations/tournees` (migration 026). « Planifiée » garde
+  // son sens d'origine : publiée, exécutable. « Brouillon » et « Validée » sont en
+  // préparation — le collecteur ne les voit pas.
   function puceStatut(statut) {
     var classes = {
-      terminee: 'ok', en_cours: 'attention', planifiee: 'neutre',
-      manquee: 'alerte', annulee: 'neutre',
+      brouillon: 'neutre', validee: 'attention', planifiee: 'neutre',
+      en_cours: 'attention', terminee: 'ok', cloturee: 'ok',
+      manquee: 'alerte', reportee: 'attention', annulee: 'neutre',
     };
     var libelles = {
-      terminee: 'Terminée', en_cours: 'En cours', planifiee: 'Planifiée',
-      manquee: 'Manquée', annulee: 'Annulée',
+      brouillon: 'Brouillon', validee: 'Validée', planifiee: 'Planifiée',
+      en_cours: 'En cours', terminee: 'Terminée', cloturee: 'Clôturée',
+      manquee: 'Manquée', reportee: 'Reportée', annulee: 'Annulée',
     };
     return '<span class="puce ' + (classes[statut] || 'neutre') + '">'
       + echapper(libelles[statut] || statut) + '</span>';
@@ -330,20 +337,32 @@
     elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(6) + '</div></div>';
 
     var suffixe = parametres() ? parametres() + '&page=' + (page || 1) : '?page=' + (page || 1);
+    if (statutTournees) suffixe += '&statut=' + encodeURIComponent(statutTournees);
 
     return EnviroAPI.get('/api/direction-operations/tournees' + suffixe).then(function (d) {
       elSousTitre.textContent = d.pagination.total + ' tournée(s) — du '
         + d.periode.debut + ' au ' + d.periode.fin;
       afficherAvertissements([]);
 
-      if (d.etat_vide) { elContenu.innerHTML = '<div class="panneau">' + etatVide(d.etat_vide) + '</div>'; return; }
+      // ── L'état vide garde ses filtres ──
+      //
+      // Le retour anticipé remplaçait toute la vue par le message. On perdait donc le
+      // filtre par statut au moment précis où il sert : « aucune tournée » sur un filtre
+      // « Brouillon » se lit comme « il n'y en a nulle part », et rien à l'écran ne
+      // permet d'en changer. Une impasse.
+      if (d.etat_vide) {
+        elContenu.innerHTML = '<div class="panneau"><div class="corps">'
+          + filtreStatutTournees() + etatVide(d.etat_vide) + '</div></div>';
+        brancherFiltresTournees(page);
+        return;
+      }
 
       var lignes = d.tournees.map(function (t) {
-        return '<tr>'
+        return '<tr data-tournee="' + t.id + '" style="cursor:pointer">'
           + '<td>' + echapper(String(t.date_tournee).slice(0, 10)) + '</td>'
           + '<td>' + echapper(t.zone || '—') + '</td>'
           + '<td>' + echapper(t.collecteur || '—') + '</td>'
-          + '<td>' + puceStatut(t.statut) + '</td>'
+          + '<td>' + puceStatut(t.statut) + traceCircuit(t) + '</td>'
           + '<td>' + t.clients + '</td>'
           + '<td>' + t.effectuees + '</td>'
           + '<td>' + (t.echecs > 0 ? '<span style="color:var(--alerte)">' + t.echecs + '</span>' : '0') + '</td>'
@@ -362,18 +381,101 @@
       elContenu.innerHTML = '<div class="panneau">'
         + '<header><h2>Tournées</h2><span style="font-size:12.5px;color:var(--texte-faible)">'
         + p.total + ' au total</span></header>'
-        + '<div class="corps"><div class="table-wrap"><table><thead><tr>'
+        + '<div class="corps">'
+        + filtreStatutTournees()
+        + '<div class="table-wrap"><table><thead><tr>'
         + '<th>Date</th><th>Zone</th><th>Collecteur</th><th>Statut</th>'
         + '<th>Clients</th><th>Effectuées</th><th>Échecs</th><th>Progression</th>'
         + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
-        + pagination + '</div></div>';
+        + pagination
+        + '<div id="commandesTournee"></div>'
+        + '</div></div>';
 
       Array.prototype.forEach.call(elContenu.querySelectorAll('[data-page]'), function (b) {
         b.addEventListener('click', function () {
           if (!b.disabled) vueTournees(parseInt(b.getAttribute('data-page'), 10));
         });
       });
+
+      brancherFiltresTournees(page);
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-tournee]'), function (tr) {
+        tr.addEventListener('click', function () {
+          ouvrirCommandesTournee(parseInt(tr.getAttribute('data-tournee'), 10), page);
+        });
+      });
+
+      // Rouvrir la barre là où elle était avant le rechargement : sans cela, chaque
+      // commande refermerait le panneau et obligerait à retrouver la ligne à la main.
+      if (tourneeOuverte) ouvrirCommandesTournee(tourneeOuverte, page);
     }).catch(afficherErreur);
+  }
+
+  // ── Le circuit des tournées, à l'écran ─────────────────────────────────────
+  //
+  // Les boutons ne sont pas écrits ici : ils viennent de `GET …/actions`, qui applique
+  // la machine à états, les permissions et la séparation des tâches côté serveur. Une
+  // liste codée dans la page finirait par proposer une étape que le serveur refuse — ou
+  // par cacher celle qu'il accepte.
+
+  var statutTournees = '';
+  var tourneeOuverte = null;
+
+  var ETATS_TOURNEE = [
+    ['', 'Tous'], ['brouillon', 'Brouillon'], ['validee', 'Validée'],
+    ['planifiee', 'Planifiée'], ['en_cours', 'En cours'], ['terminee', 'Terminée'],
+    ['cloturee', 'Clôturée'], ['manquee', 'Manquée'], ['reportee', 'Reportée'],
+    ['annulee', 'Annulée'],
+  ];
+
+  function brancherFiltresTournees() {
+    Array.prototype.forEach.call(elContenu.querySelectorAll('[data-statut-tournee]'), function (b) {
+      b.addEventListener('click', function () {
+        statutTournees = b.getAttribute('data-statut-tournee') || '';
+        tourneeOuverte = null;
+        vueTournees(1);
+      });
+    });
+  }
+
+  function filtreStatutTournees() {
+    var html = '<div class="filtres" style="margin-bottom:12px">';
+    ETATS_TOURNEE.forEach(function (e) {
+      var actif = statutTournees === e[0];
+      html += '<button class="action' + (actif ? '' : ' secondaire')
+        + '" data-statut-tournee="' + e[0] + '">' + echapper(e[1]) + '</button> ';
+    });
+    return html + '</div>';
+  }
+
+  /** Qui a validé, publié, clôturé — un état sans son auteur ne se relit pas. */
+  function traceCircuit(t) {
+    var traces = [];
+    if (t.validee_par) traces.push('validée par ' + t.validee_par);
+    if (t.publiee_par) traces.push('publiée par ' + t.publiee_par);
+    if (t.cloturee_par) traces.push('clôturée par ' + t.cloturee_par);
+    if (t.statut === 'reportee' && t.report_vers_date) {
+      traces.push('reportée au ' + String(t.report_vers_date).slice(0, 10));
+    }
+    if (traces.length === 0) return '';
+    return '<br><small style="color:var(--texte-faible)">'
+      + echapper(traces.join(' · ')) + '</small>';
+  }
+
+  function ouvrirCommandesTournee(id, page) {
+    tourneeOuverte = id;
+    var cible = document.getElementById('commandesTournee');
+    if (!cible || !window.EspaceCommandes) return;
+
+    window.EspaceCommandes.barre({
+      cible: cible,
+      ressource: 'operations/tournees',
+      id: id,
+      // Recharger la liste APRÈS chaque commande : c'est ce qui fait apparaître un
+      // conflit 409 au bon moment, quand quelqu'un d'autre a fait avancer la tournée
+      // entre l'affichage et le clic.
+      apres: function () { vueTournees(page); },
+    });
   }
 
   // ── Vue : équipes ──────────────────────────────────────────────────────────
@@ -1206,9 +1308,25 @@
     });
   }
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   // ── Routage ────────────────────────────────────────────────────────────────
 
   var VUES = {
+    decisions: vueDecisions,
     controle: vueControle, tournees: vueTournees, equipes: vueEquipes,
     zones: vueZones, qualite: vueQualite, registre: vueRegistre,
     carte: vueCarte, collectes: vueCollectes, vehicules: vueVehicules,

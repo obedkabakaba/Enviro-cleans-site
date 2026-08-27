@@ -70,4 +70,58 @@ for (const page of ESPACES) {
   );
 }
 
-console.log(`Barre de commandes : ${ESPACES.length} espaces branchés, garde-fous vérifiés.`);
+// ── Le circuit des tournées est réellement branché (migration 026) ──
+//
+// L'espace Opérations n'avait aucune commande : la liste des tournées était une
+// consultation, et le cycle de vie déclaré côté serveur ne menait à aucun bouton. Trois
+// choses doivent tenir ensemble, et deux sur trois ne servent à rien.
+const ops = lire('direction-operations-commerciales.html');
+
+assert.match(ops, /ressource: 'operations\/tournees'/,
+  'la liste des tournées doit monter la barre de commandes du circuit');
+assert.match(ops, /id="commandesTournee"/,
+  'le conteneur de la barre doit exister dans la vue des tournées');
+assert.match(ops, /apres: function \(\) \{ vueTournees\(page\); \}/,
+  'après une commande, la liste doit être rechargée depuis l’API : sans cela l’écran '
+  + 'montrerait l’état espéré, pas celui que le serveur a écrit');
+
+// Les neuf états doivent être nommés en clair. Un statut brut affiché tel quel
+// (« cloturee ») laisse l'utilisateur deviner, et « brouillon » ressemble alors à une
+// panne plutôt qu'à une étape.
+for (const etat of ['brouillon', 'validee', 'planifiee', 'en_cours', 'terminee',
+  'cloturee', 'manquee', 'reportee', 'annulee']) {
+  assert.ok(new RegExp(`${etat}:\\s*'`).test(ops),
+    `direction-operations-commerciales.html : l'état « ${etat} » n'a pas de libellé lisible`);
+}
+
+// Les champs que le serveur exige aux transitions des tournées doivent avoir un libellé,
+// sinon le formulaire demande « observations_cloture » à un directeur.
+for (const champ of ['motif_report', 'report_vers_date', 'motif_annulation',
+  'observations_cloture']) {
+  assert.ok(cmd.indexOf(`${champ}:`) !== -1,
+    `espace-commandes.js : le champ « ${champ} » n'a pas de libellé lisible`);
+}
+
+// ── La file des décisions attendues (§25) ──
+//
+// Une permission accordée sans écran pour l'exercer est une intention, pas une
+// fonctionnalité. `hr.discipline.decide` allait à la direction générale, dont l'espace
+// n'avait aucune vue disciplinaire : la sanction était prononçable par l'API et par
+// personne à l'écran.
+assert.match(cmd, /\/api\/ressources\/decisions/,
+  'la file doit demander au serveur ce qui attend une décision de CE compte');
+assert.match(cmd, /EspaceCommandes = \{[^}]*file: file/,
+  'la file doit être exposée par le module');
+assert.match(cmd, /apres: charger/,
+  'après une commande, la file doit être rechargée : une pièce traitée doit en sortir, '
+  + 'sinon le compteur ment');
+
+for (const page of ESPACES) {
+  const html = lire(page);
+  assert.match(html, /data-vue="decisions"/, `${page} : entrée de menu « Décisions attendues » absente`);
+  assert.match(html, /decisions: vueDecisions/, `${page} : la vue n'est pas enregistrée dans le routeur`);
+  assert.match(html, /EspaceCommandes\.file/, `${page} : la vue ne monte pas la file`);
+}
+
+console.log(`Barre de commandes : ${ESPACES.length} espaces branchés, circuit des tournées `
+  + `branché, file des décisions dans ${ESPACES.length} espaces, garde-fous vérifiés.`);

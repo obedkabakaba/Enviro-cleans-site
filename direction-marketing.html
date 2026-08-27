@@ -24,6 +24,7 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="tableau">Tableau de bord</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="acquisition">Acquisition</a>
       <a href="#" data-vue="territoire">Territoire</a>
       <a href="#" data-vue="retention">Rétention</a>
@@ -100,6 +101,7 @@
   var elSousTitre = document.getElementById('sousTitre');
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     tableau: 'Tableau de bord',
     acquisition: 'Acquisition',
     territoire: 'Territoire',
@@ -1073,7 +1075,23 @@
     });
   }
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   var allerA = E.router({
+    decisions: vueDecisions,
     tableau: vueTableau,
     acquisition: vueAcquisition,
     territoire: vueTerritoire,

@@ -81,6 +81,7 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="commandement">Aujourd’hui</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="directions" data-permission="executive.appointment.manage">Directions &amp; accès</a>
       <a href="#" data-vue="terrain">Terrain &amp; carte clients</a>
       <a href="#" data-vue="approbations">Décisions à prendre</a>
@@ -97,6 +98,7 @@
         <a href="#" data-vue="risques">Risques &amp; conformité</a>
         <a href="#" data-vue="investissements" data-permission="executive.approval.final">Investissements</a>
         <a href="#" data-vue="conseil" data-permission="executive.approval.final">Conseil de direction</a>
+        <a href="#" data-vue="demandes" data-permission="executive.report.request">Demandes de rapport</a>
         <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
         <a href="#" data-vue="rapports">Rapports exécutifs</a>
         <a href="#" data-vue="journal">Journal de direction</a>
@@ -181,6 +183,7 @@
   });
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     commandement: 'Aujourd’hui',
     directions: 'Directions & accès',
     terrain: 'Terrain & carte clients',
@@ -194,6 +197,7 @@
     risques: 'Risques & conformité',
     investissements: 'Investissements',
     conseil: 'Conseil de direction',
+    demandes: 'Demandes de rapport',
     approbations: 'Approbations',
     documents: 'Documents & contrats',
     rapports: 'Rapports exécutifs',
@@ -1035,7 +1039,46 @@
         + E.panneau('Historique des décisions et votes',
           E.tableau(['Séance', 'Sujet', 'Résolution', 'Pour / Contre / Abst.', 'Résultat'],
             decisions, { vide: 'Aucune décision enregistrée.' }));
+
+      // ── Piloter les réunions et les dossiers (migration 028) ──
+      //
+      // Ces tables étaient lues par les panneaux ci-dessus et écrites par personne.
+      // La barre de commandes, ouverte sur chaque fiche, apporte le circuit : le PDG
+      // approuve le compte rendu qu'il n'a pas rédigé, et publie le dossier qu'il n'a
+      // pas préparé.
+      EspaceRessources.ajouterGestion(elContenu, {
+        ressource: 'direction/dossiers-conseil',
+        titre: 'Dossiers de séance',
+        id: 'gestion_pdg_dossiers',
+        filtres: ['statut'],
+      });
+
+      EspaceRessources.ajouterGestion(elContenu, {
+        ressource: 'direction/reunions',
+        titre: 'Réunions de direction',
+        id: 'gestion_pdg_reunions',
+        filtres: ['statut', 'type_reunion'],
+      });
     }).catch(echec);
+  }
+
+  // ── Demandes de rapport ────────────────────────────────────────────────────
+  //
+  // Demander formellement un rapport à une direction — objet, échéance, destinataire —
+  // et garder la trace de ce qui a été remis. L'acte de coordination le plus courant
+  // d'une direction générale, et le seul qui n'existait sous aucune forme : la demande
+  // passait par message, et sa trace mourait avec le message.
+  function vueDemandes() {
+    elContenu.innerHTML = '';
+    elSousTitre.textContent = 'Rapports demandés aux directions métiers';
+
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/demandes-rapport',
+      titre: 'Demandes de rapport',
+      id: 'gestion_pdg_demandes',
+      filtres: ['statut', 'priorite', 'direction_destinataire'],
+    });
+    return Promise.resolve();
   }
 
   // ── Approbations ───────────────────────────────────────────────────────────
@@ -1348,7 +1391,25 @@
 
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer : la
+  // direction générale pouvait prononcer une sanction disciplinaire par l'API, et par
+  // personne à l'écran.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   allerA = E.router({
+    decisions: vueDecisions,
     commandement: commandementUi.aujourdHui,
     directions: commandementUi.directions,
     terrain: commandementUi.terrain,
@@ -1362,6 +1423,7 @@
     risques: vueRisques,
     investissements: vueInvestissements,
     conseil: vueConseil,
+    demandes: vueDemandes,
     approbations: vueApprobations,
     documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,

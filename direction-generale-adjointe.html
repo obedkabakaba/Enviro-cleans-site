@@ -18,12 +18,14 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="cockpit">Cockpit DGA</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="departements">Départements</a>
       <a href="#" data-vue="plan">Plan d’action</a>
       <a href="#" data-vue="projets">Projets</a>
       <a href="#" data-vue="approbations">Approbations</a>
       <a href="#" data-vue="incidents">Incidents critiques</a>
       <a href="#" data-vue="reunions">Réunions &amp; tâches</a>
+      <a href="#" data-vue="demandes">Demandes de rapport</a>
       <a href="#" data-vue="objectifs">Objectifs</a>
       <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
       <a href="#" data-vue="carte">Carte de coordination</a>
@@ -92,6 +94,7 @@
   var elSousTitre = document.getElementById('sousTitre');
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     cockpit: 'Cockpit de coordination',
     departements: 'Départements',
     plan: 'Plan d’action',
@@ -99,6 +102,7 @@
     approbations: 'Approbations',
     incidents: 'Incidents critiques',
     reunions: 'Réunions & tâches',
+    demandes: 'Demandes de rapport',
     objectifs: 'Objectifs',
     documents: 'Documents & contrats',
     carte: 'Carte de coordination',
@@ -598,7 +602,46 @@
         + E.panneau('Agenda de coordination',
           E.tableau(['Date', 'Réunion', 'Lieu', 'Ordre du jour', 'Actions', 'Statut'],
             lignes, { vide: d.etat_vide || 'Aucune réunion enregistrée.' }));
+
+      // ── Créer et piloter une réunion (migration 028) ──
+      //
+      // `executive_meetings` était lue par ce tableau et écrite par personne : la
+      // direction pouvait consulter ses réunions et pas les convoquer. Le bloc de
+      // gestion apporte la création ; la barre de commandes, ouverte sur chaque fiche,
+      // apporte le circuit — convoquer, acter la tenue, faire approuver le compte rendu.
+      EspaceRessources.ajouterGestion(elContenu, {
+        ressource: 'direction/reunions',
+        titre: 'Préparer et piloter les réunions',
+        id: 'gestion_direction_reunions',
+        filtres: ['statut', 'type_reunion'],
+      });
+
+      EspaceRessources.ajouterGestion(elContenu, {
+        ressource: 'direction/dossiers-conseil',
+        titre: 'Dossiers de séance',
+        id: 'gestion_direction_dossiers',
+        filtres: ['statut'],
+      });
     }).catch(echec);
+  }
+
+  // ── Demandes de rapport ────────────────────────────────────────────────────
+  //
+  // L'acte de coordination le plus courant d'une direction générale — et le seul moyen
+  // de dire ensuite « ce rapport a été demandé le 3, remis le 11, et voici ce qu'il
+  // disait ». Il n'existait sous aucune forme : la demande passait par message, et sa
+  // trace mourait avec le message.
+  function vueDemandes() {
+    elContenu.innerHTML = '';
+    elSousTitre.textContent = 'Rapports demandés aux directions métiers';
+
+    EspaceRessources.ajouterGestion(elContenu, {
+      ressource: 'direction/demandes-rapport',
+      titre: 'Demandes de rapport',
+      id: 'gestion_direction_demandes',
+      filtres: ['statut', 'priorite', 'direction_destinataire'],
+    });
+    return Promise.resolve();
   }
 
   // ── Objectifs ──────────────────────────────────────────────────────────────
@@ -778,9 +821,27 @@
     }).catch(echec);
   }
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer : la
+  // direction générale pouvait prononcer une sanction disciplinaire par l'API, et par
+  // personne à l'écran.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
   var allerA = E.router({
+    decisions: vueDecisions,
     cockpit: vueCockpit,
     departements: vueDepartements,
     plan: vuePlan,
@@ -788,6 +849,7 @@
     approbations: vueApprobations,
     incidents: vueIncidents,
     reunions: vueReunions,
+    demandes: vueDemandes,
     objectifs: vueObjectifs,
     documents: function () { EspaceDocuments.vue(elContenu); },
     carte: function () { EspaceCarte.dga(elContenu); },
