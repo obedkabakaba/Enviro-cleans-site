@@ -48,11 +48,17 @@
     prochaine_action_le: 'Date de la prochaine action',
     prochaine_etape: 'Suite donnée',
     date_fin: 'Date de fin',
+    // ── Circuit des tournées (migration 026) ──
+    motif_report: 'Motif du report',
+    report_vers_date: 'Reporter au',
+    motif_annulation: 'Motif de l’annulation',
+    observations_cloture: 'Observations de clôture',
   };
 
   var TYPES_SAISIE = {
     prochaine_action_le: 'date',
     date_fin: 'date',
+    report_vers_date: 'date',
     assigne_a: 'number',
   };
 
