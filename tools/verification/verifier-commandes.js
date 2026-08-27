@@ -102,5 +102,26 @@ for (const champ of ['motif_report', 'report_vers_date', 'motif_annulation',
     `espace-commandes.js : le champ « ${champ} » n'a pas de libellé lisible`);
 }
 
+// ── La file des décisions attendues (§25) ──
+//
+// Une permission accordée sans écran pour l'exercer est une intention, pas une
+// fonctionnalité. `hr.discipline.decide` allait à la direction générale, dont l'espace
+// n'avait aucune vue disciplinaire : la sanction était prononçable par l'API et par
+// personne à l'écran.
+assert.match(cmd, /\/api\/ressources\/decisions/,
+  'la file doit demander au serveur ce qui attend une décision de CE compte');
+assert.match(cmd, /EspaceCommandes = \{[^}]*file: file/,
+  'la file doit être exposée par le module');
+assert.match(cmd, /apres: charger/,
+  'après une commande, la file doit être rechargée : une pièce traitée doit en sortir, '
+  + 'sinon le compteur ment');
+
+for (const page of ESPACES) {
+  const html = lire(page);
+  assert.match(html, /data-vue="decisions"/, `${page} : entrée de menu « Décisions attendues » absente`);
+  assert.match(html, /decisions: vueDecisions/, `${page} : la vue n'est pas enregistrée dans le routeur`);
+  assert.match(html, /EspaceCommandes\.file/, `${page} : la vue ne monte pas la file`);
+}
+
 console.log(`Barre de commandes : ${ESPACES.length} espaces branchés, circuit des tournées `
-  + 'branché, garde-fous vérifiés.');
+  + `branché, file des décisions dans ${ESPACES.length} espaces, garde-fous vérifiés.`);

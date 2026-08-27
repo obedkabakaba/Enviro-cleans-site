@@ -244,5 +244,104 @@
     return API().get('/api/ressources/circuits').then(function (d) { return d.circuits; });
   }
 
-  global.EspaceCommandes = { barre: barre, circuits: circuits };
+  // ════════════════════════════════════════
+  // FILE DES DÉCISIONS ATTENDUES
+  // ════════════════════════════════════════
+  //
+  // ── Le défaut que cette vue referme ──
+  //
+  // Une permission accordée sans écran pour l'exercer est une intention, pas une
+  // fonctionnalité. Le cas qui l'a montré : `hr.discipline.decide` va à la direction
+  // générale, mais l'écran des dossiers vit dans l'espace RH, derrière une permission
+  // qu'elle n'a pas — et ne doit pas avoir. La sanction était prononçable par l'API et
+  // par personne à l'écran.
+  //
+  // Ajouter un écran par circuit, c'est dix-huit écrans et dix-huit occasions d'oublier
+  // le dix-neuvième. Cette vue se déduit des machines : le serveur ne renvoie que les
+  // pièces sur lesquelles l'appelant peut RÉELLEMENT agir, séparation des tâches
+  // comprise. Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici.
+
+  /**
+   * Monte la file des décisions attendues.
+   *
+   * @param options.cible  élément ou identifiant où rendre la file
+   * @param options.vide   message quand il n'y a rien à décider
+   */
+  function file(options) {
+    var cible = typeof options.cible === 'string'
+      ? document.getElementById(options.cible) : options.cible;
+    if (!cible) return;
+
+    function charger() {
+      cible.innerHTML = '<p class="sous-titre">Chargement des décisions attendues…</p>';
+
+      API().get('/api/ressources/decisions')
+        .then(rendre)
+        .catch(function (err) { E().afficherErreur(cible, err); });
+    }
+
+    function rendre(reponse) {
+      var groupes = reponse.circuits || [];
+
+      if (groupes.length === 0) {
+        // Un état vide qui dit ce qu'il signifie. « Aucune donnée » laisserait croire à
+        // une panne ; ici, rien à décider est une bonne nouvelle.
+        cible.innerHTML = '<div class="etat-vide">'
+          + E().echapper(options.vide
+            || 'Aucune pièce n’attend votre décision. Les circuits que vous pilotez sont à jour.')
+          + '</div>';
+        return;
+      }
+
+      var total = groupes.reduce(function (n, g) { return n + g.pieces.length; }, 0);
+
+      var html = '<p class="sous-titre">' + total + ' pièce(s) attendent votre décision, '
+        + 'réparties sur ' + groupes.length + ' circuit(s).</p>';
+
+      groupes.forEach(function (g) {
+        html += '<div class="panneau" style="margin-top:12px">'
+          + '<header><h2>' + E().echapper(g.libelle) + '</h2>'
+          + '<span style="font-size:12.5px;color:var(--texte-faible)">'
+          + g.pieces.length + (g.tronque ? '+' : '') + ' à traiter</span></header>'
+          + '<div class="corps"><ul class="compact">';
+
+        g.pieces.forEach(function (p) {
+          html += '<li><button class="lien-inline" data-circuit="' + E().echapper(g.circuit)
+            + '" data-id="' + p.id + '">' + E().echapper(p.etiquette) + '</button>'
+            + ' <span class="puce neutre">' + E().echapper(String(p.etat).replace(/_/g, ' '))
+            + '</span> — ' + E().echapper(p.actions.map(function (a) { return a.libelle; }).join(', '))
+            + '</li>';
+        });
+
+        html += '</ul>';
+        if (g.tronque) {
+          html += '<p class="meta">La file est plus longue que ce qui est affiché : '
+            + 'traitez les pièces ci-dessus, les suivantes apparaîtront.</p>';
+        }
+        html += '</div></div>';
+      });
+
+      html += '<div id="commandesFile" style="margin-top:12px"></div>';
+      cible.innerHTML = html;
+
+      Array.prototype.forEach.call(cible.querySelectorAll('[data-circuit]'), function (b) {
+        b.addEventListener('click', function () {
+          barre({
+            cible: document.getElementById('commandesFile'),
+            ressource: b.getAttribute('data-circuit'),
+            id: b.getAttribute('data-id'),
+            // Recharger la file APRÈS la commande : une pièce traitée doit en sortir.
+            // Sans cela, elle resterait affichée comme « à décider » alors qu'elle ne
+            // l'est plus, et le compteur mentirait.
+            apres: charger,
+          });
+          document.getElementById('commandesFile').scrollIntoView({ block: 'nearest' });
+        });
+      });
+    }
+
+    charger();
+  }
+
+  global.EspaceCommandes = { barre: barre, circuits: circuits, file: file };
 }(typeof window !== 'undefined' ? window : this));

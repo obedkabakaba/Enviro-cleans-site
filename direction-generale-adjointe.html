@@ -18,6 +18,7 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="cockpit">Cockpit DGA</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="departements">Départements</a>
       <a href="#" data-vue="plan">Plan d’action</a>
       <a href="#" data-vue="projets">Projets</a>
@@ -92,6 +93,7 @@
   var elSousTitre = document.getElementById('sousTitre');
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     cockpit: 'Cockpit de coordination',
     departements: 'Départements',
     plan: 'Plan d’action',
@@ -778,9 +780,27 @@
     }).catch(echec);
   }
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer : la
+  // direction générale pouvait prononcer une sanction disciplinaire par l'API, et par
+  // personne à l'écran.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   // ── Démarrage ──────────────────────────────────────────────────────────────
 
   var allerA = E.router({
+    decisions: vueDecisions,
     cockpit: vueCockpit,
     departements: vueDepartements,
     plan: vuePlan,

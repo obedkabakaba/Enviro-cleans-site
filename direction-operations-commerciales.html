@@ -33,6 +33,7 @@
     </div>
     <div class="menu">
       <a href="#" class="actif" data-vue="controle">Centre de contrôle</a>
+      <a href="#" data-vue="decisions">Décisions attendues</a>
       <a href="#" data-vue="tournees">Tournées</a>
       <a href="#" data-vue="equipes">Équipes</a>
       <a href="#" data-vue="zones">Zones</a>
@@ -109,6 +110,7 @@
   var elAvertissements = document.getElementById('zoneAvertissements');
 
   var TITRES = {
+    decisions: 'Décisions attendues',
     controle: 'Centre de contrôle',
     tournees: 'Tournées',
     equipes: 'Équipes',
@@ -1290,9 +1292,25 @@
     });
   }
 
+  // ── Décisions attendues ────────────────────────────────────────────────────
+  //
+  // Cette vue n'a rien de propre à cet espace : elle demande au serveur ce qui attend
+  // une décision de CE compte, tous circuits confondus, et n'affiche que les pièces sur
+  // lesquelles il peut réellement agir — séparation des tâches comprise.
+  //
+  // Un nouveau circuit y apparaît sans qu'une ligne soit écrite ici. C'est précisément
+  // ce qui manquait quand une permission était accordée sans écran pour l'exercer.
+  function vueDecisions() {
+    elContenu.innerHTML = '<div id="fileDecisions"></div>';
+    elSousTitre.textContent = 'Ce qui attend votre décision, tous circuits confondus';
+    EspaceCommandes.file({ cible: 'fileDecisions' });
+    return Promise.resolve();
+  }
+
   // ── Routage ────────────────────────────────────────────────────────────────
 
   var VUES = {
+    decisions: vueDecisions,
     controle: vueControle, tournees: vueTournees, equipes: vueEquipes,
     zones: vueZones, qualite: vueQualite, registre: vueRegistre,
     carte: vueCarte, collectes: vueCollectes, vehicules: vueVehicules,
