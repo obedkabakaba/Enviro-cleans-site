@@ -53,6 +53,10 @@
     report_vers_date: 'Reporter au',
     motif_annulation: 'Motif de l’annulation',
     observations_cloture: 'Observations de clôture',
+    // ── Gouvernance exécutive (migration 028) ──
+    compte_rendu: 'Compte rendu de la réunion',
+    motif_retour: 'Motif du retour',
+    contenu: 'Contenu du rapport',
   };
 
   var TYPES_SAISIE = {
@@ -169,8 +173,12 @@
         + ' — informations requises</p>'
         + action.saisie_requise.map(function (champ) {
           var type = TYPES_SAISIE[champ] || 'text';
+          // Champs de rédaction : un compte rendu de réunion ou un rapport dans un
+          // <input> d'une ligne se saisit en aveugle. Le format suit le contenu.
           var long = ['motif', 'motif_refus', 'motif_rejet', 'motif_perte',
-            'cause_racine', 'action_corrective', 'blocage', 'sanction'].indexOf(champ) !== -1;
+            'cause_racine', 'action_corrective', 'blocage', 'sanction',
+            'motif_report', 'motif_annulation', 'observations_cloture',
+            'compte_rendu', 'motif_retour', 'contenu'].indexOf(champ) !== -1;
           return '<label>' + E().echapper(libelleSaisie(champ))
             + (long
               ? '<textarea name="' + E().echapper(champ) + '" rows="3" required></textarea>'

@@ -344,7 +344,18 @@
         + d.periode.debut + ' au ' + d.periode.fin;
       afficherAvertissements([]);
 
-      if (d.etat_vide) { elContenu.innerHTML = '<div class="panneau">' + etatVide(d.etat_vide) + '</div>'; return; }
+      // ── L'état vide garde ses filtres ──
+      //
+      // Le retour anticipé remplaçait toute la vue par le message. On perdait donc le
+      // filtre par statut au moment précis où il sert : « aucune tournée » sur un filtre
+      // « Brouillon » se lit comme « il n'y en a nulle part », et rien à l'écran ne
+      // permet d'en changer. Une impasse.
+      if (d.etat_vide) {
+        elContenu.innerHTML = '<div class="panneau"><div class="corps">'
+          + filtreStatutTournees() + etatVide(d.etat_vide) + '</div></div>';
+        brancherFiltresTournees(page);
+        return;
+      }
 
       var lignes = d.tournees.map(function (t) {
         return '<tr data-tournee="' + t.id + '" style="cursor:pointer">'
@@ -386,12 +397,7 @@
         });
       });
 
-      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-statut-tournee]'), function (b) {
-        b.addEventListener('click', function () {
-          statutTournees = b.getAttribute('data-statut-tournee') || '';
-          vueTournees(1);
-        });
-      });
+      brancherFiltresTournees(page);
 
       Array.prototype.forEach.call(elContenu.querySelectorAll('[data-tournee]'), function (tr) {
         tr.addEventListener('click', function () {
@@ -421,6 +427,16 @@
     ['cloturee', 'Clôturée'], ['manquee', 'Manquée'], ['reportee', 'Reportée'],
     ['annulee', 'Annulée'],
   ];
+
+  function brancherFiltresTournees() {
+    Array.prototype.forEach.call(elContenu.querySelectorAll('[data-statut-tournee]'), function (b) {
+      b.addEventListener('click', function () {
+        statutTournees = b.getAttribute('data-statut-tournee') || '';
+        tourneeOuverte = null;
+        vueTournees(1);
+      });
+    });
+  }
 
   function filtreStatutTournees() {
     var html = '<div class="filtres" style="margin-bottom:12px">';
