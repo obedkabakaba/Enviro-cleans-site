@@ -4,7 +4,8 @@ const { chromium } = require('playwright');
   const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
   const page=await (await nav.newContext()).newPage();
   page.on('pageerror',e=>console.log('[pageerror]',e.message.slice(0,200)));
-  await page.goto('http://127.0.0.1:5500/direction-operations-commerciales.html',{waitUntil:'domcontentloaded'});
+  const SITE_LOCAL = process.env.SITE_LOCAL || 'http://127.0.0.1:5500';
+  await page.goto(`${SITE_LOCAL}/direction-operations-commerciales.html`,{waitUntil:'domcontentloaded'});
   const r = await page.evaluate(async () => {
     const s=document.createElement('script'); s.src='assets/vendor/carto/basemaps.js';
     await new Promise((ok,ko)=>{s.onload=ok;s.onerror=ko;document.head.appendChild(s);});

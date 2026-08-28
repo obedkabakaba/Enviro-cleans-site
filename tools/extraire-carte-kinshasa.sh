@@ -95,11 +95,63 @@ pmtiles extract "$SOURCE" "$SORTIE" \
   --maxzoom="$ZOOM_MAX"
 
 TAILLE=$(du -h "$SORTIE" | cut -f1)
+OCTETS=$(wc -c < "$SORTIE")
 echo
 echo "✓ $SORTIE produit — $TAILLE"
 echo
+
+# ── La taille décide de la voie de dépôt ──
+#
+# GitHub refuse tout fichier de plus de 100 Mo. Le découvrir au moment du `git push`,
+# après avoir commité un binaire, coûte une manipulation d'historique désagréable. On
+# tranche donc ici, tant que le fichier n'est engagé nulle part.
+LIMITE_GITHUB=$((100 * 1000 * 1000))
+
 echo "── Et maintenant ────────────────────────────────────────────────"
+
+if [ "$OCTETS" -lt "$LIMITE_GITHUB" ]; then
 cat <<AIDE
+VOIE 1 — GitHub Pages (la plus simple, recommandée)
+
+Votre site est déjà servi par GitHub Pages, qui gère les requêtes par plage HTTP : c'est
+tout ce dont pmtiles a besoin. Le fichier étant servi depuis la MÊME origine que la page,
+il n'y a aucun CORS à configurer, aucun compartiment à créer, aucune clé à gérer.
+
+  mkdir -p assets/cartes
+  mv $SORTIE assets/cartes/
+
+Puis dans assets/js/carte-config.js :
+
+      window.ENVIRO_CARTE = {
+        pmtiles: 'assets/cartes/kinshasa.pmtiles',
+      };
+
+Puis :
+
+  git add assets/cartes/kinshasa.pmtiles assets/js/carte-config.js
+  git commit -m "Fond de carte OpenStreetMap de Kinshasa"
+  git push
+
+Le fichier pèse $TAILLE, sous la limite de 100 Mo de GitHub. Il alourdit le dépôt de
+façon permanente : c'est le prix d'un fond de carte sans dépendance externe, et il se
+paie une fois.
+AIDE
+else
+cat <<AIDE
+Le fichier pèse $TAILLE — au-dessus de la limite de 100 Mo de GitHub. Deux options :
+
+  a) Relancez avec un zoom maximal plus bas (14 reste à l'échelle de la rue) :
+         bash tools/extraire-carte-kinshasa.sh 14
+     Chaque niveau de zoom en moins divise la taille par environ quatre.
+
+  b) Utilisez la voie Supabase ci-dessous.
+AIDE
+fi
+
+cat <<AIDE
+
+VOIE 2 — Supabase Storage
+
 1. Déposez le fichier dans Supabase → Storage, dans un compartiment PUBLIC
    (nommez-le « cartes » par exemple).
 
@@ -114,9 +166,16 @@ cat <<AIDE
          pmtiles: 'https://VOTRE-PROJET.supabase.co/storage/v1/object/public/cartes/kinshasa.pmtiles',
        };
 
-4. Rouvrez « Carte en direct » dans l'espace opérations. Sans cette URL, ou si le
-   fichier est injoignable, la carte reste celle d'aujourd'hui — points et tournées
-   exacts, sans fond de plan. Rien ne casse.
+── Dans les deux cas ────────────────────────────────────────────
+
+Rouvrez « Carte en direct » (opérations) ou « Terrain & carte clients » (PDG). Sans URL,
+ou si le fichier est injoignable, la carte reste celle d'aujourd'hui — points et tournées
+exacts, sans les rues. Rien ne casse, et la note sous la carte dit laquelle des trois
+causes s'applique : fichier absent, accès refusé, ou origine non autorisée.
+
+Les noms de rues viennent d'un second fichier, les polices de libellés, servies par
+défaut depuis protomaps.github.io. Si votre réseau le bloque, la carte s'affiche sans les
+noms — et le dit — au lieu de disparaître.
 
 Rappel de licence : les données sont sous ODbL. L'attribution « © OpenStreetMap »
 est affichée sur la carte, et elle doit y rester.
