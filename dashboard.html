@@ -699,7 +699,7 @@ tr:last-child td{border-bottom:none;}
           <div class="mform-group"><label>Nom complet</label><input type="text" id="contactName"/></div>
           <div class="mform-group"><label>Email</label><input type="email" id="contactEmail"/></div>
         </div>
-        <div class="mform-group" style="margin-bottom:12px;"><label>Sujet</label><select id="contactSubject"><option>Sélectionner un sujet</option><option>Problème de collecte</option><option>Paiement</option><option>Abonnement</option><option>Autre</option></select></div>
+        <div class="mform-group" style="margin-bottom:12px;"><label>Sujet</label><select id="contactSubject"><option value="">Sélectionner un sujet</option><option value="reclamation">Problème de collecte</option><option value="reclamation">Paiement</option><option value="info">Abonnement</option><option value="autre">Autre</option></select></div>
         <div class="mform-group"><label>Votre message</label><textarea id="contactMessage" placeholder="Décrivez votre demande..."></textarea></div>
         <button class="btn-green" id="contactSendBtn" style="width:100%;justify-content:center;">Envoyer le message</button>
       </div>
@@ -1258,7 +1258,6 @@ function showToast(msg){
   clearTimeout(window.__toastTimer);
   window.__toastTimer = setTimeout(()=>{ t.classList.remove('show'); }, 3000);
 }
-function comingSoon(){ showToast('Cette fonctionnalité arrive bientôt 🚧'); }
 
 function openEditProfilModal(){
   const client = (CLIENT_DATA_CACHE && CLIENT_DATA_CACHE.client) || {};
@@ -1746,14 +1745,57 @@ function openContactModal(sujetPreset){
   }
 }
 
+// La route `POST /api/public/contact` existe et envoie réellement le message par email.
+// Le formulaire affichait pourtant « arrive bientôt » : une API qui marche sans commande
+// pour l'atteindre, et un client qui repart en croyant que personne ne l'a lu.
+//
+// Le sujet est envoyé sous le code attendu par l'API (`reclamation`, `info`, `autre`),
+// mais l'intitulé choisi est repris EN TÊTE du message : « Paiement » et « Problème de
+// collecte » partagent le même code, et le support perdrait sinon la distinction.
 async function handleContactSend(){
+  const btn = document.getElementById('contactSendBtn');
+  const select = document.getElementById('contactSubject');
   const message = document.getElementById('contactMessage').value.trim();
-  if(!message){
-    showToast('Écris ton message avant d\'envoyer.');
-    return;
+  const nom = (document.getElementById('contactName').value || '').trim();
+  const email = (document.getElementById('contactEmail').value || '').trim();
+
+  if(!select.value){ showToast('Choisis un sujet avant d\'envoyer.'); return; }
+  if(!message){ showToast('Écris ton message avant d\'envoyer.'); return; }
+  if(!nom){ showToast('Ton nom est nécessaire pour que le support puisse répondre.'); return; }
+  if(!email){ showToast('Une adresse email est nécessaire pour recevoir la réponse.'); return; }
+
+  // Un double clic enverrait deux messages identiques au support.
+  if(btn.disabled) return;
+  const libelle = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours...';
+  try {
+    const intitule = select.options[select.selectedIndex].textContent;
+    const response = await fetch(`${API_BASE_URL}/api/public/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nom, email, sujet: select.value,
+        message: `[${intitule}]\n\n${message}`,
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if(!response.ok){
+      // Le message du serveur est repris tel quel : « trop de messages envoyés » et
+      // « adresse email invalide » n'appellent pas la même correction.
+      showToast(data.message || 'Le message n\'a pas pu être envoyé. Réessaie dans un instant.');
+      return;
+    }
+    showToast(data.message || 'Votre message a bien été envoyé.');
+    document.getElementById('contactMessage').value = '';
+    closeModal('contactModal');
+  } catch(err){
+    console.error('Erreur envoi du message de support:', err);
+    showToast('Impossible de contacter le serveur. Vérifie ta connexion.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = libelle;
   }
-  // L'envoi réel des messages de support arrive bientôt (nécessite une route backend dédiée).
-  showToast('Cette fonctionnalité d\'envoi arrive bientôt 🚧 — en attendant, appelle directement le support.');
 }
 
 // ════════════════════════════════════════
@@ -1943,10 +1985,11 @@ function wireExtraFeatures(data){
   if(contactNameInput) contactNameInput.value = fullName(client, true);
   if(contactEmailInput) contactEmailInput.value = client.email || '';
 
-  // ── Boutons encore en attente de backend : message clair plutôt qu'un clic mort ──
+  // ── Les boutons du profil et de l'abonnement, rattachés à leur vraie action ──
+  // Ils étaient annoncés « en attente de backend » alors que les trois appellent des
+  // routes qui existent : le commentaire décrivait un état révolu.
   bindByText('#page-profil button', 'Modifier le profil', openEditProfilModal);
-  // Le bouton photo de profil déclenche déjà le sélecteur de fichier via son onclick HTML —
-  // l'envoi fonctionne réellement, pas besoin (et pas correct) d'afficher "arrive bientôt" en plus.
+  // Le bouton photo de profil déclenche déjà le sélecteur de fichier via son onclick HTML.
   bindByText('#page-abonnement button', 'Changer de plan', openChangerOffreModal);
   bindByText('#page-abonnement button', 'Souscrire à une offre', openChangerOffreModal);
   document.querySelectorAll('.changer-link').forEach(a => a.addEventListener('click', (e)=>{ e.preventDefault(); openChangerOffreModal(); }));

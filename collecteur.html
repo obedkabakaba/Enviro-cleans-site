@@ -157,6 +157,9 @@ body{font-family:'Open Sans',sans-serif;background:#f4f6f3;color:#1a1a1a;display
 
 /* ══ SEARCH BAR ══ */
 .search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid #eee;border-radius:9px;padding:10px 14px;margin-bottom:14px;}
+.col-filtres-loc{display:flex;gap:7px;flex-wrap:wrap;margin:-6px 0 14px;}
+.col-filtre{font:inherit;font-size:12px;padding:6px 12px;border:1.5px solid #eee;border-radius:999px;background:#fff;color:#666;cursor:pointer;}
+.col-filtre.actif{border-color:#1f6b3a;background:#1f6b3a;color:#fff;}
 .search-bar svg{width:15px;height:15px;stroke:#bbb;fill:none;stroke-width:2;flex-shrink:0;}
 .search-bar input{border:none;outline:none;font-size:13px;color:#333;font-family:'Open Sans',sans-serif;flex:1;background:transparent;min-width:0;}
 
@@ -561,6 +564,16 @@ body.logged-out .main { margin-left:0; }
   <div class="page" id="page-clients">
     <div class="page-top"><div><h1 style="font-family:Montserrat;font-weight:900;font-size:22px;">Mes clients</h1><p style="font-size:13px;color:#999;" id="colMesClientsSousTitre">Clients déjà visités</p></div></div>
     <div class="search-bar"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="colMesClientsSearch" placeholder="Rechercher par nom, adresse, numéro..." oninput="colRenderMesClients()"/></div>
+    <!-- La direction voit la liste des positions manquantes mais ne peut pas les
+         corriger : une position se relève sur place, elle ne se saisit pas depuis un
+         bureau. Le collecteur, lui, le peut — encore faut-il qu'il trouve les clients
+         concernés autrement qu'en faisant défiler une liste à la recherche d'un point
+         rouge. -->
+    <div class="col-filtres-loc" id="colMesClientsFiltres">
+      <button type="button" class="col-filtre actif" data-loc-filtre="tous" onclick="colFiltrerMesClients('tous')">Tous</button>
+      <button type="button" class="col-filtre" data-loc-filtre="absente" onclick="colFiltrerMesClients('absente')">Sans position 🔴</button>
+      <button type="button" class="col-filtre" data-loc-filtre="a_verifier" onclick="colFiltrerMesClients('a_verifier')">À vérifier 🟠</button>
+    </div>
     <div class="client-list" id="colMesClientsListe">
       <p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Chargement...</p>
     </div>
@@ -1503,7 +1516,6 @@ async function colLoadMesClients(){
     });
     const data = await response.json();
     COL_MES_CLIENTS = data.clients || [];
-    document.getElementById('colMesClientsSousTitre').textContent = `${COL_MES_CLIENTS.length} client(s) déjà visité(s)`;
     colRenderMesClients();
   } catch(err){
     console.error('Erreur chargement mes clients:', err);
@@ -1511,16 +1523,41 @@ async function colLoadMesClients(){
   }
 }
 
+let COL_MES_CLIENTS_FILTRE = 'tous';
+
+function colFiltrerMesClients(filtre){
+  COL_MES_CLIENTS_FILTRE = filtre;
+  document.querySelectorAll('#colMesClientsFiltres .col-filtre').forEach(b => {
+    b.classList.toggle('actif', b.getAttribute('data-loc-filtre') === filtre);
+  });
+  colRenderMesClients();
+}
+
 function colRenderMesClients(){
   const search = (document.getElementById('colMesClientsSearch').value || '').toLowerCase();
   let filtered = COL_MES_CLIENTS;
+  if(COL_MES_CLIENTS_FILTRE !== 'tous'){
+    filtered = filtered.filter(c => c.locationStatus === COL_MES_CLIENTS_FILTRE);
+  }
   if(search){
     filtered = filtered.filter(c => `${c.nom} ${c.prenom||''} ${c.numero_abonne} ${c.adresse||''}`.toLowerCase().includes(search));
   }
 
+  const sansPosition = COL_MES_CLIENTS.filter(c => c.locationStatus === 'absente').length;
+  const compteur = document.getElementById('colMesClientsSousTitre');
+  if(compteur){
+    // Le nombre de positions manquantes est annoncé en permanence : c'est le travail
+    // que personne d'autre ne peut faire à la place du collecteur.
+    compteur.textContent = `${COL_MES_CLIENTS.length} client(s) déjà visité(s)`
+      + (sansPosition > 0 ? ` · ${sansPosition} sans position` : '');
+  }
+
   const liste = document.getElementById('colMesClientsListe');
   if(filtered.length === 0){
-    liste.innerHTML = '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucun client trouvé.</p>';
+    liste.innerHTML = COL_MES_CLIENTS_FILTRE === 'absente'
+      // Un état vide qui dit ce qu'il signifie : ici, c'est une bonne nouvelle.
+      ? '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Tous vos clients ont une position relevée.</p>'
+      : '<p style="color:#999;font-size:13px;padding:20px 0;text-align:center;">Aucun client trouvé.</p>';
     return;
   }
   liste.innerHTML = filtered.map(c => {

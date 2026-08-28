@@ -74,8 +74,9 @@
       ED.tableau(['N° abonné', 'Client', 'Zone', 'Commune', 'Source'], corps,
         { vide: 'Tous les clients de la période sont géolocalisés.' }),
       { sousTitre: 'Ces clients ne figurent pas sur la carte : aucune coordonnée ne leur '
-        + 'est attribuée, et aucune ne leur sera inventée. Corrigez la position depuis '
-        + 'l’espace Opérations, vue « Géolocalisation ».' });
+        + 'est attribuée, et aucune ne leur sera inventée. La position se relève sur le '
+        + 'terrain, depuis l’espace Opérations, vue « Géolocalisation » — accessible aux '
+        + 'superviseurs, collecteurs et gestionnaires.' });
   }
 
   // ════════════════════════════════════════
@@ -114,6 +115,10 @@
             latitude: p.latitude,
             longitude: p.longitude,
             nom: 'Prospect — ' + p.nom,
+            // Catégorie explicite : la carte sait la déduire du libellé, mais cette
+            // déduction repose sur une convention de nommage qu'une refonte du libellé
+            // casserait sans un mot. Ici on la DIT.
+            categorie: 'prospect',
             etat: p.etat,
             detail: p.detail,
           };

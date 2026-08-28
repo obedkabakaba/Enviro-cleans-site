@@ -38,6 +38,7 @@
       <a href="#" data-vue="equipes">Équipes</a>
       <a href="#" data-vue="zones">Zones</a>
       <a href="#" data-vue="carte">Carte en direct</a>
+      <a href="#" data-vue="geolocalisation" data-permission="location.audit">Géolocalisation</a>
       <a href="#" data-vue="collectes">Collectes</a>
       <a href="#" data-vue="vehicules" data-permission="operations.vehicle.manage">Véhicules</a>
       <a href="#" data-vue="incidents">Incidents</a>
@@ -110,6 +111,7 @@
   var elAvertissements = document.getElementById('zoneAvertissements');
 
   var TITRES = {
+    geolocalisation: 'Géolocalisation',
     decisions: 'Décisions attendues',
     controle: 'Centre de contrôle',
     tournees: 'Tournées',
@@ -703,6 +705,9 @@
 
       // Le conteneur vient d'être injecté : la carte se monte maintenant. Elle décide
       // seule entre fond de plan et repli SVG, selon ce qui est configuré et joignable.
+      // `tournee_id` et `ordre` sont ce qui permet de SÉLECTIONNER une tournée et de
+      // numéroter ses arrêts. Sans eux, le tracé dit par où le camion passe, mais pas
+      // dans quel sens — et l'on ne peut isoler aucune tournée dans la vue.
       var pointsCarte = d.arrets.map(function (a) {
         return {
           latitude: a.latitude,
@@ -710,6 +715,10 @@
           libelle: a.client + ' — ' + (a.numero_abonne || ''),
           etat: a.statut,
           detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
+          tournee_id: a.tournee_id,
+          ordre: a.ordre,
+          zone: a.zone,
+          heure_passage: a.heure_passage,
         };
       }).concat(d.incidents.filter(function (i) {
         return i.latitude !== null && i.longitude !== null;
@@ -719,15 +728,29 @@
           longitude: i.longitude,
           libelle: i.titre,
           etat: 'incident',
-          type: 'incident',
+          categorie: 'incident',
           detail: i.severite + ' · ' + (i.zone || ''),
+          zone: i.zone,
         };
       }));
 
       CarteInteractive.afficher('carteDuJour', pointsCarte, {
+        // Le sélecteur de tournée affiche ce que le superviseur a besoin de lire avant
+        // de choisir : qui conduit, avec quoi, combien d'arrêts, où ça en est.
         tournees: d.tournees.map(function (t) {
           return {
+            id: t.id,
             nom: t.nom || ('Tournée ' + t.id),
+            collecteur: t.collecteur,
+            vehicule: t.vehicule,
+            clients: t.arrets,
+            statut: t.statut,
+            // `progression` n'est pas renvoyée par cet endpoint : elle se calcule ici,
+            // exactement comme dans le tableau au-dessus. La reprendre de `t.progression`
+            // aurait affiché « undefined % » dans le sélecteur.
+            progression: t.arrets > 0
+              ? Math.round(((t.traites + t.echecs) / t.arrets) * 100)
+              : null,
             arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
           };
         }),
@@ -1323,9 +1346,181 @@
     return Promise.resolve();
   }
 
+  // ── Géolocalisation ────────────────────────────────────────────────────────
+  //
+  // ── L'écran vers lequel la carte renvoyait, et qui n'existait pas ──
+  //
+  // La carte Marketing liste les clients sans coordonnées et conclut : « Corrigez la
+  // position depuis l'espace Opérations, vue Géolocalisation ». Cette vue n'existait
+  // pas. Un renvoi vers un écran absent est pire qu'un silence : il fait chercher, puis
+  // douter de soi, puis renoncer.
+  //
+  // ── Voir et corriger ne sont pas la même permission ──
+  //
+  // `location.audit` ouvre la liste — la direction répond de la qualité des données de
+  // terrain. `location.manage` écrit une position, et reste au terrain : corriger une
+  // coordonnée suppose de savoir où se trouve réellement la parcelle. Un directeur qui
+  // la corrigerait depuis son bureau l'inventerait.
+  //
+  // La commande de correction n'apparaît donc que pour qui peut l'exercer, et le dit
+  // aux autres plutôt que de laisser un bouton mort.
+  var geoFiltre = 'sans_gps';
+
+  // `EnviroAPI.Session.peut()` lit la même liste que `appliquerPermissionsAuDOM` : une
+  // seconde lecture de `localStorage` écrite ici aurait divergé au premier changement de
+  // clé de stockage — et le bouton serait apparu à qui ne peut pas s'en servir.
+  function peutCorrigerGps() { return EnviroAPI.Session.peut('location.manage'); }
+
+  function vueGeolocalisation() {
+    elContenu.innerHTML = '<div class="panneau"><div class="corps">' + squelette(5) + '</div></div>';
+
+    return Promise.all([
+      EnviroAPI.get('/api/locations/stats/coverage'),
+      EnviroAPI.get('/api/locations?statut=' + encodeURIComponent(geoFiltre)),
+    ]).then(function (r) {
+      var stats = r[0];
+      var clients = (r[1] && r[1].clients) || [];
+      var corrigeable = peutCorrigerGps();
+
+      elSousTitre.textContent = nombre(stats.clientsAvecGPS) + ' client(s) géolocalisé(s) sur '
+        + nombre(stats.totalClients) + ' — couverture ' + stats.tauxCouverture + ' %';
+
+      var lignes = clients.map(function (c) {
+        var pos = c.location
+          ? Number(c.location.latitude).toFixed(5) + ', ' + Number(c.location.longitude).toFixed(5)
+          // Jamais « 0, 0 » : une position absente est absente, pas au large du Ghana.
+          : '<span style="color:var(--texte-faible)">non relevée</span>';
+        return '<tr>'
+          + '<td>' + echapper(c.numero_abonne || '—') + '</td>'
+          + '<td><strong>' + echapper(((c.prenom || '') + ' ' + (c.nom || '')).trim() || '—') + '</strong></td>'
+          + '<td>' + echapper(c.zone || '—') + '</td>'
+          + '<td>' + echapper(c.commune || '—') + '</td>'
+          + '<td>' + pos + '</td>'
+          + '<td>' + (corrigeable
+            ? '<button class="action secondaire" data-gps="' + c.id + '">'
+              + (c.hasLocation ? 'Corriger' : 'Renseigner') + '</button>'
+            : '<span class="meta">terrain</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      var filtres = [['sans_gps', 'Sans coordonnées'], ['avec_gps', 'Géolocalisés'], ['', 'Tous']]
+        .map(function (f) {
+          return '<button class="action' + (geoFiltre === f[0] ? '' : ' secondaire')
+            + '" data-geo-filtre="' + f[0] + '">' + echapper(f[1]) + '</button>';
+        }).join(' ');
+
+      elContenu.innerHTML = '<div class="panneau">'
+        + '<header><h2>Couverture GPS</h2>'
+        + '<span style="font-size:12.5px;color:var(--texte-faible)">'
+        + nombre(stats.clientsSansGPS) + ' sans coordonnées</span></header>'
+        + '<div class="corps">'
+        + '<div class="filtres" style="margin-bottom:12px">' + filtres + '</div>'
+        + '<div class="table-wrap"><table><thead><tr>'
+        + '<th>N° abonné</th><th>Client</th><th>Zone</th><th>Commune</th>'
+        + '<th>Position</th><th>Action</th>'
+        + '</tr></thead><tbody>' + lignes + '</tbody></table></div>'
+        + (clients.length === 0
+          ? etatVide(geoFiltre === 'sans_gps'
+            ? 'Tous les clients de cette liste sont géolocalisés.'
+            : 'Aucun client dans cette sélection.')
+          : '')
+        + '<div id="formulaireGps"></div>'
+        + '<p class="meta">' + (corrigeable
+          ? 'Une position corrigée ici met à jour la carte au prochain affichage. '
+            + 'Aucune coordonnée n’est déduite d’une adresse : elle est relevée, ou elle manque.'
+          : 'Relever une position est un acte de terrain : superviseurs, collecteurs et '
+            + 'gestionnaires en ont la permission. Cette vue vous montre ce qui manque.')
+        + '</p>'
+        + '</div></div>';
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-geo-filtre]'), function (b) {
+        b.addEventListener('click', function () {
+          geoFiltre = b.getAttribute('data-geo-filtre');
+          vueGeolocalisation();
+        });
+      });
+
+      Array.prototype.forEach.call(elContenu.querySelectorAll('[data-gps]'), function (b) {
+        b.addEventListener('click', function () {
+          ouvrirFormulaireGps(clients.filter(function (c) {
+            return String(c.id) === b.getAttribute('data-gps');
+          })[0]);
+        });
+      });
+    }).catch(afficherErreur);
+  }
+
+  function ouvrirFormulaireGps(client) {
+    if (!client) return;
+    var zone = document.getElementById('formulaireGps');
+    var existe = client.hasLocation;
+
+    zone.innerHTML = '<form class="formulaire" id="formGps" style="margin-top:14px">'
+      + '<p class="sous-titre">' + echapper(((client.prenom || '') + ' ' + client.nom).trim())
+      + ' — ' + echapper(client.numero_abonne || '') + '</p>'
+      + '<label>Latitude<input type="number" step="0.000001" name="latitude" required '
+      + 'value="' + (client.location ? client.location.latitude : '') + '"></label>'
+      + '<label>Longitude<input type="number" step="0.000001" name="longitude" required '
+      + 'value="' + (client.location ? client.location.longitude : '') + '"></label>'
+      + (existe
+        ? '<label>Motif de la correction<textarea name="motif" rows="2" required></textarea></label>'
+        : '')
+      + '<div class="filtres">'
+      + '<button type="submit" class="action">Enregistrer la position</button> '
+      + '<button type="button" class="action secondaire" id="annulerGps">Annuler</button>'
+      + '</div><p class="meta" id="messageGps"></p></form>';
+
+    document.getElementById('annulerGps').addEventListener('click', function () {
+      zone.innerHTML = '';
+    });
+
+    document.getElementById('formGps').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var bouton = ev.target.querySelector('button[type=submit]');
+      // Anti-double-clic : deux enregistrements pour un geste écriraient deux entrées
+      // dans l'historique de position, et la seconde effacerait le motif de la première.
+      if (bouton.disabled) return;
+      bouton.disabled = true;
+      bouton.textContent = 'Enregistrement…';
+
+      var lat = Number(ev.target.elements.latitude.value);
+      var lon = Number(ev.target.elements.longitude.value);
+      var message = document.getElementById('messageGps');
+
+      // Kinshasa tient entre -4,0 et -4,9 de latitude et 15,1 et 15,6 de longitude. Un
+      // chiffre inversé — 15, -4 au lieu de -4, 15 — pose le client en Afrique de
+      // l'Ouest, et rien à l'écran ne le signalerait.
+      if (!(lat >= -5.2 && lat <= -3.8) || !(lon >= 14.8 && lon <= 16.2)) {
+        message.innerHTML = '<span class="erreur">Ces coordonnées sortent de la région de '
+          + 'Kinshasa. Vérifiez que la latitude et la longitude ne sont pas inversées.</span>';
+        bouton.disabled = false;
+        bouton.textContent = 'Enregistrer la position';
+        return;
+      }
+
+      var corps = { latitude: lat, longitude: lon };
+      var appel = client.hasLocation
+        ? EnviroAPI.put('/api/locations/' + client.id,
+          Object.assign(corps, { modification_reason: ev.target.elements.motif.value }))
+        : EnviroAPI.post('/api/locations',
+          Object.assign(corps, { client_id: client.id }));
+
+      appel.then(function () {
+        // Rechargement depuis l'API : l'écran doit montrer ce que le serveur a écrit,
+        // pas ce qu'on vient de taper.
+        vueGeolocalisation();
+      }).catch(function (err) {
+        message.innerHTML = '<span class="erreur">' + echapper(err.message) + '</span>';
+        bouton.disabled = false;
+        bouton.textContent = 'Enregistrer la position';
+      });
+    });
+  }
+
   // ── Routage ────────────────────────────────────────────────────────────────
 
   var VUES = {
+    geolocalisation: vueGeolocalisation,
     decisions: vueDecisions,
     controle: vueControle, tournees: vueTournees, equipes: vueEquipes,
     zones: vueZones, qualite: vueQualite, registre: vueRegistre,

@@ -271,6 +271,85 @@ details.donnees-graphique table{ min-width:0; margin-top:8px; }
 }
 @media (max-width:900px){ .carte-hote{ height:320px; } }
 
+/* ── Barre d'outils et légende de la carte ──
+   Elles vivent dans le même conteneur que la carte et disparaissent avec elle : le
+   routeur des espaces vide `#contenu` à chaque changement de vue, et une barre survivante
+   piloterait une carte détruite.
+
+   `flex-wrap` plutôt qu'une grille : sur mobile la recherche prend toute la largeur et le
+   sélecteur de tournée passe dessous, ce qui est le comportement voulu — un champ de
+   recherche à demi visible ne se remplit pas. */
+.carte-barre{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px;
+}
+.carte-recherche{
+  flex:1 1 240px; min-width:0; padding:7px 10px; font:inherit; font-size:13px;
+  color:var(--texte); background:var(--surface); border:1px solid var(--bordure);
+  border-radius:8px;
+}
+.carte-tournee{
+  flex:0 1 320px; max-width:100%; padding:7px 10px; font:inherit; font-size:13px;
+  color:var(--texte); background:var(--surface); border:1px solid var(--bordure);
+  border-radius:8px;
+}
+.carte-ensemble, .carte-pleinecran{
+  flex:none; padding:7px 12px; font:inherit; font-size:12.5px; cursor:pointer;
+  color:var(--texte); background:var(--surface-2);
+  border:1px solid var(--bordure); border-radius:8px;
+}
+.carte-ensemble:hover, .carte-pleinecran:hover{ border-color:var(--texte-faible); }
+.carte-ensemble:focus-visible, .carte-pleinecran:focus-visible{
+  outline:2px solid var(--info-texte); outline-offset:2px;
+}
+/* Le bouton désactivé reste VISIBLE avec son `title` : le retirer laisserait croire que
+   le plein écran n'a jamais été prévu, au lieu que ce navigateur le refuse. */
+.carte-pleinecran[disabled]{ opacity:.5; cursor:not-allowed; }
+
+.carte-compte{ font-size:12.5px; color:var(--texte-faible); white-space:nowrap; }
+
+/* Les résultats se superposent à la carte : les insérer dans le flux ferait sauter la
+   carte de 150 pixels à chaque frappe. */
+.carte-resultats{
+  position:relative; z-index:3; margin:-6px 0 8px;
+  background:var(--surface); border:1px solid var(--bordure); border-radius:8px;
+  padding:8px 10px; max-height:220px; overflow-y:auto;
+}
+.carte-resultats ul.compact{ margin:0; }
+
+.carte-legende{ margin-top:10px; }
+.carte-legende-items{ display:flex; flex-wrap:wrap; gap:6px; }
+.carte-legende-item{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 9px; font:inherit; font-size:12.5px; cursor:pointer;
+  color:var(--texte); background:var(--surface-2);
+  border:1px solid var(--bordure); border-radius:999px;
+}
+.carte-legende-item:hover{ border-color:var(--texte-faible); }
+.carte-legende-item:focus-visible{ outline:2px solid var(--info-texte); outline-offset:2px; }
+/* Une couche masquée reste LISIBLE : la griser complètement ferait douter qu'on puisse
+   la rallumer. L'opacité dit « éteinte », le texte dit encore laquelle. */
+.carte-legende-item.masquee{ opacity:.45; text-decoration:line-through; }
+.carte-legende-item .pastille{
+  width:10px; height:10px; border-radius:50%; flex:none;
+  box-shadow:0 0 0 1.5px var(--surface);
+}
+
+/* En plein écran, MapLibre place le conteneur en position fixe : la carte doit alors
+   occuper toute la hauteur, sans quoi elle garde ses 440 pixels au milieu d'un écran noir. */
+.maplibregl-ctrl-fullscreen-active .carte-hote,
+.carte-en-plein-ecran .carte-hote,
+:fullscreen .carte-hote{ height:calc(100vh - 130px); }
+:fullscreen .carte-outils, :fullscreen .carte-legende{
+  padding:10px 14px; background:var(--fond);
+}
+/* Le conteneur passé en plein écran n'hérite plus du fond de la page : sans cette
+   règle, l'arrière-plan est le noir par défaut du navigateur et le texte de la barre
+   disparaît dessus. */
+:fullscreen.carte-en-plein-ecran{ background:var(--fond); overflow-y:auto; }
+/* Le repli SVG n'a pas de hauteur propre : en plein écran il occuperait 440 pixels au
+   milieu de l'écran. */
+.carte-en-plein-ecran .carte-hote svg{ width:100%; height:auto; }
+
 /* Les contrôles de MapLibre suivent le thème du châssis plutôt que leur blanc d'origine,
    qui trouait le mode sombre. */
 :root[data-theme="dark"] .maplibregl-ctrl-group,

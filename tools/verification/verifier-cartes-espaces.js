@@ -79,3 +79,75 @@ for (const [page, appel] of [
 }
 
 console.log('Cartes des espaces : hauteur, cycle de vie et absence de faux points vérifiés.');
+
+// ── Les fonctions cartographiques attendues (§3 de la mission de clôture) ──
+//
+// Chacune correspond à un geste réel sur une carte de terrain. Les vérifier ici attrape
+// la régression silencieuse : une couche retirée, une recherche débranchée, un
+// regroupement désactivé — la carte s'affiche toujours, elle sert simplement moins.
+const sourceCarte = lire('assets/js/carte-maplibre.js');
+
+// Regroupement : sans lui, quatre cents clients d'une commune forment un amas illisible.
+assert.match(sourceCarte, /cluster:\s*true/, 'le regroupement des marqueurs doit être activé');
+assert.match(sourceCarte, /clusterMaxZoom/, 'le dégroupement au zoom doit être borné');
+assert.match(sourceCarte, /point_count_abbreviated/,
+  'un agrégat sans compteur ne dit pas combien de points il cache');
+assert.match(sourceCarte, /getClusterExpansionZoom/,
+  'cliquer un agrégat doit le dégrouper : sans cela, un amas est une impasse');
+
+// Recherche, plein écran, recentrage.
+assert.match(sourceCarte, /carte-recherche/, 'la recherche cartographique doit exister');
+// Plein écran et vue d'ensemble sont dans la barre COMMUNE : placés dans les contrôles
+// MapLibre, ils n'existeraient que lorsque le fichier de fond est déposé — c'est-à-dire
+// jamais tant que `carte-config.js` n'est pas renseigné.
+assert.match(sourceCarte, /class="carte-pleinecran"/, 'le plein écran doit être dans la barre');
+assert.match(sourceCarte, /document\.exitFullscreen/, 'la SORTIE du plein écran doit exister');
+assert.match(sourceCarte, /'fullscreenchange'/,
+  'le libellé du bouton doit suivre une sortie par Échap');
+assert.match(sourceCarte, /class="carte-ensemble"/, 'le retour à la vue globale doit exister');
+assert.match(sourceCarte, /vueDEnsemble/, 'la vue globale doit recadrer aussi en mode fond de plan');
+assert.match(sourceCarte, /Recentrer sans changer le zoom/, 'le recentrage doit exister');
+
+// Couches et légende.
+assert.match(sourceCarte, /CATEGORIES\s*=/, 'les couches métier doivent être déclarées');
+for (const couche of ['client', 'prospect', 'incident', 'collecteur', 'vehicule',
+  'collecte_reussie', 'collecte_manquee', 'zone']) {
+  assert.ok(new RegExp(`\\b${couche}:\\s*\\{`).test(sourceCarte),
+    `la couche « ${couche} » n'est pas déclarée`);
+}
+assert.match(sourceCarte, /carte-legende-item/, 'la légende doit être cliquable pour filtrer');
+
+// Popups au CLIC : au survol, la bulle disparaît au moindre mouvement et ne se lit pas.
+assert.match(sourceCarte, /closeButton:\s*true/,
+  'la bulle ouverte au clic doit rester jusqu’à ce qu’on la ferme');
+assert.match(sourceCarte, /c\.on\('click', 'arrets-point'/, 'le clic sur un point doit ouvrir sa fiche');
+
+// Itinéraires : tracé, ordre des arrêts, sélection.
+assert.match(sourceCarte, /tournees-trace/, 'le tracé des tournées doit exister');
+assert.match(sourceCarte, /tournees-ordre/, 'l’ordre des arrêts doit pouvoir s’afficher');
+assert.match(sourceCarte, /selectionnerTournee/, 'une tournée doit pouvoir être sélectionnée');
+
+// Le compteur ne doit jamais mentir : masquer une couche recharge la source, sinon un
+// agrégat continuerait de compter des points invisibles.
+assert.match(sourceCarte, /getSource\('arrets'\)\.setData/,
+  'masquer une couche doit recharger la source, sinon le compteur d’agrégat ment');
+
+// ── La vue Géolocalisation et sa commande de correction ──
+//
+// La carte Marketing renvoyait vers une vue « Géolocalisation » de l'espace Opérations
+// qui N'EXISTAIT PAS. Un renvoi vers un écran absent fait chercher, puis douter, puis
+// renoncer.
+const ops = lire('direction-operations-commerciales.html');
+assert.match(ops, /data-vue="geolocalisation"/, 'la vue Géolocalisation doit exister');
+assert.match(ops, /geolocalisation: vueGeolocalisation/, 'elle doit être routée');
+assert.match(ops, /\/api\/locations\/stats\/coverage/, 'elle doit lire la couverture réelle');
+assert.match(ops, /Session\.peut\('location\.manage'\)/,
+  'la commande de correction doit dépendre de la permission, pas du rôle');
+assert.match(ops, /modification_reason/,
+  'corriger une position existante doit exiger un motif : sans lui, l’historique ne se relit pas');
+assert.match(ops, /sortent de la région de\s*'\s*\+\s*'Kinshasa|sortent de la région de Kinshasa/,
+  'des coordonnées hors région doivent être refusées : une inversion lat/lon place le '
+  + 'client en Afrique de l’Ouest sans que rien ne le signale');
+
+console.log('Fonctions cartographiques : regroupement, recherche, couches, plein écran, '
+  + 'itinéraires et géolocalisation vérifiés.');

@@ -4,7 +4,9 @@
  * lecture du .pmtiles produit bien le repli SVG, et non un cadre vide.
  */
 const { chromium } = require('playwright');
-const API_PROD='https://enviro-cleans-api.onrender.com', API_LOCAL='http://localhost:4000';
+const API_PROD='https://enviro-cleans-api.onrender.com';
+const API_LOCAL=process.env.API_LOCAL||'http://localhost:4000';
+const SITE_LOCAL=process.env.SITE_LOCAL||'http://127.0.0.1:5500';
 
 (async()=>{
   const nav=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});
@@ -39,7 +41,7 @@ const API_PROD='https://enviro-cleans-api.onrender.com', API_LOCAL='http://local
     });
   });
 
-  await page.goto('http://127.0.0.1:5500/direction-operations-commerciales.html',{waitUntil:'networkidle'});
+  await page.goto(`${SITE_LOCAL}/direction-operations-commerciales.html`,{waitUntil:'networkidle'});
   await page.click('.menu a[data-vue="carte"]');
   // Capturer le message d'erreur réellement émis par MapLibre.
   await page.evaluate(()=>{ window.__erreursCarte=[]; });
