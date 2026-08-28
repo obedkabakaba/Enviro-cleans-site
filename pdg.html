@@ -102,6 +102,7 @@
         <a href="#" data-vue="documents" data-permission="document.read">Documents &amp; contrats</a>
         <a href="#" data-vue="rapports">Rapports exécutifs</a>
         <a href="#" data-vue="journal">Journal de direction</a>
+        <a href="#" data-vue="registre">Registre des indicateurs</a>
         <a href="#" data-vue="administration" data-permission="executive.delegation.manage">Administration métier</a>
       </details>
     </div>
@@ -202,6 +203,7 @@
     documents: 'Documents & contrats',
     rapports: 'Rapports exécutifs',
     journal: 'Journal de direction',
+    registre: 'Registre des indicateurs',
     administration: 'Administration métier',
   };
 
@@ -1201,6 +1203,59 @@
     }).catch(echec);
   }
 
+  // ── Registre des indicateurs ───────────────────────────────────────────────
+  //
+  // D'où vient chaque chiffre affiché dans les vingt écrans de cet espace : la table
+  // source, la formule, la fréquence de rafraîchissement — et surtout la liste de ce
+  // qui n'est PAS mesuré, avec le motif. Les directions opérationnelle, financière et
+  // RH avaient ce registre ; le PDG, non. C'est pourtant là où l'on décide qu'il
+  // importe le plus de savoir ce qu'un chiffre recouvre, et ce qu'il ne recouvre pas.
+
+  function vueRegistre() {
+    elContenu.innerHTML = E.squelette(4);
+
+    EnviroAPI.get('/api/pdg/registre-kpi').then(function (d) {
+      elSousTitre.textContent = E.nombre(d.disponibles) + ' indicateur(s) calculable(s) · '
+        + E.nombre(d.indisponibles.length) + ' non mesuré(s)';
+
+      var lignes = d.kpi.map(function (k) {
+        return '<tr>'
+          + '<td><strong>' + E.echapper(k.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(k.code) + '</small></td>'
+          + '<td style="max-width:300px">' + E.echapper(k.definition || '—') + '</td>'
+          + '<td><code style="font-size:11px">' + E.echapper(k.formule || '—') + '</code></td>'
+          + '<td>' + E.echapper((k.sources || []).join(', ') || '—') + '</td>'
+          + '<td>' + E.echapper(k.rafraichissement || '—') + '</td>'
+          + '<td>' + (k.disponible
+            ? '<span class="puce ok">Calculé</span>'
+            : '<span class="puce neutre">Non mesuré</span>') + '</td>'
+          + '</tr>';
+      }).join('');
+
+      // Ce qui n'est pas mesuré est listé À PART, avec son motif : noyé au milieu des
+      // indicateurs calculés, on le lit comme une ligne vide plutôt que comme une
+      // donnée qui n'existe pas encore dans la base.
+      var manquants = d.indisponibles.map(function (k) {
+        return '<tr><td><strong>' + E.echapper(k.nom) + '</strong><br>'
+          + '<small style="color:var(--texte-faible)">' + E.echapper(k.code) + '</small></td>'
+          + '<td>' + E.echapper(k.motif || 'Motif non renseigné.') + '</td></tr>';
+      }).join('');
+
+      elContenu.innerHTML = '<div class="note">Un chiffre sans définition n’est pas '
+        + 'exploitable. Chaque indicateur porte ici sa formule, ses tables sources et sa '
+        + 'fréquence. Ce registre est filtré sur vos permissions.</div>'
+        + E.panneau('Indicateurs disponibles',
+          E.tableau(['Indicateur', 'Définition', 'Formule', 'Sources', 'Rafraîchissement', 'État'],
+            lignes, { vide: 'Aucun indicateur accessible avec vos permissions.' }))
+        + E.panneau('Ce qui n’est pas mesuré',
+          E.tableau(['Indicateur', 'Pourquoi'], manquants,
+            { vide: 'Tous les indicateurs déclarés sont calculables.' }),
+          { sousTitre: 'Ces indicateurs sont déclarés au registre mais reposent sur des '
+            + 'données que la plateforme ne collecte pas encore. Les écrans affichent '
+            + '« non mesuré » plutôt qu’un zéro.' });
+    }).catch(echec);
+  }
+
   // ── Administration métier ──────────────────────────────────────────────────
 
   function vueAdministration() {
@@ -1428,6 +1483,7 @@
     documents: function () { EspaceDocuments.vue(elContenu); },
     rapports: vueRapports,
     journal: vueJournal,
+    registre: vueRegistre,
     administration: vueAdministration,
   }, TITRES);
 
