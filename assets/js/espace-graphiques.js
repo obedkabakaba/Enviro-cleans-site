@@ -787,8 +787,11 @@ window.G = (function () {
 
     return G.figure({
       titre: options.titre,
+      // Renvoyer le lecteur à « la note sous la carte » l'oblige à faire défiler pour
+      // apprendre pourquoi il regarde des points dans le vide. La raison se dit ici.
       sousTitre: options.sousTitre
-        || 'Positions réelles, à l’échelle. Sans fond de plan : voir la note sous la carte.',
+        || 'Positions et distances exactes, à l’échelle. Le fond de plan (rues, fleuve, '
+          + 'limites de communes) n’est pas installé.',
       resume: 'Carte de ' + utiles.length + ' point(s) géolocalisé(s)'
         + (options.tournees ? ' et ' + options.tournees.length + ' tournée(s)' : ''),
       largeur: L,
@@ -809,11 +812,18 @@ window.G = (function () {
         })
       ),
     })
-    + (options.sansNote ? '' : '<div class="note" style="margin-top:10px">Carte sans fond de plan. Les positions '
-      + 'et les distances sont exactes ; les rues, le fleuve et les limites de communes '
-      + 'ne sont pas représentés. Les afficher demande un fournisseur de tuiles '
-      + 'cartographiques et le tracé GeoJSON des communes de Kinshasa — deux éléments '
-      + 'externes à la plateforme.</div>');
+    // ── Ce message disait le faux ──
+    //
+    // Il affirmait qu'afficher les rues « demande un fournisseur de tuiles cartographiques
+    // et le tracé GeoJSON des communes — deux éléments externes à la plateforme ». C'était
+    // vrai d'une version antérieure. La plateforme embarque désormais MapLibre et pmtiles,
+    // et sait lire un fond OpenStreetMap complet : il manque UN fichier à produire une
+    // fois et à déposer. Décrire un manque comme une impossibilité décourage de le combler.
+    + (options.sansNote ? '' : '<div class="note" style="margin-top:10px">Carte sans fond '
+      + 'de plan. Les positions et les distances sont exactes ; les rues, le fleuve et les '
+      + 'limites de communes ne sont pas dessinés. Le fond OpenStreetMap se produit en une '
+      + 'commande — <code>bash tools/extraire-carte-kinshasa.sh</code> — puis se dépose une '
+      + 'fois pour toutes. Rien d’autre n’est à installer.</div>');
   };
 
   /**

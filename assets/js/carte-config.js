@@ -14,13 +14,27 @@
 
 window.ENVIRO_CARTE = {
   /**
-   * URL publique du fichier .pmtiles déposé sur Supabase Storage.
+   * URL du fichier .pmtiles.
    *
-   * Exemple :
-   *   'https://xxxx.supabase.co/storage/v1/object/public/cartes/kinshasa.pmtiles'
+   * ── Deux façons de le servir ──
    *
-   * Le compartiment doit être PUBLIC et autoriser l'origine du site : le navigateur lit
-   * le fichier par plages HTTP, ce qui exige une réponse CORS correcte.
+   * 1. **Depuis ce dépôt** (le plus simple). GitHub Pages gère les requêtes par plage
+   *    HTTP, et le fichier est alors servi depuis la MÊME origine que la page : aucun
+   *    CORS à configurer, aucun compartiment, aucune clé.
+   *
+   *        pmtiles: 'assets/cartes/kinshasa.pmtiles'
+   *
+   *    GitHub refuse les fichiers de plus de 100 Mo ; le script d'extraction vérifie la
+   *    taille et le dit avant que vous n'engagiez quoi que ce soit.
+   *
+   * 2. **Depuis Supabase Storage.** Le compartiment doit être PUBLIC et autoriser
+   *    l'origine du site : le navigateur lit le fichier par plages HTTP, ce qui exige
+   *    une réponse CORS correcte.
+   *
+   *        pmtiles: 'https://xxxx.supabase.co/storage/v1/object/public/cartes/kinshasa.pmtiles'
+   *
+   * Produire le fichier : `bash tools/extraire-carte-kinshasa.sh`. Une seule commande,
+   * un seul binaire à installer, aucun abonnement ni clé d'API.
    */
   pmtiles: '',
 

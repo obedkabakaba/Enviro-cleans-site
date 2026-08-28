@@ -545,16 +545,23 @@ window.CarteInteractive = (function () {
     // MapLibre : `rendre(points)` et `allerA(point)`. La barre pilote l'un ou l'autre
     // sans savoir lequel.
     function replier(motif) {
+      // ── La raison passe AVANT la carte ──
+      //
+      // Elle était placée sous le rendu : sur un téléphone, il fallait faire défiler tout
+      // le cadre pour apprendre pourquoi on regardait des points dans le vide. Le premier
+      // réflexe est alors « la carte ne s'affiche même pas », et le vrai manque — un
+      // fichier de fond jamais déposé — reste invisible.
       var noteRepli = motif
-        ? '<div class="note">Fond de plan non affiché : ' + window.G.echapper(motif)
-          + ' Les positions, les tournées et l’échelle ci-dessus restent exactes.</div>'
+        ? '<div class="note carte-note-fond">Fond de plan non affiché : '
+          + window.G.echapper(motif)
+          + ' Les positions, les tournées et l’échelle ci-dessous restent exactes.</div>'
         : '';
 
       function dessiner(pts) {
         var opts = {};
         Object.keys(options).forEach(function (k) { opts[k] = options[k]; });
         opts.sansNote = Boolean(motif);
-        hote.innerHTML = window.G.carte(pts, opts) + noteRepli;
+        hote.innerHTML = noteRepli + window.G.carte(pts, opts);
       }
 
       dessiner(points);
@@ -607,8 +614,12 @@ window.CarteInteractive = (function () {
       // Le contexte est OBLIGATOIRE : sans lui, `monterOutils` rend la vue telle quelle
       // et la barre reste vide. C'est justement le chemin le plus emprunté — tant que
       // le fichier de fond n'est pas déposé, tout le monde passe par ici.
+      // Le motif s'adresse à qui lit l'écran, pas au développeur : renvoyer un
+      // directeur vers un fichier JavaScript ne lui apprend rien d'actionnable.
       return Promise.resolve(monterOutils(
-        replier('aucun fichier de fond n’est configuré (voir assets/js/carte-config.js).'),
+        replier('le fond OpenStreetMap n’a jamais été installé. Il se produit en une '
+          + 'commande et se dépose une fois pour toutes — voir tools/extraire-carte-'
+          + 'kinshasa.sh. Aucun abonnement ni clé d’API n’est nécessaire.'),
         { el: el, points: utiles, tournees: tournees }
       ));
     }

@@ -118,6 +118,26 @@ async function connexion(email) {
     await page.fill('.carte-recherche', '');
   });
 
+  await v('l’absence de fond de plan est expliquée AVANT la carte, en clair', async () => {
+    const note = await page.$('.carte-note-fond');
+    assert.ok(note, 'aucune note n’explique l’absence de fond de plan');
+
+    // Sous la carte, il faut faire défiler tout le cadre pour la lire : le premier
+    // réflexe devient « la carte ne s’affiche même pas ».
+    const avant = await page.evaluate(() => {
+      const n = document.querySelector('.carte-note-fond');
+      const svg = document.querySelector('.carte-hote svg');
+      if (!n || !svg) return null;
+      return n.compareDocumentPosition(svg) & Node.DOCUMENT_POSITION_FOLLOWING ? true : false;
+    });
+    assert.equal(avant, true, 'la note doit précéder la carte, pas la suivre');
+
+    const texte = await note.textContent();
+    assert.doesNotMatch(texte, /carte-config\.js/,
+      'renvoyer un directeur vers un fichier JavaScript ne lui apprend rien d’actionnable');
+    assert.match(texte, /extraire-carte-kinshasa/, 'la marche à suivre doit être nommée');
+  });
+
   await v('le compteur annonce le nombre réel de points', async () => {
     const t = await page.textContent('.carte-compte');
     assert.match(t, /\d+ \/ \d+ point\(s\) affiché\(s\)/, `compteur : ${t}`);
