@@ -468,6 +468,7 @@ window.PdgCommandement = (function () {
       cible.innerHTML = E.squelette(5);
       EnviroAPI.get('/api/pdg/terrain/carte' + suffixe).then(function (d) {
         if (generation !== sequenceTerrain) return;
+        var sansTournee = (d.tournees || []).length === 0;
         var tournees = (d.tournees || []).map(function (t) {
           var progression = t.arrets > 0 ? Math.round(((t.traites + t.echecs) / t.arrets) * 100) : 0;
           return '<tr><td><strong>' + attr(t.nom || ('Tournée #' + t.id)) + '</strong></td>'
@@ -481,7 +482,15 @@ window.PdgCommandement = (function () {
           + '<button class="action" id="actualiserCartePdg">Afficher</button></div>'
           + E.grilleKpi([
             { nom: 'Tournées du jour', valeur: (d.tournees || []).length },
-            { nom: 'Clients géolocalisés', valeur: (d.arrets || []).length },
+            // « Clients géolocalisés » comptait les ARRÊTS du jour : il affichait 0 un jour
+            // sans tournée, en laissant croire que personne n'a de position. Les deux
+            // chiffres sont désormais distincts, parce que ce sont deux questions.
+            { nom: 'Arrêts géolocalisés ce jour', valeur: (d.arrets || []).length },
+            {
+              nom: 'Clients géolocalisés (parc)',
+              valeur: (d.couverture || {}).clients_geolocalises,
+              base: 'sur ' + nombre((d.couverture || {}).clients_total) + ' clients',
+            },
             { nom: 'Arrêts sans GPS', valeur: d.arrets_sans_gps },
             { nom: 'Incidents ouverts', valeur: (d.incidents || []).length },
             {
@@ -491,9 +500,19 @@ window.PdgCommandement = (function () {
             },
           ])
           + E.avertissements(d.avertissements)
-          + E.panneau('Carte des clients programmés à Kinshasa', '<div id="cartePdgKinshasa"></div>', {
-            sousTitre: 'Chaque point client vient de client_locations. Les incidents enregistrés '
-              + 'apparaissent aussi ; aucun faux trajet GPS n’est ajouté.',
+          + E.panneau(sansTournee
+            ? 'Clients géolocalisés à Kinshasa (parc)'
+            : 'Carte des clients programmés à Kinshasa',
+          '<div id="cartePdgKinshasa"></div>', {
+            sousTitre: sansTournee
+              // Le titre ET le sous-titre changent : montrer le parc sous l'étiquette
+              // « clients programmés » ferait passer des clients non planifiés pour des
+              // arrêts du jour — un mensonge plus grave que le cadre vide qu'il remplace.
+              ? 'Aucune tournée n’est planifiée pour cette journée. La carte montre donc le '
+                + 'parc des clients dont la position est enregistrée — ce ne sont pas des '
+                + 'arrêts programmés. Choisissez une journée avec tournée pour voir des arrêts.'
+              : 'Chaque point client vient de client_locations. Les incidents enregistrés '
+                + 'apparaissent aussi ; aucun faux trajet GPS n’est ajouté.',
           })
           + E.panneau('Tournées du jour',
             E.tableau(['Tournée', 'Zone', 'Collecteur', 'Arrêts', 'Traités', 'Échecs',
@@ -504,7 +523,17 @@ window.PdgCommandement = (function () {
           chargerCarteTerrain(nouvelleGeneration, document.getElementById('jourCartePdg').value);
         });
 
-        var points = (d.arrets || []).map(function (a) {
+        // Faute de tournée, on affiche le parc géolocalisé plutôt qu'un cadre vide — mais
+        // dans une catégorie distincte, jamais mélangé aux arrêts du jour.
+        var points = (sansTournee ? (d.clients_base || []).map(function (c) {
+          return {
+            latitude: c.latitude,
+            longitude: c.longitude,
+            libelle: c.client + ' — ' + (c.numero_abonne || ''),
+            categorie: 'client',
+            detail: [c.zone, c.avenue].filter(Boolean).join(' · ') || 'Client non programmé ce jour',
+          };
+        }) : []).concat((d.arrets || []).map(function (a) {
           return {
             latitude: a.latitude,
             longitude: a.longitude,
@@ -512,7 +541,7 @@ window.PdgCommandement = (function () {
             etat: a.statut,
             detail: (a.zone || '') + (a.heure_passage ? ' · passage ' + a.heure_passage : ''),
           };
-        }).concat((d.incidents || []).filter(function (i) {
+        })).concat((d.incidents || []).filter(function (i) {
           return i.latitude !== null && i.longitude !== null;
         }).map(function (i) {
           return {
@@ -532,7 +561,14 @@ window.PdgCommandement = (function () {
               arrets: (d.arrets || []).filter(function (a) { return a.tournee_id === t.id; }),
             };
           }),
-          motifVide: 'Aucun client géolocalisé pour cette journée.',
+          // L'ancien message — « aucun client géolocalisé pour cette journée » — accusait
+          // la géolocalisation alors que le seul fait établi était l'absence de tournée.
+          // Il n'est atteint désormais que si la base n'a réellement aucune position.
+          motifVide: sansTournee
+            ? 'Aucune tournée ce jour, et aucun client n’a de position enregistrée. '
+              + 'Les positions se relèvent sur le terrain, depuis l’espace collecteur.'
+            : 'Les tournées de cette journée n’ont aucun arrêt géolocalisé. Les clients '
+              + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
         });
       }).catch(function (err) {
         if (generation === sequenceTerrain) afficherErreur(err, cible);

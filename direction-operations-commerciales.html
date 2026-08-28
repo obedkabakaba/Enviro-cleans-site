@@ -678,8 +678,15 @@
           + '</tr>';
       }).join('');
 
+      // Un jour sans tournée n'est pas un jour sans clients géolocalisés. Confondre les
+      // deux faisait accuser la géolocalisation d'un simple trou de planification.
+      var sansTournee = d.tournees.length === 0;
+      var couverture = d.couverture || {};
+
       elContenu.innerHTML = E.grilleKpi([
         { nom: 'Tournées du jour', valeur: d.tournees.length },
+        { nom: 'Clients géolocalisés (parc)', valeur: couverture.clients_geolocalises,
+          base: 'sur ' + nombre(couverture.clients_total) + ' clients' },
         { nom: 'Véhicules en service', valeur: d.vehicules.en_service,
           base: 'sur ' + nombre(d.vehicules.total) + ' au parc' },
         { nom: 'Incidents ouverts', valeur: d.incidents.length },
@@ -689,7 +696,11 @@
         { nom: 'Position des véhicules', disponible: false,
           motif: d.positions_vehicules.motif },
       ])
-        + E.panneau('Carte du jour', '<div id="carteDuJour"></div>')
+        + E.panneau(sansTournee ? 'Clients géolocalisés (parc)' : 'Carte du jour',
+          '<div id="carteDuJour"></div>',
+          sansTournee ? { sousTitre: 'Aucune tournée n’est planifiée pour cette journée. '
+            + 'La carte montre le parc des clients dont la position est enregistrée — ce '
+            + 'ne sont pas des arrêts programmés.' } : undefined)
         + E.panneau('Tournées en cours',
           E.tableau(['Tournée', 'Zone', 'Collecteur', 'Véhicule', 'Arrêts', 'Traités',
             'Échecs', 'Progression', 'Statut'], tournees,
@@ -708,7 +719,17 @@
       // `tournee_id` et `ordre` sont ce qui permet de SÉLECTIONNER une tournée et de
       // numéroter ses arrêts. Sans eux, le tracé dit par où le camion passe, mais pas
       // dans quel sens — et l'on ne peut isoler aucune tournée dans la vue.
-      var pointsCarte = d.arrets.map(function (a) {
+      var pointsCarte = (sansTournee ? (d.clients_base || []).map(function (c) {
+        return {
+          latitude: c.latitude,
+          longitude: c.longitude,
+          libelle: c.client + ' — ' + (c.numero_abonne || ''),
+          categorie: 'client',
+          detail: [c.zone, c.avenue].filter(Boolean).join(' · ')
+            || 'Client non programmé ce jour',
+          zone: c.zone,
+        };
+      }) : []).concat(d.arrets.map(function (a) {
         return {
           latitude: a.latitude,
           longitude: a.longitude,
@@ -720,7 +741,7 @@
           zone: a.zone,
           heure_passage: a.heure_passage,
         };
-      }).concat(d.incidents.filter(function (i) {
+      })).concat(d.incidents.filter(function (i) {
         return i.latitude !== null && i.longitude !== null;
       }).map(function (i) {
         return {
@@ -754,8 +775,13 @@
             arrets: d.arrets.filter(function (a) { return a.tournee_id === t.id; }),
           };
         }),
-        motifVide: 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
-          + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
+        // Ce message n'est atteint que si la base n'a réellement aucune position : le cas
+        // « pas de tournée aujourd'hui » est traité au-dessus, et affiche le parc.
+        motifVide: sansTournee
+          ? 'Aucune tournée ce jour, et aucun client n’a de position enregistrée. Les '
+            + 'positions se relèvent sur le terrain, depuis l’espace collecteur.'
+          : 'Aucun arrêt géolocalisé ce jour. Les clients sans coordonnées '
+            + 'restent dans leur tournée : ils ne peuvent simplement pas être placés.',
       });
     }).catch(afficherErreur);
   }
