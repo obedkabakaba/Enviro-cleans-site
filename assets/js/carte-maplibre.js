@@ -643,11 +643,31 @@ window.CarteInteractive = (function () {
       }).then(function (rep) {
         if (rep.status === 404) throw new Error('fichier introuvable (404).');
         if (rep.status === 403 || rep.status === 401) {
-          throw new Error('accès refusé (' + rep.status + ') — le compartiment Supabase '
-            + 'doit être public.');
+          throw new Error('accès refusé (' + rep.status + ') — le fichier doit être '
+            + 'accessible publiquement.');
         }
         if (!rep.ok && rep.status !== 206) {
           throw new Error('réponse inattendue (' + rep.status + ').');
+        }
+
+        // ── L'hébergeur honore-t-il les requêtes par PLAGE ? ──
+        //
+        // C'est la seule chose dont pmtiles a besoin, et la seule qui ne se voit pas.
+        // Un serveur qui ignore l'en-tête `Range` répond 200 avec le fichier ENTIER : la
+        // requête réussit, les octets sont faux, et MapLibre échoue plus loin sur un
+        // message d'archive corrompue qui accuse le fichier au lieu de l'hébergeur.
+        //
+        // On a demandé 16 octets. Un 206 le confirme ; un 200 qui rend davantage prouve
+        // le contraire. Le dire ici épargne une enquête sur le mauvais suspect.
+        if (rep.status === 200) {
+          return rep.arrayBuffer().then(function (corps) {
+            if (corps.byteLength > 16) {
+              throw new Error('l’hébergeur ignore les requêtes par plage (il a renvoyé '
+                + corps.byteLength + ' octets au lieu de 16). Un fichier .pmtiles se lit '
+                + 'par morceaux : il faut un hébergement qui répond 206.');
+            }
+            return true;
+          });
         }
         return true;
       }).catch(function (err) {

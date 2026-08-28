@@ -1,0 +1,217 @@
+# ════════════════════════════════════════
+# PRODUIRE LE FOND DE CARTE DE KINSHASA
+# ════════════════════════════════════════
+#
+# ── Pourquoi ce workflow existe ──
+#
+# La carte affiche les positions exactes des clients, mais sans les rues autour : le fond
+# OpenStreetMap n'a jamais été produit. `tools/extraire-carte-kinshasa.sh` le fabrique en
+# une commande — encore faut-il un ordinateur pour la lancer.
+#
+# Ce workflow fait le même travail sur un runner GitHub, et se déclenche depuis
+# l'interface web ou l'application mobile : Actions → « Fond de carte » → « Run workflow ».
+# Aucun ordinateur, aucun outil à installer, aucune clé d'API.
+#
+# ── Ce qu'il produit ──
+#
+# Un fichier `assets/cartes/kinshasa.pmtiles`, commité dans ce dépôt. GitHub Pages le sert
+# alors depuis la MÊME origine que les pages : aucun CORS à configurer, aucun compartiment
+# Supabase, aucun quota de tuiles. `carte-config.js` est renseigné automatiquement s'il ne
+# l'est pas déjà.
+#
+# ── Le coût, énoncé franchement ──
+#
+# Le fichier reste dans l'historique du dépôt, définitivement. C'est le prix d'un fond de
+# carte sans dépendance externe, et il se paie une fois. Le zoom maximal décide de la
+# taille : chaque niveau en plus la multiplie par environ quatre.
+#
+#   zoom 13 → quartiers et grands axes          quelques Mo
+#   zoom 14 → rues nommées (recommandé)         quelques dizaines de Mo
+#   zoom 15 → détail du bâti                    peut dépasser la limite de 100 Mo
+#
+# ── Licence ──
+#
+# Les données sont sous ODbL. L'attribution « © OpenStreetMap » est affichée sur la carte
+# et doit y rester.
+
+name: Fond de carte
+
+on:
+  workflow_dispatch:
+    inputs:
+      zoom_max:
+        description: "Zoom maximal (13 = quartiers, 14 = rues nommées, 15 = bâti)"
+        required: true
+        default: '14'
+        type: choice
+        options: ['13', '14', '15']
+      emprise:
+        description: "Emprise ouest,sud,est,nord — par défaut le Grand Kinshasa"
+        required: true
+        default: '15.15,-4.52,15.75,-4.20'
+
+# Écrire dans le dépôt : c'est tout l'objet du workflow.
+permissions:
+  contents: write
+
+# Deux extractions simultanées se pousseraient dessus l'une l'autre.
+concurrency:
+  group: fond-de-carte
+  cancel-in-progress: false
+
+jobs:
+  produire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer l'outil pmtiles
+        run: |
+          set -euo pipefail
+          # La version n'est PAS écrite en dur : une URL figée finit par renvoyer un 404
+          # le jour où la release est retirée, et le workflow échouerait sur un message
+          # qui n'aurait rien à voir avec la carte.
+          VERSION=$(curl -sSf \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/protomaps/go-pmtiles/releases/latest \
+            | grep -oP '"tag_name":\s*"\K[^"]+')
+          echo "version pmtiles : $VERSION"
+          # Le nom de l'archive n'est PAS reconstruit à la main : sa convention a déjà
+          # changé (Linux_x86_64, linux_amd64…) et une supposition se casse en silence
+          # des mois plus tard. On demande à la release quelle archive elle publie.
+          ARCHIVE=$(curl -sSf \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/protomaps/go-pmtiles/releases/tags/${VERSION}" \
+            | grep -oP '"browser_download_url":\s*"\K[^"]+' \
+            | grep -iE 'linux' | grep -iE 'x86_64|amd64' | grep -E '\.tar\.gz$' | head -1)
+          if [ -z "$ARCHIVE" ]; then
+            echo "::error::Aucune archive Linux x86_64 dans la release ${VERSION} de go-pmtiles."
+            exit 1
+          fi
+          echo "archive : $ARCHIVE"
+          curl -sSfL -o /tmp/pmtiles.tar.gz "$ARCHIVE"
+          tar -xzf /tmp/pmtiles.tar.gz -C /tmp pmtiles
+          sudo install -m 0755 /tmp/pmtiles /usr/local/bin/pmtiles
+          pmtiles version
+
+      - name: Trouver une construction Protomaps disponible
+        id: source
+        run: |
+          set -euo pipefail
+          # Les constructions quotidiennes portent une date et ne sont pas conservées
+          # indéfiniment. On remonte jusqu'à dix jours plutôt que d'échouer parce que
+          # celle d'hier vient d'être retirée.
+          trouve=""
+          for i in $(seq 1 10); do
+            jour=$(date -u -d "$i days ago" +%Y%m%d)
+            url="https://build.protomaps.com/${jour}.pmtiles"
+            if curl -sS -f -r 0-1023 -o /dev/null "$url" 2>/dev/null; then
+              trouve="$url"
+              echo "construction retenue : $url"
+              break
+            fi
+            echo "  indisponible : $jour"
+          done
+          if [ -z "$trouve" ]; then
+            echo "::error::Aucune construction Protomaps des dix derniers jours n'est joignable. Vérifiez https://docs.protomaps.com (section Basemap Downloads)."
+            exit 1
+          fi
+          echo "url=$trouve" >> "$GITHUB_OUTPUT"
+
+      - name: Extraire l'emprise de Kinshasa
+        run: |
+          set -euo pipefail
+          EMPRISE="${{ inputs.emprise }}"
+          ZOOM="${{ inputs.zoom_max }}"
+          echo "emprise  : $EMPRISE"
+          echo "zoom max : $ZOOM"
+          echo "Seuls les octets de cette emprise sont téléchargés."
+          pmtiles extract "${{ steps.source.outputs.url }}" kinshasa.pmtiles \
+            --bbox="$EMPRISE" --maxzoom="$ZOOM"
+
+      - name: Vérifier la taille avant d'engager quoi que ce soit
+        id: taille
+        run: |
+          set -euo pipefail
+          OCTETS=$(wc -c < kinshasa.pmtiles)
+          LISIBLE=$(du -h kinshasa.pmtiles | cut -f1)
+          echo "taille : $LISIBLE ($OCTETS octets)"
+          echo "lisible=$LISIBLE" >> "$GITHUB_OUTPUT"
+
+          # GitHub refuse tout fichier de plus de 100 Mo. Le découvrir au `git push`,
+          # le binaire déjà commité, coûte une réécriture d'historique désagréable :
+          # on tranche ici, tant que rien n'est engagé.
+          if [ "$OCTETS" -gt 95000000 ]; then
+            echo "::error::Le fichier pèse $LISIBLE, trop proche de la limite de 100 Mo de GitHub. Relancez ce workflow avec un zoom maximal plus bas (14, ou 13) : chaque niveau en moins divise la taille par environ quatre."
+            exit 1
+          fi
+          if [ "$OCTETS" -lt 100000 ]; then
+            echo "::error::Le fichier ne pèse que $LISIBLE : l'extraction n'a manifestement rien récupéré. Vérifiez l'emprise (ouest,sud,est,nord) — elle doit couvrir Kinshasa."
+            exit 1
+          fi
+
+      - name: Déposer le fond et brancher la configuration
+        run: |
+          set -euo pipefail
+          mkdir -p assets/cartes
+          mv kinshasa.pmtiles assets/cartes/kinshasa.pmtiles
+
+          # L'URL est RELATIVE : le site est servi sous un chemin de projet
+          # (obedkabakaba.github.io/<dépôt>/), et une URL absolue devinée ici serait
+          # fausse. Une relative reste juste quel que soit le chemin de publication.
+          #
+          # Et l'on ne remplace jamais une valeur déjà posée : si quelqu'un a branché un
+          # Supabase, ce workflow n'a pas à décider à sa place.
+          if grep -q "pmtiles: ''" assets/js/carte-config.js; then
+            sed -i "s|pmtiles: ''|pmtiles: 'assets/cartes/kinshasa.pmtiles'|" assets/js/carte-config.js
+            echo "carte-config.js branché sur le fichier déposé."
+          else
+            echo "carte-config.js porte déjà une URL : laissée telle quelle."
+            grep -n "pmtiles:" assets/js/carte-config.js || true
+          fi
+
+      - name: Commiter
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/cartes/kinshasa.pmtiles assets/js/carte-config.js
+
+          if git diff --cached --quiet; then
+            echo "Rien à commiter : le fond était déjà à jour."
+            exit 0
+          fi
+
+          git commit -m "Fond de carte OpenStreetMap de Kinshasa (zoom ${{ inputs.zoom_max }}, ${{ steps.taille.outputs.lisible }})
+
+          Extrait de la construction quotidienne Protomaps, emprise ${{ inputs.emprise }}.
+          Servi par GitHub Pages depuis la même origine que les pages : aucun CORS, aucun
+          compartiment, aucun quota de tuiles.
+
+          Données © OpenStreetMap, sous licence ODbL. L'attribution est affichée sur la
+          carte et doit y rester.
+
+          Produit par le workflow « Fond de carte »."
+          git push
+
+      - name: Ce qu'il reste à faire
+        run: |
+          cat <<'FIN'
+          ── Terminé ──────────────────────────────────────────────────
+
+          Le fond est déposé et la configuration branchée. GitHub Pages redéploie le site
+          automatiquement ; comptez une à deux minutes.
+
+          Rouvrez ensuite « Carte en direct » (opérations) ou « Terrain & carte clients »
+          (PDG) : les rues, le fleuve et les communes doivent apparaître sous vos points.
+
+          Si la carte reste sans fond, la note au-dessus d'elle dit laquelle des trois
+          causes s'applique : fichier absent, accès refusé, ou origine non autorisée.
+
+          Les noms de rues viennent d'un second fichier — les polices de libellés, servies
+          depuis protomaps.github.io. Si votre réseau le bloque, la carte s'affiche sans
+          les noms, et le dit, au lieu de disparaître.
+          FIN
