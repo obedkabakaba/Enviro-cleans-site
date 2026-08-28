@@ -73,6 +73,27 @@ API_LOCAL=http://localhost:4000 SITE_LOCAL=http://127.0.0.1:5500 \
   node tools/verification/carte-outils.js
 ```
 
+## `carte-jour-sans-tournee.js`
+
+Demande délibérément une journée **sans tournée** — la situation la plus fréquente en
+exploitation, et celle qu'un jeu de démonstration bien garni masque.
+
+Les cartes de direction ne montrent que les clients PROGRAMMÉS sur une tournée du jour
+demandé. Un dimanche, un jour férié, une planification faite à la semaine, ou simplement
+demain : zéro tournée, donc zéro point — et l'écran annonçait « aucun client géolocalisé
+pour cette journée » alors que la base en contenait des centaines. Le message était faux,
+et il accusait la mauvaise chose : on cherchait un problème de géolocalisation là où il
+n'y avait qu'un trou de planification.
+
+Contrôle donc, sur l'espace PDG et sur la direction des opérations : la vraie cause est
+nommée, le parc géolocalisé est chiffré et distingué des arrêts programmés, la carte
+affiche réellement des points, et les journées qui portent des tournées sont indiquées.
+
+```bash
+API_LOCAL=http://localhost:4000 SITE_LOCAL=http://127.0.0.1:5500 \
+  node tools/verification/carte-jour-sans-tournee.js
+```
+
 ## `carte-maplibre-reel.js`
 
 Exerce le mode MapLibre **réellement**, moteur WebGL compris — là où `carte-repli.js`
