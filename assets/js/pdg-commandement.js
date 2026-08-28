@@ -520,7 +520,7 @@ window.PdgCommandement = (function () {
             longitude: i.longitude,
             libelle: i.titre,
             etat: 'incident',
-            type: 'incident',
+            categorie: 'incident',
             detail: i.severite + ' · ' + (i.zone || ''),
           };
         }));

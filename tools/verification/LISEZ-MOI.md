@@ -54,6 +54,47 @@ fichier `.pmtiles` absent (404) et contrôle que :
 C'est le scénario le plus probable en exploitation : quelqu'un renomme le fichier,
 le compartiment repasse en privé, ou l'URL change. La vue doit continuer de servir.
 
+## `carte-outils.js`
+
+Exerce la carte dans son mode **normal** — celui sans fond de plan. `carte-config.js`
+livre `pmtiles: ''` : tant que le fichier de fond n'est pas déposé, tout le monde voit le
+repli SVG. Une recherche, une légende ou un plein écran qui n'existeraient que dans le
+mode MapLibre seraient des fonctions décoratives — annoncées, jamais rencontrées.
+
+Contrôle donc, dans le repli : barre d'outils rendue, recherche qui trouve et qui dit
+quand elle ne trouve pas, compteur exact, légende cliquable qui masque et réaffiche une
+couche, sélection de tournée qui filtre, « Vue d'ensemble » qui remet tout, plein écran
+qui s'active **et se quitte**. Vérifie aussi la vue Géolocalisation et le fait qu'un
+directeur voit la liste des positions manquantes sans pouvoir les corriger depuis son
+bureau.
+
+```bash
+API_LOCAL=http://localhost:4000 SITE_LOCAL=http://127.0.0.1:5500 \
+  node tools/verification/carte-outils.js
+```
+
+## `carte-maplibre-reel.js`
+
+Exerce le mode MapLibre **réellement**, moteur WebGL compris — là où `carte-repli.js`
+vérifie l'échec, celui-ci vérifie le succès.
+
+Il construit en mémoire une archive PMTiles v3 minimale mais valide (en-tête de 127
+octets, répertoire vide, aucune tuile) et la sert au navigateur en honorant `Range`,
+exactement comme Supabase Storage. Le contrôle préalable passe, les modules se chargent,
+la carte démarre — sans qu'aucune tuile ni aucun réseau ne soient nécessaires. Le dépôt
+n'a donc pas à porter un binaire de plusieurs mégaoctets pour se vérifier lui-même.
+
+Contrôle alors : couches de regroupement présentes, `cluster: true` effectif, agrégats
+réellement formés, **dégroupement** au-delà de `clusterMaxZoom`, bulle au clic avec son
+bouton de fermeture, sélection de tournée qui filtre le tracé ET les numéros d'arrêt,
+recadrage, et le fait qu'une police de libellés injoignable **dégrade** la carte au lieu
+de la détruire.
+
+```bash
+API_LOCAL=http://localhost:4000 SITE_LOCAL=http://127.0.0.1:5500 \
+  node tools/verification/carte-maplibre-reel.js
+```
+
 ## `carte-style.js`
 
 Contrôle que l'API de style de Protomaps est utilisée correctement — `namedFlavor` en
