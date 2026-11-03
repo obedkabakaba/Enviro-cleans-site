@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Plan directeur — Enviro Cleans</title>
+<meta name="description" content="Plan directeur 2027-2032 d'EnviroCleans, réservé à la direction."/>
+<meta name="robots" content="noindex, nofollow"/>
+<meta name="theme-color" content="#0f1b16"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Plan EC"/>
+<link rel="manifest" href="plan-directeur.webmanifest"/>
+<link rel="icon" type="image/png" href="assets/brand/favicon.png"/>
+<link rel="apple-touch-icon" href="assets/brand/plan-icone-apple-180.png"/>
+<script src="assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="assets/css/site-refresh.css"/>
+<link rel="stylesheet" href="assets/css/plan-directeur.css"/>
+</head>
+<body class="plan-app">
+
+<header class="plan-barre">
+  <a class="plan-marque" href="#haut" aria-label="Haut du plan">
+    <img src="assets/brand/logo-enviro-cleans.webp" alt="" width="28" height="26"/>
+    <span>Plan directeur</span>
+  </a>
+  <span class="plan-statut" id="statut" role="status" aria-live="polite">Chargement…</span>
+  <div class="topbar-right plan-barre-droite">
+    <button type="button" class="plan-bouton-menu" id="ouvrirMenu" aria-controls="menu" aria-expanded="false" aria-label="Ouvrir le sommaire">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="plan-menu" id="menu" aria-label="Sommaire du plan" hidden>
+  <div class="plan-menu-tete">
+    <strong>Sommaire</strong>
+    <button type="button" class="plan-fermer" id="fermerMenu" aria-label="Fermer le sommaire">×</button>
+  </div>
+  <ol class="plan-sommaire" id="sommaire"></ol>
+  <div class="plan-menu-actions">
+    <button type="button" class="plan-action" id="installer" hidden>Installer l'application</button>
+    <p class="plan-aide-ios" id="aideIos" hidden>Sur iPhone : touchez <strong>Partager</strong>, puis <strong>Sur l'écran d'accueil</strong>.</p>
+    <button type="button" class="plan-action" id="actualiser">Vérifier les mises à jour</button>
+    <button type="button" class="plan-action plan-action-danger" id="deconnecter">Se déconnecter et effacer la copie</button>
+    <p class="plan-note" id="noteCopie"></p>
+  </div>
+</nav>
+<div class="plan-voile" id="voile" hidden></div>
+
+<main id="haut" class="plan-page">
+  <section class="plan-ecran" id="ecran" hidden></section>
+  <article class="plan-contenu" id="contenu" hidden></article>
+</main>
+
+<script src="assets/js/enviro-api.js"></script>
+<script src="assets/js/plan-directeur.js"></script>
+<script src="assets/js/theme.js"></script>
+</body>
+</html>

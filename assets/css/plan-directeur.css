@@ -1,0 +1,233 @@
+/*
+ * ════════════════════════════════════════
+ * PLAN DIRECTEUR — application de lecture (téléphone d'abord)
+ * ════════════════════════════════════════
+ *
+ * Les schémas du plan sont dessinés avec les jetons `--cds-*` (même vocabulaire que le
+ * document d'origine). Ils sont définis ici pour les deux thèmes du site : un schéma
+ * inséré dans la page suit le mode clair ou sombre sans être redessiné.
+ */
+
+:root {
+  --cds-text-primary: #17211b;
+  --cds-text-secondary: #5c6a61;
+  --cds-chart-axis: #9aa59d;
+  --cds-chart-grid: #e2e7e3;
+  --cds-chart-categorical-1: #2f6fd6;
+  --cds-chart-categorical-2: #df7130;
+  --cds-chart-status-good: #2b9d55;
+  --cds-chart-status-critical: #d14343;
+  --cds-chart-reference-tint: rgba(23, 33, 27, .06);
+  --plan-fond: var(--ec-bg, #f5f7f5);
+  --plan-surface: var(--ec-surface, #fff);
+  --plan-ligne: var(--ec-line, rgba(23, 33, 27, .12));
+  --plan-texte: var(--ec-text, #17211b);
+  --plan-faible: var(--ec-muted, #647068);
+  --plan-accent: var(--green-dark, #0d8f72);
+}
+
+html[data-theme="dark"] {
+  --cds-text-primary: #eef3ef;
+  --cds-text-secondary: #a9b4ac;
+  --cds-chart-axis: #66736a;
+  --cds-chart-grid: #2a312c;
+  --cds-chart-categorical-1: #6ea2ff;
+  --cds-chart-categorical-2: #ff9c5b;
+  --cds-chart-status-good: #5cc97a;
+  --cds-chart-status-critical: #ff6b6b;
+  --cds-chart-reference-tint: rgba(240, 247, 242, .07);
+  --plan-accent: var(--green, #63c66d);
+}
+
+.plan-app [hidden] { display: none !important; }
+
+body.plan-app {
+  margin: 0;
+  background: var(--plan-fond);
+  color: var(--plan-texte);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── Barre du haut ───────────────────────────────────────────────────────── */
+
+.plan-barre {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  background: #0f1b16;
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .08);
+}
+.plan-marque {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.plan-statut {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: rgba(255, 255, 255, .85);
+}
+.plan-statut[data-ton="bon"] { background: rgba(92, 201, 122, .2); color: #b9f0c9; }
+.plan-statut[data-ton="attente"] { background: rgba(255, 183, 77, .18); color: #ffd99c; }
+.plan-statut[data-ton="alerte"] { background: rgba(255, 107, 107, .2); color: #ffc0c0; }
+.plan-barre-droite { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.plan-barre .theme-toggle { width: 38px; height: 38px; flex: 0 0 38px; margin: 0; }
+.plan-bouton-menu {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  cursor: pointer;
+}
+.plan-bouton-menu svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+/* ── Sommaire (tiroir) ───────────────────────────────────────────────────── */
+
+.plan-voile { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .45); }
+.plan-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  width: min(340px, 88vw);
+  overflow-y: auto;
+  padding: calc(16px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));
+  background: var(--plan-surface);
+  color: var(--plan-texte);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, .25);
+}
+.plan-menu-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.plan-fermer { border: 0; background: none; color: inherit; font-size: 28px; line-height: 1; cursor: pointer; }
+.plan-sommaire { margin: 0 0 18px; padding-left: 0; list-style: none; counter-reset: s; }
+.plan-sommaire li { border-bottom: 1px solid var(--plan-ligne); }
+.plan-sommaire a { display: block; padding: 12px 2px; color: inherit; text-decoration: none; font-weight: 600; font-size: 15px; }
+.plan-menu-actions { display: grid; gap: 10px; }
+.plan-action {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--plan-ligne);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--plan-texte);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.plan-action-principale { background: var(--plan-accent); border-color: transparent; color: #fff; }
+.plan-action-danger { color: #c43c3c; }
+html[data-theme="dark"] .plan-action-danger { color: #ff8a8a; }
+.plan-note, .plan-aide-ios { margin: 4px 0 0; font-size: 12.5px; color: var(--plan-faible); line-height: 1.5; }
+
+/* ── Écrans (connexion, hors ligne, refus) ──────────────────────────────── */
+
+.plan-ecran { display: grid; place-items: center; min-height: 70vh; padding: 24px 16px; }
+.plan-carte {
+  max-width: 420px;
+  padding: 28px 22px;
+  border: 1px solid var(--plan-ligne);
+  border-radius: 18px;
+  background: var(--plan-surface);
+  text-align: center;
+}
+.plan-carte h1 { margin: 14px 0 8px; font-size: 20px; }
+.plan-carte p { margin: 0 0 18px; color: var(--plan-faible); line-height: 1.6; font-size: 14.5px; }
+
+/* ── Le plan ─────────────────────────────────────────────────────────────── */
+
+.plan-page { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+.plan-contenu {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 16px 0;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.plan-contenu h1 { font-size: 26px; line-height: 1.25; margin: 8px 0 6px; letter-spacing: -.01em; }
+.plan-contenu h1 + p { color: var(--plan-faible); font-size: 13.5px; margin-top: 0; }
+.plan-contenu h2 {
+  font-size: 21px;
+  line-height: 1.3;
+  margin: 40px 0 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--plan-ligne);
+  scroll-margin-top: 72px;
+}
+.plan-contenu h3 { font-size: 17px; margin: 28px 0 8px; scroll-margin-top: 72px; }
+.plan-contenu p, .plan-contenu li { color: var(--plan-texte); }
+.plan-contenu ul, .plan-contenu ol { padding-left: 22px; }
+.plan-contenu li { margin: 4px 0; }
+.plan-contenu strong { font-weight: 700; }
+
+.plan-tableau {
+  margin: 14px -16px;
+  padding: 0 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.plan-tableau table { border-collapse: collapse; min-width: 100%; font-size: 13.5px; line-height: 1.45; }
+.plan-tableau th, .plan-tableau td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--plan-ligne);
+  text-align: left;
+  vertical-align: top;
+}
+.plan-tableau th { font-weight: 700; background: var(--ec-surface-soft, #eef2ef); white-space: nowrap; }
+.plan-tableau td { min-width: 90px; }
+.plan-tableau td:last-child { min-width: 180px; }
+.plan-tableau tr td:first-child { font-weight: 600; }
+
+.plan-schema, .plan-image { margin: 18px -16px; }
+.plan-schema {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 16px;
+  background: var(--plan-surface);
+  border-block: 1px solid var(--plan-ligne);
+}
+.plan-schema svg { display: block; width: 100%; min-width: 640px; height: auto; }
+.plan-image img { display: block; width: 100%; height: auto; }
+.plan-schema figcaption, .plan-image figcaption {
+  padding: 8px 16px 0;
+  font-size: 12.5px;
+  color: var(--plan-faible);
+}
+.plan-schema figcaption { padding: 6px 0 0; position: sticky; left: 0; }
+.plan-schema figcaption::after { content: " · glissez pour voir tout le schéma"; }
+
+@media (min-width: 760px) {
+  .plan-contenu { padding-top: 32px; }
+  .plan-schema svg { min-width: 0; }
+  .plan-schema figcaption::after { content: none; }
+  .plan-schema, .plan-image, .plan-tableau { margin-inline: 0; }
+  .plan-image img { border-radius: 12px; }
+}
+
+@media print {
+  .plan-barre, .plan-menu, .plan-voile, .theme-toggle { display: none !important; }
+}
