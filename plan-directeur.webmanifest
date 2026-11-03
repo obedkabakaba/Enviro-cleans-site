@@ -1,0 +1,16 @@
+{
+  "name": "EnviroCleans — Plan directeur",
+  "short_name": "Plan EC",
+  "description": "Le plan directeur 2027-2032 d'EnviroCleans, lisible hors connexion, réservé à la direction.",
+  "lang": "fr",
+  "start_url": "plan-directeur.html?source=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1b16",
+  "theme_color": "#0f1b16",
+  "icons": [
+    { "src": "assets/brand/plan-icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/brand/plan-icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
