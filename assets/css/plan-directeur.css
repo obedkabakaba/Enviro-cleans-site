@@ -211,6 +211,8 @@ html[data-theme="dark"] .plan-action-danger { color: #ff8a8a; }
   border-block: 1px solid var(--plan-ligne);
 }
 .plan-schema svg { display: block; width: 100%; min-width: 640px; height: auto; }
+/* Schémas livrés en image (WebP) : fond clair d'origine, même défilement que les SVG. */
+.plan-capture img { display: block; width: 100%; min-width: 640px; height: auto; border-radius: 8px; background: #fff; }
 .plan-image img { display: block; width: 100%; height: auto; }
 .plan-schema figcaption, .plan-image figcaption {
   padding: 8px 16px 0;
@@ -222,7 +224,7 @@ html[data-theme="dark"] .plan-action-danger { color: #ff8a8a; }
 
 @media (min-width: 760px) {
   .plan-contenu { padding-top: 32px; }
-  .plan-schema svg { min-width: 0; }
+  .plan-schema svg, .plan-capture img { min-width: 0; }
   .plan-schema figcaption::after { content: none; }
   .plan-schema, .plan-image, .plan-tableau { margin-inline: 0; }
   .plan-image img { border-radius: 12px; }
