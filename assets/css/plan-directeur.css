@@ -230,6 +230,25 @@ html[data-theme="dark"] .plan-action-danger { color: #ff8a8a; }
   .plan-image img { border-radius: 12px; }
 }
 
+/* Impression : sert aussi de PDF hors connexion (« Enregistrer en PDF »). */
 @media print {
-  .plan-barre, .plan-menu, .plan-voile, .theme-toggle { display: none !important; }
+  @page { size: A4; margin: 15mm; }
+  .plan-barre, .plan-menu, .plan-voile, .theme-toggle, .plan-ecran { display: none !important; }
+  html, body.plan-app { background: #fff !important; color: #17211b !important; }
+  html[data-theme="dark"] {
+    --cds-text-primary: #17211b; --cds-text-secondary: #5c6a61; --cds-chart-axis: #9aa59d;
+    --cds-chart-grid: #e2e7e3; --plan-texte: #17211b; --plan-faible: #5c6a61; --plan-ligne: #d5dbd7;
+    --plan-surface: #fff;
+  }
+  .plan-contenu { max-width: none; padding: 0; font-size: 10pt; }
+  .plan-contenu h2 { break-before: page; border-top: 0; padding-top: 0; }
+  .plan-contenu h2:first-of-type { break-before: auto; }
+  .plan-contenu h3 { break-after: avoid; }
+  .plan-tableau { overflow: visible; margin: 8pt 0; padding: 0; }
+  .plan-tableau table { font-size: 8pt; }
+  .plan-tableau tr { break-inside: avoid; }
+  .plan-tableau th { white-space: normal; }
+  .plan-schema, .plan-image { margin: 8pt 0; padding: 0; overflow: visible; border: 0; break-inside: avoid; }
+  .plan-schema svg, .plan-capture img { min-width: 0 !important; max-height: 240mm; object-fit: contain; }
+  .plan-schema figcaption::after { content: none; }
 }

@@ -50,6 +50,8 @@
     actualiser: document.getElementById('actualiser'),
     deconnecter: document.getElementById('deconnecter'),
     note: document.getElementById('noteCopie'),
+    pdf: document.getElementById('telechargerPdf'),
+    word: document.getElementById('telechargerWord'),
   };
 
   var copieAffichee = null;
@@ -120,6 +122,8 @@
     el.contenu.hidden = true;
     el.contenu.innerHTML = '';
     el.sommaire.innerHTML = '';
+    el.pdf.hidden = true;
+    el.word.hidden = true;
     el.ecran.innerHTML = '<div class="plan-carte">'
       + '<img src="assets/brand/logo-enviro-cleans.webp" alt="" width="56" height="51"/>'
       + '<h1>' + texte(titre) + '</h1><p>' + texte(message) + '</p>' + (actionHtml || '') + '</div>';
@@ -135,6 +139,8 @@
     el.ecran.hidden = true;
     el.contenu.innerHTML = copie.html;
     el.contenu.hidden = false;
+    el.pdf.hidden = false;
+    el.word.hidden = false;
 
     el.sommaire.innerHTML = (copie.sommaire || []).map(function (s) {
       return '<li><a href="#' + encodeURIComponent(s.id) + '">' + texte(s.titre) + '</a></li>';
@@ -239,6 +245,74 @@
       return synchroniser(copie || null, utilisateur);
     });
   }
+
+  // ── Téléchargement en PDF ou en Word ────────────────────────────────────────
+  //
+  // Les fichiers viennent de la même API, avec les mêmes droits : un compte sans
+  // executive.plan.read reçoit un 403 et sa copie est effacée, comme pour le plan.
+  // Hors connexion, le PDF reste possible : l'application imprime la copie locale
+  // (« Enregistrer en PDF » dans la fenêtre d'impression du téléphone).
+
+  var FORMATS = {
+    pdf: { libelle: 'PDF', extension: 'pdf' },
+    docx: { libelle: 'Word', extension: 'docx' },
+  };
+
+  function imprimerCopie() {
+    basculerMenu(false);
+    statut('Choisissez « Enregistrer en PDF »', 'attente');
+    global.setTimeout(function () { global.print(); }, 300);
+  }
+
+  function telecharger(format) {
+    var f = FORMATS[format];
+    if (!navigator.onLine) {
+      if (format === 'pdf') return imprimerCopie();
+      statut('Le Word demande une connexion', 'attente');
+      return;
+    }
+
+    statut('Téléchargement du ' + f.libelle + '…', 'neutre');
+    // L'appel léger renouvelle la session si besoin avant le téléchargement lui-même.
+    API.get('/api/plan-directeur/version')
+      .then(function () {
+        return fetch(API.BASE_URL + '/api/plan-directeur/fichier/' + format, {
+          headers: { Authorization: 'Bearer ' + API.Session.accessToken() },
+        });
+      })
+      .then(function (reponse) {
+        if (reponse.status === 403) { var e = new Error('refus'); e.statut = 403; throw e; }
+        if (!reponse.ok) throw new Error('Erreur ' + reponse.status);
+        return reponse.blob();
+      })
+      .then(function (contenu) {
+        var url = URL.createObjectURL(contenu);
+        var lien = document.createElement('a');
+        lien.href = url;
+        lien.download = 'EnviroCleans-Plan-directeur-2027-2032.' + f.extension;
+        document.body.appendChild(lien);
+        lien.click();
+        lien.remove();
+        global.setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        statut(f.libelle + ' téléchargé', 'bon');
+      })
+      .catch(function (err) {
+        if (err && err.statut === 403) {
+          return effacerCopie().then(function () {
+            statut('Accès refusé', 'alerte');
+            afficherEcran('Accès au plan retiré',
+              'Votre compte n’a pas (ou plus) le droit de lire le plan directeur. '
+              + 'La copie de cet appareil a été effacée.', '');
+          });
+        }
+        if (estHorsLigne(err) && format === 'pdf') return imprimerCopie();
+        statut('Téléchargement impossible', 'alerte');
+        return null;
+      });
+  }
+
+  el.pdf.addEventListener('click', function () { basculerMenu(false); telecharger('pdf'); });
+  el.word.addEventListener('click', function () { basculerMenu(false); telecharger('docx'); });
 
   // ── Menu, installation, déconnexion ────────────────────────────────────────
 
